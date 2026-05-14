@@ -18,6 +18,23 @@ def get_market_trends_task(product_name: str, agent):
     return Task(
         description=f"'{product_name}' ürünü için pazar trendlerini, genel satış potansiyelini ve hedef kitleyi analiz et. Diğer görevlerden elde edilen rakip analizini ve müşteri şikayetlerini de göz önünde bulundurarak genel bir pazar konumu belirle.",
         expected_output=f"'{product_name}' için hedef kitleyi, pazar trendlerini, pazardaki fırsatları ve satış potansiyelini içeren, önceki analizleri de sentezleyen kapsamlı bir nihai pazar analizi raporu.",
-        output_file="rapor.md",
+        output_file="pazar_analizi_raporu.md",
+        agent=agent
+    )
+
+def get_pricing_analysis_task(product_name: str, costs: dict, agent):
+    costs_str = (
+        f"- Ürün Geliş Fiyatı: {costs.get('base_cost')} TL\n"
+        f"- Kargo Ücreti: {costs.get('shipping_cost')} TL\n"
+        f"- Platform Komisyon Oranı: %{costs.get('commission_rate')}\n"
+        f"- Diğer Giderler: {costs.get('other_costs')} TL\n"
+    )
+    
+    return Task(
+        description=f"'{product_name}' ürünü için e-ticaret platformlarındaki rakip fiyatlarını araştır. Kullanıcının girdiği maliyet bilgileri şunlardır:\n{costs_str}\n"
+                    "Rakiplerin ortalama, en düşük ve en yüksek fiyatlarını belirle. Bu fiyatlara ve maliyetlere göre (komisyonu satış fiyatı üzerinden hesaplayarak) net kâr marjı hesabı yap. "
+                    "Önceki pazar analizi verilerini de kullanarak ürün için optimum, rekabetçi ve kârlı bir satış fiyat bandı öner.",
+        expected_output=f"'{product_name}' için rakip fiyat tablosu, maliyet kalemlerine göre net kâr hesaplaması ve hedeflenen kâr marjı ile önerilen nihai satış fiyat bandını içeren Fiyat Analizi raporu.",
+        output_file="fiyat_analizi_raporu.md",
         agent=agent
     )

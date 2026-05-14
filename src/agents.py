@@ -5,7 +5,7 @@ from crewai_tools import ScrapeWebsiteTool
 
 def _get_gemini_llm():
     return LLM(
-        model="gemini/gemini-2.5-flash-lite",
+        model="gemini/gemini-2.5-flash",
         api_key=os.getenv("GEMINI_API_KEY"),
         temperature=0.3
     )
@@ -18,7 +18,8 @@ def get_researcher_agent():
         tools=[SafeGoogleSearchTool(), ScrapeWebsiteTool()],
         llm=_get_gemini_llm(),
         verbose=True,
-        allow_delegation=False
+        allow_delegation=False,
+        max_rpm=5
     )
 
 def get_customer_insights_agent():
@@ -29,7 +30,8 @@ def get_customer_insights_agent():
         tools=[SafeGoogleSearchTool(), ScrapeWebsiteTool()],
         llm=_get_gemini_llm(),
         verbose=True,
-        allow_delegation=False
+        allow_delegation=False,
+        max_rpm=5
     )
 
 def get_strategist_agent():
@@ -40,5 +42,18 @@ def get_strategist_agent():
         tools=[],  # Baş stratejist sadece diğerlerinden gelen metinleri okuyup sentezler
         llm=_get_gemini_llm(),
         verbose=True,
-        allow_delegation=False
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_pricing_agent():
+    return Agent(
+        role='Fiyat Analizi Uzmanı',
+        goal='Rakip ürünlerin fiyatlarını karşılaştırmak, maliyetleri ve kâr marjlarını hesaplayarak en kârlı ve rekabetçi satış fiyatını belirlemek.',
+        backstory='Sen veri odaklı çalışan bir finansal analist ve e-ticaret fiyatlandırma uzmanısın. Rakip fiyatlandırma stratejilerini analiz eder, görünmez maliyetleri (komisyon, kargo vb.) hesaba katarak satıcılara en optimum fiyat bandını ve kâr marjını sunarsın.',
+        tools=[SafeGoogleSearchTool(), ScrapeWebsiteTool()],
+        llm=_get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
     )
