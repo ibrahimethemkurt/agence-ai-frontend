@@ -1,0 +1,4 @@
+crewai[tools]>=0.30.0
+langchain-google-genai
+python-dotenv
+requests
