@@ -5,29 +5,31 @@ import { Portal } from "@ark-ui/react/portal";
 import { 
   LayoutDashboard, 
   ChartNoAxesCombined, 
-  BadgePercent, 
-  BadgeCent, 
   Settings, 
   BadgeHelp,
-  FileText,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  WalletCards,
+  Search,
+  ShoppingCart,
+  PackageCheck
 } from "lucide-react";
 
 const MAIN_GROUPS = [
   {
     title: 'GENEL',
     links: [
-      { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/finans', label: 'Gelir-Gider', icon: WalletCards },
       { to: '/analizler', label: 'Analizler', icon: ChartNoAxesCombined },
-      { to: '/raporlar', label: 'Raporlar', icon: FileText },
     ],
   },
   {
     title: 'AJANLAR',
     links: [
-      { to: '/pazar-analizi', label: 'Pazar Analizi', icon: BadgePercent },
-      { to: '/fiyat-analizi', label: 'Fiyat Analizi', icon: BadgeCent },
+      { to: '/ajanlar/satis-oncesi', label: 'Satış Öncesi', icon: Search },
+      { to: '/ajanlar/satis-sureci', label: 'Satış Süreci', icon: ShoppingCart },
+      { to: '/ajanlar/satis-sonrasi', label: 'Satış Sonrası', icon: PackageCheck },
     ],
   },
 ];

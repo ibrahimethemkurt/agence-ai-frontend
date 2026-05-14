@@ -1,11 +1,19 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
-import { Reveal } from './components/animation/Reveal';
-import './styles/tokens.css';
-
 import Grainient from './components/animation/GrainientBackground';
+import { NotificationsContext } from './hooks/useNotifications';
+
+import { DashboardPage } from './pages/DashboardPage';
+import { FinansPage } from './pages/FinansPage';
+import { AnalizlerPage } from './pages/AnalizlerPage';
+import { SatisOncesiPage } from './pages/SatisOncesiPage';
+import { SatisSureciPage } from './pages/SatisSureciPage';
+import { SatisSonrasiPage } from './pages/SatisSonrasiPage';
+import { AyarlarPage } from './pages/AyarlarPage';
+
+import './styles/tokens.css';
 
 const Layout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -14,8 +22,8 @@ const Layout = () => {
     <div className="min-h-screen text-[var(--color-fg)] font-body relative">
       <div className="fixed inset-0 z-[-1] pointer-events-none">
         <Grainient
-          color1="#1d1c1c"
-          color2="#1b1b3e"
+          color1="#0F1A2E"
+          color2="#1E3A5F"
           color3="#120e1d"
           timeSpeed={0.9}
           colorBalance={-0.13}
@@ -50,30 +58,26 @@ const Layout = () => {
   );
 };
 
-// Placeholder sayfalar
-const Dashboard = () => <Reveal variant="fade"><h1 className="text-2xl font-display font-bold">Dashboard</h1></Reveal>;
-const Analizler = () => <Reveal variant="fade"><h1 className="text-2xl font-display font-bold">Analizler</h1></Reveal>;
-const Raporlar = () => <Reveal variant="fade"><h1 className="text-2xl font-display font-bold">Raporlar</h1></Reveal>;
-const PazarAnalizi = () => <Reveal variant="fade"><h1 className="text-2xl font-display font-bold">Pazar Analizi</h1></Reveal>;
-const FiyatAnalizi = () => <Reveal variant="fade"><h1 className="text-2xl font-display font-bold">Fiyat Analizi</h1></Reveal>;
-const Ayarlar = () => <Reveal variant="fade"><h1 className="text-2xl font-display font-bold">Ayarlar</h1></Reveal>;
-const Yardim = () => <Reveal variant="fade"><h1 className="text-2xl font-display font-bold">Yardım</h1></Reveal>;
-
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="analizler" element={<Analizler />} />
-          <Route path="raporlar" element={<Raporlar />} />
-          <Route path="pazar-analizi" element={<PazarAnalizi />} />
-          <Route path="fiyat-analizi" element={<FiyatAnalizi />} />
-          <Route path="ayarlar" element={<Ayarlar />} />
-          <Route path="yardim" element={<Yardim />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="finans" element={<FinansPage />} />
+            <Route path="analizler" element={<AnalizlerPage />} />
+            <Route path="ajanlar">
+              <Route path="satis-oncesi" element={<SatisOncesiPage />} />
+              <Route path="satis-sureci" element={<SatisSureciPage />} />
+              <Route path="satis-sonrasi" element={<SatisSonrasiPage />} />
+            </Route>
+            <Route path="ayarlar" element={<AyarlarPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </NotificationsContext.Provider>
   );
 };
 

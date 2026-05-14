@@ -1,45 +1,44 @@
-import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { fadeIn, fadeUp, scaleIn } from './variants';
+import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
+import { fadeUp, fadeIn, scaleIn } from './variants';
+import { useSafeAnimation } from '../../hooks/useSafeAnimation';
+
+type TransitionVariant = 'fadeUp' | 'fadeIn' | 'scaleIn';
 
 const TRANSITIONS = {
-  fade: fadeIn,
-  slideUp: fadeUp,
-  scale: scaleIn,
+  fadeUp,
+  fadeIn,
+  scaleIn,
 };
 
-export type TransitionVariant = keyof typeof TRANSITIONS;
-
-export interface RevealProps {
+interface RevealProps {
   variant?: TransitionVariant;
   duration?: number;
   delay?: number;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export const Reveal = ({ variant = 'fade', duration = 0.3, delay = 0, children, className }: RevealProps) => {
-  const shouldReduceMotion = useReducedMotion();
+export const Reveal = ({ variant = 'fadeUp', delay = 0, children, className }: RevealProps) => {
   const selectedVariant = TRANSITIONS[variant];
+  
+  const transition = {
+    ...selectedVariant.visible.transition,
+    delay,
+  };
 
-  const variants: any = shouldReduceMotion 
-    ? { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration, delay } } } 
-    : {
-        hidden: selectedVariant.hidden,
-        visible: {
-          ...(selectedVariant.visible as any),
-          transition: { ...(selectedVariant.visible as any).transition, duration, delay }
-        }
-      };
+  const animationProps = useSafeAnimation({
+    variants: {
+      hidden: selectedVariant.hidden,
+      visible: { ...selectedVariant.visible, transition }
+    },
+    initial: "hidden",
+    whileInView: "visible",
+    viewport: { once: true, margin: "-50px" }
+  });
 
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-50px' }}
-      variants={variants}
-      className={className}
-    >
+    <motion.div className={className} {...animationProps as any}>
       {children}
     </motion.div>
   );
