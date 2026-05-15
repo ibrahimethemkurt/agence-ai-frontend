@@ -75,3 +75,15 @@ def get_support_agent():
         allow_delegation=False,
         max_rpm=5
     )
+
+def get_seo_agent():
+    return Agent(
+        role='SEO ve Listeleme Uzmanı',
+        goal='Ürünlerin e-ticaret platformlarında (Trendyol, Hepsiburada vb.) en üst sıralarda çıkmasını sağlayacak anahtar kelime, başlık ve SEO uyumlu açıklamalar üretmek.',
+        backstory='Sen veri odaklı bir SEO uzmanısın. E-ticaret algoritmalarının nasıl çalıştığını, insanların hangi anahtar kelimelerle arama yaptığını biliyorsun. Girdiğin metinler her zaman tıklama oranını (CTR) maksimize eder.',
+        tools=[], # İnternete çıkabilir ancak şimdilik içerdeki veriyi işleyecek
+        llm=get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
