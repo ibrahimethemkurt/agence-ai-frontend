@@ -1,11 +1,17 @@
 import os
+import time
 from dotenv import load_dotenv
 from crewai import Crew, Process
-from src.agents import get_researcher_agent, get_customer_insights_agent, get_strategist_agent, get_pricing_agent
-from src.tasks import get_competitor_analysis_task, get_customer_needs_task, get_market_trends_task, get_pricing_analysis_task
+from src.agents import get_researcher_agent, get_customer_insights_agent, get_strategist_agent, get_pricing_agent, get_social_media_agent, get_support_agent
+from src.tasks import get_competitor_analysis_task, get_customer_needs_task, get_market_trends_task, get_pricing_analysis_task, get_social_media_task, get_support_task
 
 # .env dosyasını yükle
 load_dotenv()
+
+# API'nin Dakika Başına Token Limitine (TPM) takılmamak için bekleme fonksiyonu
+def wait_for_api(task_output):
+    print(f"\n[BİLGİ] Görev tamamlandı. API token limitini aşmamak için 30 saniye dinleniliyor...")
+    time.sleep(30)
 
 def run_market_analysis():
     # Çevre değişkenlerinin kontrolü
@@ -22,6 +28,8 @@ def run_market_analysis():
     insights_analyst = get_customer_insights_agent()
     strategist = get_strategist_agent()
     pricing_agent = get_pricing_agent()
+    social_media_agent = get_social_media_agent()
+    support_agent = get_support_agent()
     
     print("\n--- Agence AI: Pazar ve Fiyat Analizi Sistemi ---\n")
     product_to_analyze = input("Analiz edilecek ürün adını girin (Örn: Stanley Termos 1L): ")
@@ -51,14 +59,17 @@ def run_market_analysis():
     customer_task = get_customer_needs_task(product_to_analyze, insights_analyst)
     trends_task = get_market_trends_task(product_to_analyze, strategist)
     pricing_task = get_pricing_analysis_task(product_to_analyze, costs, pricing_agent)
+    social_media_task = get_social_media_task(product_to_analyze, social_media_agent)
+    support_task = get_support_task(product_to_analyze, support_agent)
 
     # Crew'u kur
     crew = Crew(
-        agents=[researcher, insights_analyst, strategist, pricing_agent],
-        tasks=[competitor_task, customer_task, trends_task, pricing_task],
+        agents=[researcher, insights_analyst, strategist, pricing_agent, social_media_agent, support_agent],
+        tasks=[competitor_task, customer_task, trends_task, pricing_task, social_media_task, support_task],
         process=Process.sequential,
         verbose=True,
-        max_rpm=5
+        max_rpm=3, # RPM'i de düşürdüm ki dakikada çok istek atmasın
+        task_callback=wait_for_api # Her görev bittiğinde bekleyecek
     )
 
     print(f"\n--- '{product_to_analyze}' için Analiz Başlıyor ---\n")
@@ -66,7 +77,7 @@ def run_market_analysis():
     
     print("\n--- Analiz Sonucu ---")
     print(result)
-    print("\n✅ Detaylı analiz raporları proje dizininde ('pazar_analizi_raporu.md' ve 'fiyat_analizi_raporu.md') olarak kaydedildi!")
+    print("\n✅ Detaylı analiz raporları proje dizininde kaydedildi! (pazar, fiyat, sosyal medya ve destek raporları)")
 
 if __name__ == "__main__":
     run_market_analysis()
