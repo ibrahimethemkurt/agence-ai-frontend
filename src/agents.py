@@ -5,7 +5,7 @@ from crewai_tools import ScrapeWebsiteTool
 
 def _get_gemini_llm():
     return LLM(
-        model="gemini/gemini-2.5-flash",
+        model="gemini/gemini-flash-latest",
         api_key=os.getenv("GEMINI_API_KEY"),
         temperature=0.3
     )
@@ -52,6 +52,30 @@ def get_pricing_agent():
         goal='Rakip ürünlerin fiyatlarını karşılaştırmak, maliyetleri ve kâr marjlarını hesaplayarak en kârlı ve rekabetçi satış fiyatını belirlemek.',
         backstory='Sen veri odaklı çalışan bir finansal analist ve e-ticaret fiyatlandırma uzmanısın. Rakip fiyatlandırma stratejilerini analiz eder, görünmez maliyetleri (komisyon, kargo vb.) hesaba katarak satıcılara en optimum fiyat bandını ve kâr marjını sunarsın.',
         tools=[SafeGoogleSearchTool(), ScrapeWebsiteTool()],
+        llm=_get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_social_media_agent():
+    return Agent(
+        role='Sosyal Medya ve Pazarlama Uzmanı',
+        goal='Belirtilen ürün için dikkat çekici sosyal medya içerikleri, reklam stratejileri ve kampanya fikirleri üretmek.',
+        backstory='Sen yaratıcı bir dijital pazarlama ve sosyal medya uzmanısın. Hangi ürünün hangi platformda (Instagram, TikTok, Twitter vb.) nasıl pazarlanacağını, hangi hashtaglerin ve trendlerin kullanılacağını çok iyi bilirsin. Kullanıcıları satın almaya ikna edecek viral içerik fikirleri üretirsin.',
+        tools=[SafeGoogleSearchTool(), ScrapeWebsiteTool()],
+        llm=_get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_support_agent():
+    return Agent(
+        role='Müşteri Şikayet Yönetimi ve Çözüm Uzmanı',
+        goal='Müşteri şikayetlerini empatiyle ele almak, iade sürecini profesyonelce yönetmek ve memnuniyeti geri kazanacak örnek yanıtlar ve çözüm süreçleri hazırlamak.',
+        backstory='Sen deneyimli bir Müşteri İlişkileri (CRM) ve Destek yöneticisisin. Dışarıda araştırma yapmazsın, tamamen sana verilen şikayet senaryosuna odaklanıp kriz yönetimi yaparsın. Kızgın müşterileri sakinleştirmekte ve sorunu tatlıya bağlamakta ustasın.',
+        tools=[], # İnterneti taramasına gerek yok, sadece metin/süreç üretecek
         llm=_get_gemini_llm(),
         verbose=True,
         allow_delegation=False,
