@@ -18,6 +18,6 @@ def get_market_trends_task(product_name: str, agent):
     return Task(
         description=f"'{product_name}' ürünü için pazar trendlerini, genel satış potansiyelini ve hedef kitleyi analiz et. Diğer görevlerden elde edilen rakip analizini ve müşteri şikayetlerini de göz önünde bulundurarak genel bir pazar konumu belirle.",
         expected_output=f"'{product_name}' için hedef kitleyi, pazar trendlerini, pazardaki fırsatları ve satış potansiyelini içeren, önceki analizleri de sentezleyen kapsamlı bir nihai pazar analizi raporu.",
-        output_file="rapor.md",
+        output_file="data/rapor.md",
         agent=agent
     )

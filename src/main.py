@@ -17,6 +17,9 @@ def run_market_analysis():
         print("Hata: SERPER_API_KEY çevre değişkeni bulunamadı. Lütfen .env dosyasını kontrol edin.")
         return
 
+    # Veri klasörünü oluştur (SRP ve Mimari için)
+    os.makedirs("data", exist_ok=True)
+
     # Ajanları oluştur
     researcher = get_researcher_agent()
     insights_analyst = get_customer_insights_agent()
@@ -45,7 +48,7 @@ def run_market_analysis():
     
     print("\n--- Analiz Sonucu ---")
     print(result)
-    print("\n✅ Detaylı analiz raporu projenin ana klasöründe 'rapor.md' olarak kaydedildi!")
+    print("\n✅ Detaylı analiz raporu 'data/rapor.md' olarak kaydedildi!")
 
 if __name__ == "__main__":
     run_market_analysis()
