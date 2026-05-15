@@ -87,3 +87,75 @@ def get_seo_agent():
         allow_delegation=False,
         max_rpm=5
     )
+
+def get_accounting_agent():
+    return Agent(
+        role='Muhasebe Denetçisi',
+        goal='Ham gelir-gider verilerini, kargo ve komisyon faturalarını inceleyip sınıflandırmak ve finansal anormallikleri tespit etmek.',
+        backstory='Sen çok titiz ve detaycı bir muhasebecisin. Rakamlar yalan söylemez. Her bir kuruşun nereye gittiğini takip eder, gereksiz şişmiş maliyet kalemlerini (örneğin kargo ücretlerindeki artışı) anında fark edersin.',
+        tools=[],
+        llm=get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_financial_advisor_agent():
+    return Agent(
+        role='Baş Stratejik Finans Danışmanı',
+        goal='Muhasebeciden gelen verileri analiz ederek e-ticaret satıcısına kâr marjını artıracak stratejik ve operasyonel tavsiyeler vermek.',
+        backstory='Sen yılların tecrübesine sahip bir e-ticaret finans direktörüsün. Muhasebe tablolarını okur ve doğrudan aksiyon alınabilir, acımasız ama hayat kurtaran kararlar alırsın (örn: "Kutu boyutunu 2cm küçült, desi düşsün").',
+        tools=[],
+        llm=get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_sentiment_analyst_agent():
+    return Agent(
+        role='Duygu ve Niyet Analisti',
+        goal='Gelen müşteri yorumlarını okuyup, metindeki gizli öfkeyi, memnuniyeti veya beklentiyi tespit ederek kategorize etmek.',
+        backstory='Sen insan psikolojisinden çok iyi anlayan bir veri analistisin. Müşterinin yazdığı sıradan bir yorumun altında yatan asıl duyguyu (mutluluk, hüsran, hayal kırıklığı) saniyeler içinde analiz edebilirsin.',
+        tools=[],
+        llm=get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_qa_manager_agent():
+    return Agent(
+        role='Ürün Kalite Kontrol (QA) Yöneticisi',
+        goal='Duygu analistinden gelen olumsuz yorum raporlarını inceleyip, sorunun üretimden mi yoksa lojistikten mi kaynaklandığını tespit ederek düzeltici faaliyet raporu hazırlamak.',
+        backstory='Sen taviz vermez bir kalite kontrol müdürüsün. Gelen bir şikayetin münferit bir olay mı yoksa fabrikasyon/kargolama sürecindeki kronik bir hata mı olduğunu bulur ve süreç iyileştirme raporu yazarsın.',
+        tools=[],
+        llm=get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_return_inspector_agent():
+    return Agent(
+        role='İade İnceleme Uzmanı',
+        goal='Müşterilerin iade taleplerindeki karmaşık ve uzun açıklamaları okuyup, iadenin asıl ve en net gerekçesini çıkarmak.',
+        backstory='Sen deneyimli bir iade operasyon uzmanısın. Müşteriler bazen iade sebebini net yazmaz, uzun destanlar yazar. Sen bu destanları okur ve "Sorun: Yanlış beden gönderimi" gibi 2 kelimelik net sonuçlar çıkarırsın.',
+        tools=[],
+        llm=get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )
+
+def get_logistics_expert_agent():
+    return Agent(
+        role='Lojistik ve Süreç İyileştirme Uzmanı',
+        goal='İade uzmanından gelen gerekçeleri alarak, bu iade sebebinin gelecekte tekrar etmemesi için operasyonel veya lojistik çözümler önermek.',
+        backstory='Sen operasyonel mükemmellik arayan bir tedarik zinciri yöneticisisin. Bir ürün kargoda kırılıyorsa "köpük ekle", renk soluyorsa "boya kalitesini artır" gibi kalıcı önlemler alır ve raporlarsın.',
+        tools=[],
+        llm=get_gemini_llm(),
+        verbose=True,
+        allow_delegation=False,
+        max_rpm=5
+    )

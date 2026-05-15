@@ -55,3 +55,52 @@ def get_support_task(product_name: str, agent: Agent):
         expected_output="JSON formatında yanıt metni ve kriz yönetimi adımları. Şablon: {\"musteri_yanit_maili\": \"...\", \"kriz_yonetim_adimlari\": [\"...\"]}",
         agent=agent
     )
+
+def get_accounting_task(financial_data: dict, agent: Agent):
+    data_str = (
+        f"- Toplam Gelir: {financial_data.get('total_revenue')} TL\n"
+        f"- Ürün Maliyetleri: {financial_data.get('cogs')} TL\n"
+        f"- Kargo Giderleri: {financial_data.get('shipping_costs')} TL\n"
+        f"- Platform Komisyonları: {financial_data.get('commissions')} TL\n"
+        f"- İade Giderleri: {financial_data.get('return_costs')} TL\n"
+    )
+    return Task(
+        description=f"Şu aylık finansal verileri incele ve sınıflandır:\n{data_str}\nHangi gider kaleminin oransal olarak en büyük riski taşıdığını tespit et.",
+        expected_output="JSON formatında muhasebe özeti. Şablon: {\"net_kar\": 0, \"en_buyuk_gider_kalemi\": \"...\", \"risk_durumu\": \"...\"}",
+        agent=agent
+    )
+
+def get_financial_advisor_task(agent: Agent):
+    return Task(
+        description="Muhasebe denetçisinden gelen risk raporunu ve net kâr durumunu incele. E-ticaret satıcısına kâr marjını artırmak için acil uygulanabilir 3 operasyonel strateji (örn: kargo anlaşmasını yenilemek, fiyat artırmak) öner.",
+        expected_output="JSON formatında stratejik tavsiyeler. Şablon: {\"durum_degerlendirmesi\": \"...\", \"aksiyon_adimlari\": [\"...\", \"...\", \"...\"]}",
+        agent=agent
+    )
+
+def get_sentiment_analysis_task(review_text: str, agent: Agent):
+    return Task(
+        description=f"Müşteriden gelen şu ürün yorumunu analiz et: '{review_text}'. Yorumun ana duygusunu (olumlu/olumsuz/nötr/öneri) belirle.",
+        expected_output="JSON formatında duygu analizi. Şablon: {\"duygu_kategorisi\": \"...\", \"onem_derecesi\": 0-10, \"kisa_ozet\": \"...\"}",
+        agent=agent
+    )
+
+def get_qa_analysis_task(agent: Agent):
+    return Task(
+        description="Duygu analistinden gelen olumsuz/öneri kategorisindeki veriyi al. Bu şikayetin üretim bandındaki bir hatadan mı, yoksa kargo/paketleme sürecinden mi kaynaklandığını analiz et ve satıcıya bir Kalite Kontrol uyarı raporu yaz.",
+        expected_output="JSON formatında kalite kontrol raporu. Şablon: {\"sorun_kaynagi\": \"...\", \"etkilenen_surec\": \"...\", \"cozum_onerisi\": \"...\"}",
+        agent=agent
+    )
+
+def get_return_inspection_task(return_reason_text: str, agent: Agent):
+    return Task(
+        description=f"Müşterinin girdiği şu iade açıklamasını oku: '{return_reason_text}'. Metindeki gereksiz detayları at ve iadenin asıl kök nedenini (root cause) tek bir cümleyle özetle.",
+        expected_output="JSON formatında iade özeti. Şablon: {\"kullanci_amaci\": \"...\", \"kok_neden\": \"...\", \"iade_turu\": \"Kusurlu/Vazgecme vb.\"}",
+        agent=agent
+    )
+
+def get_logistics_improvement_task(agent: Agent):
+    return Task(
+        description="İade inceleme uzmanından gelen kök nedeni al. Bu iade sebebinin gelecekte tekrar etmemesi için tedarik zinciri veya paketleme aşamasında ne gibi kalıcı iyileştirmeler yapılması gerektiğini belirle.",
+        expected_output="JSON formatında lojistik iyileştirme planı. Şablon: {\"gerekli_degisiklik\": \"...\", \"uygulama_maliyeti_tahmini\": \"Dusuk/Orta/Yuksek\", \"beklenen_fayda\": \"...\"}",
+        agent=agent
+    )

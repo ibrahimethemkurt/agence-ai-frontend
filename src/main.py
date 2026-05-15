@@ -4,11 +4,15 @@ from dotenv import load_dotenv
 from crewai import Crew, Process
 from src.agents import (
     get_researcher_agent, get_customer_insights_agent, get_strategist_agent, 
-    get_pricing_agent, get_social_media_agent, get_support_agent, get_seo_agent
+    get_pricing_agent, get_social_media_agent, get_support_agent, get_seo_agent,
+    get_accounting_agent, get_financial_advisor_agent, get_sentiment_analyst_agent,
+    get_qa_manager_agent, get_return_inspector_agent, get_logistics_expert_agent
 )
 from src.tasks import (
     get_competitor_analysis_task, get_customer_needs_task, get_market_trends_task, 
-    get_pricing_analysis_task, get_social_media_task, get_support_task, get_seo_task
+    get_pricing_analysis_task, get_social_media_task, get_support_task, get_seo_task,
+    get_accounting_task, get_financial_advisor_task, get_sentiment_analysis_task,
+    get_qa_analysis_task, get_return_inspection_task, get_logistics_improvement_task
 )
 
 load_dotenv()
@@ -83,6 +87,72 @@ def run_support_department(product_name: str) -> dict:
 
     result = crew.kickoff()
     return {"status": "success", "department": "support", "raw_output": result.raw}
+
+def run_finance_department(financial_data: dict) -> dict:
+    """Finans ve Maliyet Optimizasyon Departmanı"""
+    check_env()
+    
+    accounting_agent = get_accounting_agent()
+    advisor_agent = get_financial_advisor_agent()
+
+    accounting_task = get_accounting_task(financial_data, accounting_agent)
+    advisor_task = get_financial_advisor_task(advisor_agent)
+
+    crew = Crew(
+        agents=[accounting_agent, advisor_agent],
+        tasks=[accounting_task, advisor_task],
+        process=Process.sequential,
+        memory=True,
+        verbose=True,
+        max_rpm=10
+    )
+
+    result = crew.kickoff()
+    return {"status": "success", "department": "finance", "raw_output": result.raw}
+
+def run_feedback_department(review_text: str) -> dict:
+    """Müşteri Geri Bildirim (Yorum) Departmanı"""
+    check_env()
+    
+    sentiment_agent = get_sentiment_analyst_agent()
+    qa_agent = get_qa_manager_agent()
+
+    sentiment_task = get_sentiment_analysis_task(review_text, sentiment_agent)
+    qa_task = get_qa_analysis_task(qa_agent)
+
+    crew = Crew(
+        agents=[sentiment_agent, qa_agent],
+        tasks=[sentiment_task, qa_task],
+        process=Process.sequential,
+        memory=True,
+        verbose=True,
+        max_rpm=10
+    )
+
+    result = crew.kickoff()
+    return {"status": "success", "department": "feedback", "raw_output": result.raw}
+
+def run_return_department(return_reason_text: str) -> dict:
+    """İade ve Lojistik Yönetimi Departmanı"""
+    check_env()
+    
+    inspector_agent = get_return_inspector_agent()
+    logistics_agent = get_logistics_expert_agent()
+
+    inspection_task = get_return_inspection_task(return_reason_text, inspector_agent)
+    logistics_task = get_logistics_improvement_task(logistics_agent)
+
+    crew = Crew(
+        agents=[inspector_agent, logistics_agent],
+        tasks=[inspection_task, logistics_task],
+        process=Process.sequential,
+        memory=True,
+        verbose=True,
+        max_rpm=10
+    )
+
+    result = crew.kickoff()
+    return {"status": "success", "department": "return", "raw_output": result.raw}
 
 if __name__ == "__main__":
     print("Agence AI Departman API Mock Testi")
