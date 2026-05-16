@@ -4,6 +4,8 @@ import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
 import Grainient from './components/animation/GrainientBackground';
 import { NotificationsContext } from './hooks/useNotifications';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 import { DashboardPage } from './pages/DashboardPage';
 import { FinansPage } from './pages/FinansPage';
@@ -62,26 +64,30 @@ const Layout = () => {
 
 const App = () => {
   return (
-    <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<SignInPage onSignIn={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onCreateAccount={() => window.location.href = '/register'} />} />
-          <Route path="/register" element={<RegisterPage onRegister={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onSignInClick={() => window.location.href = '/login'} />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate to="/login" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="finans" element={<FinansPage />} />
-            <Route path="analizler" element={<AnalizlerPage />} />
-            <Route path="ajanlar">
-              <Route path="satis-oncesi" element={<SatisOncesiPage />} />
-              <Route path="satis-sureci" element={<SatisSureciPage />} />
-              <Route path="satis-sonrasi" element={<SatisSonrasiPage />} />
+    <AuthProvider>
+      <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<SignInPage onCreateAccount={() => window.location.href = '/register'} />} />
+            <Route path="/register" element={<RegisterPage onSignInClick={() => window.location.href = '/login'} />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="finans" element={<FinansPage />} />
+                <Route path="analizler" element={<AnalizlerPage />} />
+                <Route path="ajanlar">
+                  <Route path="satis-oncesi" element={<SatisOncesiPage />} />
+                  <Route path="satis-sureci" element={<SatisSureciPage />} />
+                  <Route path="satis-sonrasi" element={<SatisSonrasiPage />} />
+                </Route>
+                <Route path="ayarlar" element={<AyarlarPage />} />
+              </Route>
             </Route>
-            <Route path="ayarlar" element={<AyarlarPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </NotificationsContext.Provider>
+          </Routes>
+        </BrowserRouter>
+      </NotificationsContext.Provider>
+    </AuthProvider>
   );
 };
 
