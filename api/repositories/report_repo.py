@@ -7,10 +7,11 @@ class ReportRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_report_job(self, product_name: str, department: str) -> AIReport:
+    def create_report_job(self, user_id: int, product_id: int, department: str) -> AIReport:
         """Veritabanında yeni bir analiz görevi (Job) oluşturur ve durumunu 'pending' yapar."""
         db_report = AIReport(
-            product_name=product_name,
+            user_id=user_id,
+            product_id=product_id,
             department=department,
             status="pending"
         )

@@ -2,10 +2,11 @@ import os
 import json
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
-from ..models import ProductRequest, FeedbackRequest, ReturnRequest, JobResponse
+from ..models import ProductRequest, FeedbackRequest, ReturnRequest, JobResponse, User, Product
 from ..database import get_db
 from ..repositories.report_repo import ReportRepository
 from ..services.ai_service import process_presale_task
+from .auth import get_current_user
 import sys
 
 # src klasöründeki modüllere erişebilmek için:
@@ -27,19 +28,25 @@ def get_mock_data(filename: str):
 def presale_analysis(
     request: ProductRequest, 
     background_tasks: BackgroundTasks, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Ürün Keşif ve Fiyatlandırma Departmanını Arka Planda Çalıştırır"""
+    # 1. Product'ın varlığını ve bu kullanıcıya ait olduğunu kontrol et
+    product = db.query(Product).filter(Product.id == request.product_id, Product.user_id == current_user.id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı veya yetkiniz yok.")
+
     costs = request.costs or {"base_cost": 100, "shipping_cost": 30, "commission_rate": 15, "other_costs": 10}
     
-    # 1. Veritabanında boş bir görev (Job) oluştur
+    # 2. Veritabanında boş bir görev (Job) oluştur
     repo = ReportRepository(db)
-    job = repo.create_report_job(product_name=request.product_name, department="presale")
+    job = repo.create_report_job(user_id=current_user.id, product_id=product.id, department="presale")
     
-    # 2. Ağır yapay zeka işlemini Background Task'a gönder
-    background_tasks.add_task(process_presale_task, job.id, request.product_name, costs, db)
+    # 3. Ağır yapay zeka işlemini Background Task'a gönder
+    background_tasks.add_task(process_presale_task, job.id, product.name, costs, db)
     
-    # 3. Beklemeden anında Job ID dön
+    # 4. Beklemeden anında Job ID dön
     return JobResponse(
         job_id=job.id,
         status="pending",

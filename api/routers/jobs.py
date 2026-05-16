@@ -19,7 +19,8 @@ def get_job_status(job_id: int, db: Session = Depends(get_db)):
         
     return {
         "job_id": report.id,
-        "product_name": report.product_name,
+        "product_id": report.product_id,
+        "product_name": report.product.name if report.product else "Bilinmiyor",
         "department": report.department,
         "status": report.status,
         "result": report.result_json,
