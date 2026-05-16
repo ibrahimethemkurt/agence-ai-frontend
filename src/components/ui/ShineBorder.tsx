@@ -7,6 +7,7 @@ export type ShineBorderProps = {
   borderWidth?: number;
   duration?: number;
   gradient?: string;
+  innerClassName?: string;
 };
 
 export const ShineBorder = ({
@@ -15,6 +16,7 @@ export const ShineBorder = ({
   borderWidth = 2,
   duration = 3,
   gradient = "from-[var(--color-accent)] via-white/20 to-[var(--color-accent-2)]",
+  innerClassName,
 }: ShineBorderProps) => {
   return (
     <div
@@ -35,7 +37,7 @@ export const ShineBorder = ({
       </div>
 
       {/* Content Layer */}
-      <div className="relative rounded-2xl bg-[var(--color-bg)] h-full w-full">
+      <div className={cn("relative rounded-2xl bg-[var(--color-bg)] h-full w-full", innerClassName)}>
         {children}
       </div>
     </div>

@@ -11,6 +11,7 @@ import { AnalizlerPage } from './pages/AnalizlerPage';
 import { SatisOncesiPage } from './pages/SatisOncesiPage';
 import { SatisSureciPage } from './pages/SatisSureciPage';
 import { SatisSonrasiPage } from './pages/SatisSonrasiPage';
+import { SatistaOlanUrunlerPage } from './pages/SatistaOlanUrunlerPage';
 import { AyarlarPage } from './pages/AyarlarPage';
 import { SignInPage } from './components/sign-in';
 import { RegisterPage } from './components/register';
@@ -72,6 +73,7 @@ const App = () => {
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="finans" element={<FinansPage />} />
             <Route path="analizler" element={<AnalizlerPage />} />
+            <Route path="satista-olan-urunler" element={<SatistaOlanUrunlerPage />} />
             <Route path="ajanlar">
               <Route path="satis-oncesi" element={<SatisOncesiPage />} />
               <Route path="satis-sureci" element={<SatisSureciPage />} />

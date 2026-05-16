@@ -12,7 +12,8 @@ import {
   WalletCards,
   Search,
   ShoppingCart,
-  PackageCheck
+  PackageCheck,
+  Package
 } from "lucide-react";
 
 const MAIN_GROUPS = [
@@ -22,6 +23,7 @@ const MAIN_GROUPS = [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { to: '/finans', label: 'Gelir-Gider', icon: WalletCards },
       { to: '/analizler', label: 'Analizler', icon: ChartNoAxesCombined },
+      { to: '/satista-olan-urunler', label: 'Satışta Olan Ürünler', icon: Package },
     ],
   },
   {

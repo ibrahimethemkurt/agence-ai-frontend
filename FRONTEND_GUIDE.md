@@ -105,7 +105,37 @@ interface RevealProps {
   delay?: number;
   children: React.ReactNode;
 }
+## Sık Karşılaşılan "Siyah Ekran" Hataları ve Nedenleri
 
+AjansAI projesini geliştirirken yeni sayfalar ve bileşenler eklediğinizde aniden "Siyah Ekran" (Render Crash) ile karşılaşabilirsiniz. React projelerinde Vite ile çalışırken SPA (Single Page Application) yapısı hataları gizleyebilir ve sayfayı yenilediğinizde (F5) uygulamanın anında çökmesine neden olur. Lütfen bu hatalara dikkat edin:
+
+### 1. Eksik Hook İmportları (`useState`, `useEffect`)
+Bir sayfayı tamamen sıfırdan yazarken veya büyük oranda kopyalayıp değiştirirken, sayfanın en üstünde React hook'larının eksiksiz yüklendiğinden **kesinlikle emin olun**.
+**Yanlış:**
+```tsx
+import { PageTransition } from '../components/animation/PageTransition';
+// ...
+const [state, setState] = useState(false); // useState is not defined HATASI (Siyah Ekran)
+```
+**Doğru:**
+```tsx
+import { useState, useEffect } from 'react';
+import { PageTransition } from '../components/animation/PageTransition';
+```
+
+### 2. Default Export (Varsayılan) vs Named Export (İsimli) Karmaşası
+Projemizdeki UI bileşenleri çoğunlukla `export const BileşenAdı = ...` (İsimli Export) şeklinde dışarı aktarılır. Eğer bunları varsayılan (default) export gibi içe aktarmaya çalışırsanız modül hatası oluşur.
+**Yanlış:**
+```tsx
+import ShineBorder from '../components/ui/ShineBorder'; // Does not provide an export named 'default' HATASI (Siyah Ekran)
+```
+**Doğru:**
+```tsx
+import { ShineBorder } from '../components/ui/ShineBorder';
+```
+
+> [!CAUTION]
+> Her yeni bir özellik veya modül eklediğinizde, uygulamanın SPA modunda (tıklayarak gezinirken) çalıştığından emin olmakla yetinmeyin. Mutlaka bulunduğunuz sayfaya F5 atarak tam yenileme testini uygulayın. Aksi takdirde modül çözümleme hatalarını gözden kaçırabilirsiniz.
 const Reveal = ({ variant = 'fade', duration = 0.4, delay = 0, children }: RevealProps) => (
   <motion.div
     {...TRANSITIONS[variant]}

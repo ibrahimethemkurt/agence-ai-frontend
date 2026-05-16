@@ -3,7 +3,9 @@ import { useState } from 'react';
 export const useListingWizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    title: '',
+    sourceType: '' as 'analyzed' | 'manual' | '',
+    selectedProduct: '',
+    productName: '',
     description: '',
     price: '',
     platforms: [] as string[]
@@ -12,6 +14,7 @@ export const useListingWizard = () => {
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
   const updateData = (data: Partial<typeof formData>) => setFormData(prev => ({ ...prev, ...data }));
+  const setStep = (step: number) => setCurrentStep(step);
 
-  return { currentStep, formData, nextStep, prevStep, updateData };
+  return { currentStep, formData, nextStep, prevStep, updateData, setStep };
 };

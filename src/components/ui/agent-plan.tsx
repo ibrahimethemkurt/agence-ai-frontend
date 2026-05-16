@@ -11,7 +11,7 @@ import {
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 // Type definitions
-interface Subtask {
+export interface Subtask {
   id: string;
   title: string;
   description: string;
@@ -20,7 +20,7 @@ interface Subtask {
   tools?: string[]; // Optional array of MCP server tools
 }
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
   description: string;
@@ -124,8 +124,8 @@ const initialTasks: Task[] = [
   }
 ];
 
-export default function Plan() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+export default function Plan({ customTasks }: { customTasks?: Task[] }) {
+  const [tasks, setTasks] = useState<Task[]>(customTasks || initialTasks);
   const [expandedTasks, setExpandedTasks] = useState<string[]>(["1"]);
   const [expandedSubtasks, setExpandedSubtasks] = useState<{
     [key: string]: boolean;
