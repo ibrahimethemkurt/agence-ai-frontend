@@ -1,13 +1,16 @@
 import os
 import json
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from ..models import ProductRequest, FeedbackRequest, ReturnRequest
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from sqlalchemy.orm import Session
+from ..models import ProductRequest, FeedbackRequest, ReturnRequest, JobResponse
+from ..database import get_db
+from ..repositories.report_repo import ReportRepository
+from ..services.ai_service import process_presale_task
 import sys
 
 # src klasöründeki modüllere erişebilmek için:
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from src.main import (
-    run_presale_department, run_listing_department, run_support_department,
     run_finance_department, run_feedback_department, run_return_department
 )
 
@@ -20,16 +23,28 @@ def get_mock_data(filename: str):
             return json.load(f)
     return None
 
-@router.post("/presale")
-def presale_analysis(request: ProductRequest):
-    """Ürün Keşif ve Fiyatlandırma Departmanını Çalıştırır"""
+@router.post("/presale", response_model=JobResponse)
+def presale_analysis(
+    request: ProductRequest, 
+    background_tasks: BackgroundTasks, 
+    db: Session = Depends(get_db)
+):
+    """Ürün Keşif ve Fiyatlandırma Departmanını Arka Planda Çalıştırır"""
     costs = request.costs or {"base_cost": 100, "shipping_cost": 30, "commission_rate": 15, "other_costs": 10}
-    try:
-        # Senkron çalışır (Hackathon testleri için şimdilik senkron, ileride BackgroundTasks eklenebilir)
-        result = run_presale_department(request.product_name, costs)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    
+    # 1. Veritabanında boş bir görev (Job) oluştur
+    repo = ReportRepository(db)
+    job = repo.create_report_job(product_name=request.product_name, department="presale")
+    
+    # 2. Ağır yapay zeka işlemini Background Task'a gönder
+    background_tasks.add_task(process_presale_task, job.id, request.product_name, costs, db)
+    
+    # 3. Beklemeden anında Job ID dön
+    return JobResponse(
+        job_id=job.id,
+        status="pending",
+        message="Yapay zeka analizi başlatıldı. Sonucu /api/v1/jobs/" + str(job.id) + " adresinden sorgulayabilirsiniz."
+    )
 
 @router.post("/finance")
 def finance_analysis():

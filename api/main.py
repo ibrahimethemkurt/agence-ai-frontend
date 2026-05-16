@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import departments
+from .routers import departments, jobs
+from .database import engine, Base
+
+# Uygulama başlarken Veritabanı tablolarını oluştur (Eğer yoksa yaratır)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Agence AI - E-Ticaret Yapay Zeka Ajansı API",
@@ -18,7 +22,8 @@ app.add_middleware(
 )
 
 # Rotaları (Endpointleri) Bağlama
-app.include_router(departments.router, prefix="/api/v1/departments")
+app.include_router(departments.router, prefix="/api/v1/departments", tags=["Departments"])
+app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
 
 @app.get("/")
 def read_root():
