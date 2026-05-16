@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
 import Grainient from './components/animation/GrainientBackground';
 import { NotificationsContext } from './hooks/useNotifications';
+import { AIAssistantSidebar } from './components/layout/AIAssistantSidebar';
 
 import { DashboardPage } from './pages/DashboardPage';
 import { FinansPage } from './pages/FinansPage';
@@ -20,6 +21,7 @@ import './styles/tokens.css';
 
 const Layout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
 
   return (
     <div className="min-h-screen text-[var(--color-fg)] font-body relative">
@@ -52,11 +54,13 @@ const Layout = () => {
 
       <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
       <div className={`flex flex-col min-h-screen transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[240px]'}`}>
-        <TopBar />
+        <TopBar toggleAIAssistant={() => setIsAIAssistantOpen(true)} />
         <main className="flex-1 p-8">
           <Outlet />
         </main>
       </div>
+
+      <AIAssistantSidebar isOpen={isAIAssistantOpen} onClose={() => setIsAIAssistantOpen(false)} />
     </div>
   );
 };

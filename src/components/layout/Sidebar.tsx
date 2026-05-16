@@ -4,16 +4,16 @@ import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
 import {
   LayoutDashboard,
-  ChartNoAxesCombined,
   Settings,
   BadgeHelp,
   PanelLeftClose,
   PanelLeftOpen,
-  WalletCards,
   Search,
   ShoppingCart,
   PackageCheck,
-  Package
+  Landmark,
+  ChartSpline,
+  ShoppingBag
 } from "lucide-react";
 
 const MAIN_GROUPS = [
@@ -21,9 +21,9 @@ const MAIN_GROUPS = [
     title: 'GENEL',
     links: [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { to: '/finans', label: 'Finans', icon: WalletCards },
-      { to: '/analizler', label: 'Analizler', icon: ChartNoAxesCombined },
-      { to: '/satista-olan-urunler', label: 'Satışta Olan Ürünler', icon: Package },
+      { to: '/finans', label: 'Finans', icon: Landmark },
+      { to: '/analizler', label: 'Analizler', icon: ChartSpline },
+      { to: '/satista-olan-urunler', label: 'Satışta Olan Ürünler', icon: ShoppingBag },
     ],
   },
   {
@@ -156,12 +156,12 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
           </Menu.Trigger>
           <Portal>
             <Menu.Positioner>
-              <Menu.Content className="z-50 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg p-1 min-w-[208px] focus-visible:outline-none font-body text-[var(--color-fg)]">
-                <Menu.Item value="profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[var(--color-bg)] cursor-pointer outline-none">
+              <Menu.Content className="z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border border-[#2a2a2a] rounded-xl shadow-2xl p-1.5 min-w-[208px] focus-visible:outline-none font-body text-white">
+                <Menu.Item value="profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-[var(--color-surface)] cursor-pointer outline-none transition-colors">
                   Profili Düzenle
                 </Menu.Item>
-                <Menu.Separator className="my-1 h-px bg-[var(--color-border)]" />
-                <Menu.Item value="logout" className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 rounded-md hover:bg-red-500/10 cursor-pointer outline-none">
+                <Menu.Separator className="my-1 h-px bg-[#2a2a2a]" />
+                <Menu.Item value="logout" className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 rounded-lg hover:bg-red-500/10 cursor-pointer outline-none transition-colors">
                   Çıkış Yap
                 </Menu.Item>
               </Menu.Content>
