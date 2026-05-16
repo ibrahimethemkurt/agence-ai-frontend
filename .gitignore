@@ -1,5 +1,7 @@
 # Environments
 .env
+.env.local
+.env.production
 .venv
 env/
 venv/
@@ -31,11 +33,31 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# CrewAI outputs / Reports
+# SQLite Veritabanı (Lokal geliştirme DB'si - repoya girmemeli)
+*.db
+*.db-shm
+*.db-wal
+
+# Loglar
+*.log
+logs/
+
+# CrewAI / AI Çıktıları (otomatik üretilen raporlar)
 rapor.md
 *.md.bak
+pazar_analizi_raporu.md
+fiyat_analizi_raporu.md
+satis_sonrasi_destek_raporu.md
+sosyal_medya_raporu.md
+
+# Test ve Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
 
 # IDE / OS
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
