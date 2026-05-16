@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Reveal } from './animation/Reveal';
 import { Stagger } from './animation/Stagger';
 import Grainient from './animation/GrainientBackground';
 import { Radio } from './radio';
+import { useAuth } from '../context/AuthContext';
+import { ApiError } from '../api/client';
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -22,9 +26,17 @@ const GoogleIcon = () => (
 interface RegisterPageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  onRegister?: (event: React.FormEvent<HTMLFormElement>) => void;
   onGoogleSignIn?: () => void;
   onSignInClick?: () => void;
+}
+
+interface RegisterFormValues {
+  firstName: string;
+  lastName: string;
+  company: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
 
 // --- SUB-COMPONENTS ---
@@ -40,13 +52,50 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
 export const RegisterPage: React.FC<RegisterPageProps> = ({
   title = <span className="font-light text-[var(--color-fg)] tracking-tighter">Hesap Oluşturun</span>,
   description = "Geleceğin e-ticaret dünyasına ilk adımınızı atın",
-  onRegister,
   onGoogleSignIn,
   onSignInClick,
 }) => {
+  const { register: authRegister } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { isSubmitting },
+  } = useForm<RegisterFormValues>();
+
+  const onSubmit = async (values: RegisterFormValues) => {
+    if (!agreed) {
+      setApiError('Devam etmek için kullanıcı sözleşmesini kabul etmeniz gerekiyor.');
+      return;
+    }
+    if (values.password !== values.confirmPassword) {
+      setApiError('Şifreler eşleşmiyor.');
+      return;
+    }
+    setApiError(null);
+    try {
+      await authRegister({
+        full_name: `${values.firstName} ${values.lastName}`.trim(),
+        company_name: values.company,
+        email: values.email,
+        password: values.password,
+        password_confirm: values.confirmPassword,
+      });
+      navigate('/login', { replace: true });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setApiError(err.message);
+      } else {
+        setApiError('Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.');
+      }
+    }
+  };
 
   return (
     <div className="h-[100dvh] flex flex-col md:flex-row font-body w-[100dvw] bg-[var(--color-bg)] relative overflow-hidden" style={{ '--color-accent': '#8B5CF6' } as React.CSSProperties}>
@@ -90,20 +139,20 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
               <p className="text-[var(--color-muted)] text-sm">{description}</p>
             </Reveal>
 
-            <form className="space-y-3" onSubmit={onRegister}>
+            <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
               
               <Reveal variant="fadeUp">
                 <div className="flex gap-3">
                   <div className="flex-1">
                     <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Ad</label>
                     <GlassInputWrapper>
-                      <input name="firstName" type="text" placeholder="Adınız" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                      <input {...register('firstName', { required: true })} type="text" placeholder="Adınız" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                     </GlassInputWrapper>
                   </div>
                   <div className="flex-1">
                     <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Soyad</label>
                     <GlassInputWrapper>
-                      <input name="lastName" type="text" placeholder="Soyadınız" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                      <input {...register('lastName', { required: true })} type="text" placeholder="Soyadınız" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                     </GlassInputWrapper>
                   </div>
                 </div>
@@ -112,14 +161,14 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
               <Reveal variant="fadeUp">
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şirket Adı</label>
                 <GlassInputWrapper>
-                  <input name="company" type="text" placeholder="Şirketinizin adı" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                  <input {...register('company', { required: true })} type="text" placeholder="Şirketinizin adı" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                 </GlassInputWrapper>
               </Reveal>
 
               <Reveal variant="fadeUp">
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Email Adresiniz</label>
                 <GlassInputWrapper>
-                  <input name="email" type="email" placeholder="Email adresinizi girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                  <input {...register('email', { required: true })} type="email" placeholder="Email adresinizi girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                 </GlassInputWrapper>
               </Reveal>
 
@@ -127,7 +176,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şifre</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Şifrenizi oluşturun" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" required />
+                    <input {...register('password', { required: true })} type={showPassword ? 'text' : 'password'} placeholder="Şifrenizi oluşturun" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
                       {showPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" /> : <Eye className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />}
                     </button>
@@ -139,7 +188,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şifre (Tekrar)</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Şifrenizi tekrar girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" required />
+                    <input {...register('confirmPassword', { required: true })} type={showConfirmPassword ? 'text' : 'password'} placeholder="Şifrenizi tekrar girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" />
                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-3 flex items-center">
                       {showConfirmPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" /> : <Eye className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />}
                     </button>
@@ -160,10 +209,25 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 </div>
               </Reveal>
 
+              {/* API hata mesajı */}
+              {apiError && (
+                <Reveal variant="fadeUp">
+                  <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-3">
+                    {apiError}
+                  </p>
+                </Reveal>
+              )}
+
               <Reveal variant="fadeUp">
                 <div className="flex gap-3 mt-4">
-                  <button type="submit" className="flex-1 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-colors">
-                    Kayıt Ol
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Kayıt olunuyor...</>
+                    ) : 'Kayıt Ol'}
                   </button>
                   <button type="button" onClick={onGoogleSignIn} className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors" title="Google ile Kayıt Ol">
                     <GoogleIcon />

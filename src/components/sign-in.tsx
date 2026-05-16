@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Reveal } from './animation/Reveal';
 import { Stagger } from './animation/Stagger';
 import Grainient from './animation/GrainientBackground';
 import { Radio } from './radio';
+import { useAuth } from '../context/AuthContext';
+import { ApiError } from '../api/client';
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -31,10 +35,14 @@ interface SignInPageProps {
   description?: React.ReactNode;
   heroImageSrc?: string;
   testimonials?: Testimonial[];
-  onSignIn?: (event: React.FormEvent<HTMLFormElement>) => void;
   onGoogleSignIn?: () => void;
   onResetPassword?: () => void;
   onCreateAccount?: () => void;
+}
+
+interface LoginFormValues {
+  email: string;
+  password: string;
 }
 
 // --- SUB-COMPONENTS ---
@@ -63,13 +71,35 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   description = "Giriş yapın ve yolculuğunuza devam edin",
   heroImageSrc,
   testimonials = [],
-  onSignIn,
   onGoogleSignIn,
   onResetPassword,
   onCreateAccount,
 }) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<LoginFormValues>();
+
+  const onSubmit = async (values: LoginFormValues) => {
+    setApiError(null);
+    try {
+      await login({ email: values.email, password: values.password });
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setApiError(err.message);
+      } else {
+        setApiError('Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.');
+      }
+    }
+  };
 
   return (
     <div className="h-[100dvh] flex flex-col md:flex-row font-body w-[100dvw] bg-[var(--color-bg)] relative overflow-hidden" style={{ '--color-accent': '#8B5CF6' } as React.CSSProperties}>
@@ -113,11 +143,16 @@ export const SignInPage: React.FC<SignInPageProps> = ({
               <p className="text-[var(--color-muted)]">{description}</p>
             </Reveal>
 
-            <form className="space-y-5" onSubmit={onSignIn}>
+            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
               <Reveal variant="fadeUp">
                 <label className="text-sm font-medium text-[var(--color-muted)] mb-2 block">Email Adresiniz</label>
                 <GlassInputWrapper>
-                  <input name="email" type="email" placeholder="Email adresinizi girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 rounded-2xl focus:outline-none" />
+                  <input
+                    {...register('email', { required: true })}
+                    type="email"
+                    placeholder="Email adresinizi girin"
+                    className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 rounded-2xl focus:outline-none"
+                  />
                 </GlassInputWrapper>
               </Reveal>
 
@@ -125,7 +160,12 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 <label className="text-sm font-medium text-[var(--color-muted)] mb-2 block">Şifreniz</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Şifrenizi girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 pr-12 rounded-2xl focus:outline-none" />
+                    <input
+                      {...register('password', { required: true })}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Şifrenizi girin"
+                      className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 pr-12 rounded-2xl focus:outline-none"
+                    />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
                       {showPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" /> : <Eye className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />}
                     </button>
@@ -145,9 +185,24 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 </div>
               </Reveal>
 
+              {/* API hata mesajı */}
+              {apiError && (
+                <Reveal variant="fadeUp">
+                  <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-3">
+                    {apiError}
+                  </p>
+                </Reveal>
+              )}
+
               <Reveal variant="fadeUp">
-                <button type="submit" className="w-full rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-colors">
-                  Giriş Yap
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Giriş yapılıyor...</>
+                  ) : 'Giriş Yap'}
                 </button>
               </Reveal>
             </form>
