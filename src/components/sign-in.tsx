@@ -1,0 +1,200 @@
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Reveal } from './animation/Reveal';
+import { Stagger } from './animation/Stagger';
+import Grainient from './animation/GrainientBackground';
+import { Radio } from './radio';
+
+// --- HELPER COMPONENTS (ICONS) ---
+
+const GoogleIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
+    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s12-5.373 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-2.641-.21-5.236-.611-7.743z" />
+    <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+    <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+    <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.022 35.026 44 30.038 44 24c0-2.641-.21-5.236-.611-7.743z" />
+  </svg>
+);
+
+
+// --- TYPE DEFINITIONS ---
+
+export interface Testimonial {
+  avatarSrc: string;
+  name: string;
+  handle: string;
+  text: string;
+}
+
+interface SignInPageProps {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  heroImageSrc?: string;
+  testimonials?: Testimonial[];
+  onSignIn?: (event: React.FormEvent<HTMLFormElement>) => void;
+  onGoogleSignIn?: () => void;
+  onResetPassword?: () => void;
+  onCreateAccount?: () => void;
+}
+
+// --- SUB-COMPONENTS ---
+
+const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
+  <div className="rounded-xl border border-[var(--color-border)] bg-[#121212] backdrop-blur-md transition-all duration-300 focus-within:border-[var(--color-accent)] focus-within:bg-[#1a1a1a]">
+    {children}
+  </div>
+);
+
+const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => (
+  <Reveal variant="fadeUp" className="flex items-start gap-3 rounded-3xl bg-[var(--color-surface)] backdrop-blur-xl border border-[var(--color-border)] p-5 w-64">
+    <img src={testimonial.avatarSrc} className="h-10 w-10 object-cover rounded-2xl" alt="avatar" />
+    <div className="text-sm leading-snug">
+      <p className="flex items-center gap-1 font-medium text-[var(--color-fg)]">{testimonial.name}</p>
+      <p className="text-[var(--color-muted)]">{testimonial.handle}</p>
+      <p className="mt-1 text-[var(--color-fg)]/80">{testimonial.text}</p>
+    </div>
+  </Reveal>
+);
+
+// --- MAIN COMPONENT ---
+
+export const SignInPage: React.FC<SignInPageProps> = ({
+  title = <span className="font-light text-[var(--color-fg)] tracking-tighter">Hoş Geldiniz!</span>,
+  description = "Giriş yapın ve yolculuğunuza devam edin",
+  heroImageSrc,
+  testimonials = [],
+  onSignIn,
+  onGoogleSignIn,
+  onResetPassword,
+  onCreateAccount,
+}) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  return (
+    <div className="h-[100dvh] flex flex-col md:flex-row font-body w-[100dvw] bg-[var(--color-bg)] relative overflow-hidden" style={{ '--color-accent': '#8B5CF6' } as React.CSSProperties}>
+
+      {/* Global Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Grainient
+          color1="#05031a"
+          color2="#251a52"
+          color3="#13071e"
+          timeSpeed={0.5}
+          colorBalance={-0.1}
+          warpStrength={2}
+          warpFrequency={4}
+          warpSpeed={3}
+          warpAmplitude={50}
+          blendAngle={0.5}
+          blendSoftness={0.1}
+          rotationAmount={500}
+          noiseScale={2}
+          grainAmount={0.08}
+          grainScale={2}
+          grainAnimated={false}
+          contrast={1.3}
+          gamma={0.8}
+          saturation={0.9}
+          centerX={0}
+          centerY={0}
+          zoom={1}
+        />
+      </div>
+
+      {/* Left column: sign-in form */}
+      <section className="flex-1 flex items-center justify-center p-8 z-10">
+        <div className="w-full max-w-md">
+          <Stagger className="flex flex-col gap-6" staggerDelay={0.25}>
+            <Reveal variant="fadeUp">
+              <h1 className="text-4xl md:text-5xl font-display font-semibold leading-tight text-[var(--color-fg)]">{title}</h1>
+            </Reveal>
+            <Reveal variant="fadeUp">
+              <p className="text-[var(--color-muted)]">{description}</p>
+            </Reveal>
+
+            <form className="space-y-5" onSubmit={onSignIn}>
+              <Reveal variant="fadeUp">
+                <label className="text-sm font-medium text-[var(--color-muted)] mb-2 block">Email Adresiniz</label>
+                <GlassInputWrapper>
+                  <input name="email" type="email" placeholder="Email adresinizi girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 rounded-2xl focus:outline-none" />
+                </GlassInputWrapper>
+              </Reveal>
+
+              <Reveal variant="fadeUp">
+                <label className="text-sm font-medium text-[var(--color-muted)] mb-2 block">Şifreniz</label>
+                <GlassInputWrapper>
+                  <div className="relative">
+                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Şifrenizi girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 pr-12 rounded-2xl focus:outline-none" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
+                      {showPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" /> : <Eye className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />}
+                    </button>
+                  </div>
+                </GlassInputWrapper>
+              </Reveal>
+
+              <Reveal variant="fadeUp">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-3 cursor-pointer" onClick={(e) => { e.preventDefault(); setRememberMe(!rememberMe); }}>
+                    <div className="pointer-events-none">
+                      <Radio checked={rememberMe} />
+                    </div>
+                    <span className="text-[var(--color-fg)]/90 cursor-pointer select-none">Beni hatırla</span>
+                  </div>
+                  <button type="button" onClick={(e) => { e.preventDefault(); onResetPassword?.(); }} className="hover:underline text-[var(--color-accent)] transition-colors">Şifremi unuttum</button>
+                </div>
+              </Reveal>
+
+              <Reveal variant="fadeUp">
+                <button type="submit" className="w-full rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-colors">
+                  Giriş Yap
+                </button>
+              </Reveal>
+            </form>
+
+            <Reveal variant="fadeUp">
+              <div className="flex items-center w-full">
+                <div className="flex-1 border-t border-[var(--color-border)]"></div>
+                <span className="px-4 text-sm text-[var(--color-muted)]">Veya ile devam et</span>
+                <div className="flex-1 border-t border-[var(--color-border)]"></div>
+              </div>
+            </Reveal>
+
+            <Reveal variant="fadeUp">
+              <button type="button" onClick={onGoogleSignIn} className="w-full flex items-center justify-center gap-3 border border-white/10 bg-[#0A0A0A] text-white rounded-2xl py-4 hover:bg-[#1A1A1A] transition-colors">
+                <GoogleIcon />
+                Google ile Devam Et
+              </button>
+            </Reveal>
+
+            <Reveal variant="fadeUp">
+              <p className="text-center text-sm text-[var(--color-muted)]">
+                Henüz üye değil misiniz? <button type="button" onClick={(e) => { e.preventDefault(); onCreateAccount?.(); }} className="text-[var(--color-accent)] hover:underline transition-colors">Hesap Oluşturun</button>
+              </p>
+            </Reveal>
+          </Stagger>
+        </div>
+      </section>
+
+      {/* Right column: animated visual + testimonials */}
+      <section className="hidden md:flex flex-1 relative p-4 items-center justify-center z-10">
+        <Reveal variant="fadeIn" className="absolute inset-4 rounded-3xl overflow-hidden border border-[var(--color-border)] shadow-2xl bg-[#080808]">
+          <div className="absolute inset-0 bg-cover bg-[center_top] transition-transform duration-1000 hover:scale-105" style={{ backgroundImage: "url('/ecommerce-ai-agents.png')" }}></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] from-25% via-[#050505]/80 via-50% to-transparent"></div>
+
+          <div className="absolute bottom-12 left-12 right-12 z-20">
+            <Reveal variant="fadeUp">
+              <h2 className="text-3xl lg:text-4xl font-display font-semibold text-white mb-4 leading-tight">
+                E-Ticaret AI Ajan ekibiniz<br />
+                <span className="text-[#8B5CF6]">çalışmak için sizi bekliyor.</span>
+              </h2>
+              <p className="text-gray-300 text-base lg:text-lg leading-relaxed">
+                Sisteme giriş yapın ve mağazanızın büyümesini tamamen otonom yapay zeka gücüne bırakın. Satışlarınızı katlamaya hazırız.
+              </p>
+            </Reveal>
+          </div>
+        </Reveal>
+      </section>
+    </div>
+  );
+};

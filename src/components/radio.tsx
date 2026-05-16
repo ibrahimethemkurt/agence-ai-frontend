@@ -45,8 +45,8 @@ const RadioGroupItem = ({ value, children }: RadioGroupItemProps) => {
 
   return (
     <label className={twMerge(clsx(
-      "flex items-center gap-2 cursor-pointer font-sans text-[13px] text-gray-1000 leading-3 group",
-      context?.disabled && "cursor-not-allowed text-gray-500"
+      "flex items-center gap-2 cursor-pointer font-body text-[13px] text-[var(--color-fg)] leading-3 group",
+      context?.disabled && "cursor-not-allowed opacity-50"
     ))}>
       <input
         type="radio"
@@ -60,14 +60,17 @@ const RadioGroupItem = ({ value, children }: RadioGroupItemProps) => {
       />
       <span
         className={twMerge(clsx(
-          "w-4 h-4 bg-background-100 relative border rounded-full duration-200 after:duration-200 flex items-center justify-center after:absolute after:top-1/2 after:left-1/2 after:-translate-y-1/2 after:-translate-x-1/2 after:rounded-full after:bg-gray-1000",
-          isSelected && "border-gray-1000 after:w-2 after:h-2",
-          !isSelected && "border-gray-700 after:w-0 after:h-0",
-          !isSelected && !context?.disabled && "group-hover:bg-gray-200 group-hover:border-gray-900",
-          context?.disabled && "after:bg-gray-500 border-gray-500"
+          "w-4 h-4 relative border rounded-full duration-200 flex items-center justify-center transition-colors",
+          isSelected ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "bg-transparent border-[var(--color-muted)] group-hover:border-[var(--color-fg)]"
         ))}
         aria-hidden="true"
-      />
+      >
+        {isSelected && (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5 text-white">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        )}
+      </span>
       {children}
     </label>
   );
@@ -100,8 +103,8 @@ export const Radio = ({ disabled, checked, required, onChange, value }: RadioPro
 
   return (
     <label className={twMerge(clsx(
-      "flex items-center gap-2 cursor-pointer font-sans text-[13px] leading-3 group",
-      disabled && "cursor-not-allowed"
+      "flex items-center gap-2 cursor-pointer font-body text-[13px] text-[var(--color-fg)] leading-3 group",
+      disabled && "cursor-not-allowed opacity-50"
     ))}>
       <input
         type="radio"
@@ -114,14 +117,17 @@ export const Radio = ({ disabled, checked, required, onChange, value }: RadioPro
       />
       <span
         className={twMerge(clsx(
-          "w-4 h-4 bg-background-100 relative border rounded-full duration-200 after:duration-200 flex items-center justify-center after:absolute after:top-1/2 after:left-1/2 after:-translate-y-1/2 after:-translate-x-1/2 after:rounded-full after:bg-gray-1000",
-          checked && "border-gray-1000 after:w-2 after:h-2",
-          !checked && "border-gray-700 after:w-0 after:h-0",
-          !checked && !disabled && "group-hover:bg-gray-200 group-hover:border-gray-900",
-          disabled && "after:bg-gray-500 border-gray-500"
+          "w-4 h-4 relative border rounded-full duration-200 flex items-center justify-center transition-colors",
+          checked ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "bg-transparent border-[var(--color-muted)] group-hover:border-[var(--color-fg)]"
         ))}
         aria-hidden="true"
-      />
+      >
+        {checked && (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5 text-white">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        )}
+      </span>
     </label>
   );
 };

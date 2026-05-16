@@ -12,6 +12,8 @@ import { SatisOncesiPage } from './pages/SatisOncesiPage';
 import { SatisSureciPage } from './pages/SatisSureciPage';
 import { SatisSonrasiPage } from './pages/SatisSonrasiPage';
 import { AyarlarPage } from './pages/AyarlarPage';
+import { SignInPage } from './components/sign-in';
+import { RegisterPage } from './components/register';
 
 import './styles/tokens.css';
 
@@ -63,8 +65,10 @@ const App = () => {
     <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<SignInPage onSignIn={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onCreateAccount={() => window.location.href = '/register'} />} />
+          <Route path="/register" element={<RegisterPage onRegister={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onSignInClick={() => window.location.href = '/login'} />} />
           <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route index element={<Navigate to="/login" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="finans" element={<FinansPage />} />
             <Route path="analizler" element={<AnalizlerPage />} />
