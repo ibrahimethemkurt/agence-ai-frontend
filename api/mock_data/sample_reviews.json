@@ -1,0 +1,9 @@
+{
+  "reviews": [
+    {"rating": 1, "comment": "Ürünün kargosu çok geç geldi, ayrıca kutusu ezilmişti. İçindeki ürün de resimdeki gibi parlak durmuyor. Hayal kırıklığı."},
+    {"rating": 2, "comment": "Sensörü çalışmıyor telefon görüşmesi yaparken ekran açık kalıyor kulağımla tuşlara basıyorum."},
+    {"rating": 5, "comment": "Ekran parlaklığı efsane, güneş altında bile çok net görünüyor. Bataryası da 2 gün rahat çıkarıyor."},
+    {"rating": 3, "comment": "Kamerası 200MP yazıyor ama 4K 60FPS video çekememesi büyük saçmalık."},
+    {"rating": 4, "comment": "Fiyatına göre çok iyi cihaz ama içindeki kendi uygulamalarında bile reklam çıkıyor, bunu kapatmak çok zor."}
+  ]
+}
