@@ -232,3 +232,13 @@ body {
     --ds-gray-200: hsla(0, 0%, 12%, 1);
     --ds-gray-500: hsla(0, 0%, 27%, 1);
 }
+
+/* Number Input Spin Buttons Remove */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
