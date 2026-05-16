@@ -1,9 +1,13 @@
 import { PageTransition } from '../components/animation/PageTransition';
 import { useDashboardData } from '../features/dashboard/hooks/useDashboardData';
 import { InteractiveTaskHub } from '../features/dashboard/components/InteractiveTaskHub';
-import { RevenueChart } from '../features/dashboard/components/RevenueChart';
-import { RecentAnalyses } from '../features/dashboard/components/RecentAnalyses';
 import { AlertBanner } from '../features/dashboard/components/AlertBanner';
+import { IncomeExpenseChart } from '../features/dashboard/components/IncomeExpenseChart';
+import { GrowthTrendChart } from '../features/dashboard/components/GrowthTrendChart';
+import { ActiveAgentsList } from '../features/dashboard/components/ActiveAgentsList';
+import { ActiveProductsList } from '../features/dashboard/components/ActiveProductsList';
+import { StoreOptimizationScore } from '../features/dashboard/components/StoreOptimizationScore';
+import { AIInsights } from '../features/dashboard/components/AIInsights';
 
 export const DashboardPage = () => {
   const data = useDashboardData();
@@ -19,14 +23,38 @@ export const DashboardPage = () => {
 
       <AlertBanner alerts={data.alerts} />
       
-      <InteractiveTaskHub />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Row 1: Interactive Task Hub + Active Agents List */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-2">
-          <RevenueChart data={data.revenueData} />
+          <InteractiveTaskHub />
         </div>
-        <div>
-          <RecentAnalyses data={data.recentAnalyses} />
+        <div className="lg:col-span-3">
+          <ActiveAgentsList agents={data.activeAgents} />
+        </div>
+      </div>
+
+      {/* Row 2: Active Products List + Income Expense Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <ActiveProductsList products={data.activeProductsList} />
+        </div>
+        <div className="lg:col-span-2">
+          <IncomeExpenseChart data={data.revenueData} />
+        </div>
+      </div>
+
+      {/* Row 3: Growth Trend */}
+      <div className="grid grid-cols-1 gap-6">
+        <GrowthTrendChart data={data.growthTrend} />
+      </div>
+
+      {/* Row 4: AI Store Optimization Score + AI Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-1">
+          <StoreOptimizationScore score={data.optimizationScore} />
+        </div>
+        <div className="lg:col-span-2">
+          <AIInsights insights={data.aiInsights} />
         </div>
       </div>
     </PageTransition>

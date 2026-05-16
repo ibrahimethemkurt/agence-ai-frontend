@@ -24,9 +24,9 @@ const Layout = () => {
     <div className="min-h-screen text-[var(--color-fg)] font-body relative">
       <div className="fixed inset-0 z-[-1] pointer-events-none">
         <Grainient
-          color1="#0F1A2E"
-          color2="#1E3A5F"
-          color3="#120e1d"
+          color1="#05031a"
+          color2="#0f0634"
+          color3="#1f0b32"
           timeSpeed={0.9}
           colorBalance={-0.13}
           warpStrength={1}

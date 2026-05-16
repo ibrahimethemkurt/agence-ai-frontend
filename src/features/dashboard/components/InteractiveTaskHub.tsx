@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, AlertTriangle, MessageSquare, PieChart, CheckCircle2, ChevronRight, X, Check, ArrowRight, PackagePlus, TrendingUp, XCircle } from 'lucide-react';
-import { ShineBorder } from '../../../components/shine-border';
 import { AnimatedButton } from '../../../components/ui/AnimatedButton';
 import { useNavigate } from 'react-router-dom';
 
 // Import new radio components
 import { RadioGroup as SegmentControl } from '../../../components/radio-group';
 import { RadioGroup as ShugarRadioGroup } from '../../../components/radio';
+
+import { GlowCard } from '../../../components/ui/glow-card';
 
 type TaskId = 'siparis' | 'stok' | 'yorum' | 'analiz';
 
@@ -16,14 +17,14 @@ interface TaskDef {
   title: string;
   count: number;
   icon: React.ElementType;
-  gradient: string;
+  glowColor: 'blue' | 'purple' | 'green' | 'red' | 'orange';
 }
 
 const TASK_DEFINITIONS: TaskDef[] = [
-  { id: 'siparis', title: 'Sipariş Geldi', count: 3, icon: Package, gradient: 'from-[#2E5F8A] via-teal-400 to-[#1E3A5F]' },
-  { id: 'stok', title: 'Stok Uyarısı', count: 2, icon: AlertTriangle, gradient: 'from-[#7A5C00] via-yellow-400 to-[#7A1A1A]' },
-  { id: 'yorum', title: 'Yorum Geldi', count: 5, icon: MessageSquare, gradient: 'from-[#1A6B3C] via-emerald-400 to-[#0F1A2E]' },
-  { id: 'analiz', title: 'Analiz Tamamlandı', count: 1, icon: PieChart, gradient: 'from-blue-500 via-purple-500 to-indigo-500' }
+  { id: 'siparis', title: 'Sipariş Geldi', count: 3, icon: Package, glowColor: 'blue' },
+  { id: 'stok', title: 'Stok Uyarısı', count: 2, icon: AlertTriangle, glowColor: 'orange' },
+  { id: 'yorum', title: 'Yorum Geldi', count: 5, icon: MessageSquare, glowColor: 'green' },
+  { id: 'analiz', title: 'Analiz Tamamlandı', count: 1, icon: PieChart, glowColor: 'purple' }
 ];
 
 export const InteractiveTaskHub = () => {
@@ -106,14 +107,14 @@ export const InteractiveTaskHub = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {TASK_DEFINITIONS.map((task) => {
           const isPending = pendingTasks.includes(task.id);
           const Icon = task.icon;
 
           if (!isPending) {
             return (
-              <div key={task.id} className="relative rounded-2xl p-6 border border-white/5 bg-[#0A0A0A] opacity-50 flex flex-col items-center justify-center gap-3 h-36">
+              <div key={task.id} className="relative rounded-2xl p-6 border border-white/5 bg-[#0A0A0A] opacity-50 flex flex-col items-center justify-center gap-3 h-[168px]">
                 <CheckCircle2 className="text-[var(--color-success)]" size={32} />
                 <span className="font-medium text-[var(--color-fg)]">{task.title} (Tamamlandı)</span>
               </div>
@@ -125,23 +126,22 @@ export const InteractiveTaskHub = () => {
               key={task.id}
               layoutId={`hub-${task.id}`}
               onClick={() => setActiveTask(task.id)}
-              className="cursor-pointer h-36"
+              className="cursor-pointer h-[168px]"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <ShineBorder borderWidth={1.5} duration={3} gradient={task.gradient} className="h-full">
-                <div className="flex flex-col p-6 h-full justify-between">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                      <Icon className="text-white" size={20} />
+              <GlowCard customSize={true} className="h-full p-6 flex flex-col justify-between overflow-hidden group" glowColor={task.glowColor}>
+                  <div className="flex items-start justify-between relative z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="text-white" size={24} strokeWidth={1.5} />
                     </div>
-                    <span className="text-2xl font-display font-bold text-white">{task.count}</span>
+                    <span className="text-4xl font-display font-bold text-white tracking-tight">{task.count}</span>
                   </div>
-                  <div>
+                  <div className="relative z-10">
                     <h3 className="font-display font-medium text-lg text-white/90">{task.title}</h3>
+                    <p className="text-sm text-[var(--color-muted)] mt-1 group-hover:text-white/70 transition-colors">İşlem Bekliyor</p>
                   </div>
-                </div>
-              </ShineBorder>
+              </GlowCard>
             </motion.div>
           );
         })}
