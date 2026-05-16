@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import departments, jobs, auth, products
+from .routers import departments, jobs, auth, products, assistant
 from .database import engine, Base
 
 # Uygulama başlarken Veritabanı tablolarını oluştur (Eğer yoksa yaratır)
@@ -24,6 +24,7 @@ app.add_middleware(
 # Rotaları (Endpointleri) Bağlama
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
+app.include_router(assistant.router, prefix="/api/v1/assistant", tags=["AI Assistant"])
 app.include_router(departments.router, prefix="/api/v1/departments", tags=["Departments"])
 app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
 
