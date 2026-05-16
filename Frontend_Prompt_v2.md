@@ -21,7 +21,8 @@ TypeScript          → Tip güvenliği
 Tailwind CSS        → Stil (token sistemi zorunlu)
 Framer Motion       → Animasyon (birincil)
 React Bits          → Animasyonlu component kaynağı
-Recharts            → Grafik bileşenleri
+Recharts            → Grafik altyapısı
+Tremor Raw          → Dashboard, KPI ve Veri Görselleştirme
 React Hook Form     → Form yönetimi
 Lucide React        → İkon seti
 Vite                → Build aracı
@@ -56,8 +57,8 @@ Tüm renk, spacing ve motion değerleri için aşağıdaki token sistemi kullan�
   --space-12: 48px; --space-16: 64px;  --space-24: 96px;
 
   /* Typography */
-  --font-display: 'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
+  --font-display: 'Manrope', sans-serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
 
   /* Motion */
   --duration-fast:  150ms;
@@ -242,7 +243,7 @@ features/dashboard/
 - Her kart `scaleIn` variant ile mount animasyonu alır
 
 **Gelir Trendi Grafiği**
-- Recharts `LineChart`
+- Tremor Raw `LineChart` (Kendi `--color-accent` tokenlerimiz ile)
 - `GET /api/finance/summary?period=monthly`
 - `Reveal` wrapper ile `fadeUp` animasyonu
 
@@ -298,7 +299,7 @@ features/finans/
 - Net Kâr: pozitifse `--color-success`, negatifse `--color-danger`
 
 **Gelir–Gider Grafiği**
-- Recharts `BarChart`: yan yana gelir (accent) ve gider (danger)
+- Tremor Raw `BarChart`: yan yana gelir (accent) ve gider (danger)
 - `Reveal` + `fadeUp`
 
 **4 Sekme: Gelir / Gider / Net Kâr / Gemini Raporu**
@@ -546,7 +547,7 @@ features/ayarlar/
 | Bileşen | Konum | Açıklama |
 |---|---|---|
 | `Sidebar` | `components/layout/` | Sol nav, aktif sayfa vurgusu, alt menü |
-| `KPICard` | `components/ui/` | props: title, value, unit, trend |
+| `KPICard` | `components/ui/` | props: title, value, unit, trend (Tremor Card bazlı) |
 | `StatusBadge` | `components/ui/` | props: status (tamamlandı/bekliyor/hata/olumlu/olumsuz) |
 | `LoadingSpinner` | `components/ui/` | inline veya tam ekran |
 | `EmptyState` | `components/ui/` | props: icon, title, description, actionLabel, onAction |

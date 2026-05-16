@@ -12,6 +12,7 @@ Tasarım referansları ve animasyon bileşenleri ağırlıklı olarak şu kaynak
 
 | Kaynak | Ne için |
 |---|---|
+| [Tremor Raw](https://tremor.so) | Veri görselleştirme (Grafik, KPI, Dashboard Kartları) |
 | [React Bits](https://reactbits.dev) | Animasyonlu, özelleştirilebilir React componentleri |
 | [21st.dev](https://21st.dev) | Shadcn uyumlu modern UI componentleri |
 | [Framer Motion](https://www.framer.com/motion/) | Declarative React animasyon kütüphanesi |
@@ -284,6 +285,19 @@ export default TextShimmer;
 
 ---
 
+## 📊 Tremor Raw Kullanım Protokolü
+
+[Tremor Raw](https://tremor.so) — Dashboard ve veri görselleştirme (Chart, Tracker, KPI Card vb.) için temel yapı taşı.
+
+```
+1. tremor.so/docs'tan kullanılacak bileşen kodunu bul
+2. src/components/ui/ altına yeni dosyaya kopyala
+3. Tailwind class'larındaki varsayılan renkleri (örneğin text-blue-500, bg-slate-900) kendi design token'larımızla (ör: var(--color-accent), var(--color-bg)) değiştir
+4. Bileşen ikonları Remix Icon kullanıyorsa, lucide-react ikonlarıyla güncelle
+```
+
+---
+
 ## 📁 Klasör Yapısı
 
 ```
@@ -341,8 +355,8 @@ src/
   --space-12: 48px; --space-16: 64px;  --space-24: 96px;
 
   /* Typography */
-  --font-display: 'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
+  --font-display: 'Manrope', sans-serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
   --text-sm: 0.875rem; --text-base: 1rem;   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;  --text-4xl: 2.25rem; --text-6xl: 3.75rem;
 
@@ -403,7 +417,7 @@ TASARIM REFERANSI:
 - Kaynak: React Bits > Scroll Reveal + 21st.dev > Bento Grid
 - Ton: Dark, minimal, teknolojik
 - Renk: bg=#0D0D0D  fg=#EFEFEF  accent=#00FF88
-- Font: display=Syne, body=DM Sans
+- Font: display=Manrope, body=Plus Jakarta Sans
 - Animasyon: staggered fade-up, scroll tetiklemeli
 - Motion kaynak: Framer Motion (whileInView)
 - Spacing: dramatik — büyük section padding'ler
@@ -483,6 +497,7 @@ transition={{ duration: 0.35 }}
 
 | Kaynak | URL |
 |---|---|
+| Tremor Raw | https://tremor.so |
 | React Bits | https://reactbits.dev |
 | 21st.dev | https://21st.dev |
 | Framer Motion | https://www.framer.com/motion |

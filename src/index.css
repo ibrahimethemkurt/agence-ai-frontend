@@ -86,6 +86,12 @@ body {
     --ds-shadow-small: var(----ds-shadow-small);
     --ds-shadow-border: var(----ds-shadow-border);
     --color-color-color-red-900: var(----color-color-red-900);
+    --color-radio-group-fg-hover: var(----radio-group-fg-hover);
+    --color-radio-group-fg-active: var(----radio-group-fg-active);
+    --color-radio-group-fg-default: var(----radio-group-fg-default);
+    --color-radio-group-bg-hover: var(----radio-group-bg-hover);
+    --color-radio-group-bg-active: var(----radio-group-bg-active);
+    --color-radio-group-bg-default: var(----radio-group-bg-default);
   @keyframes fade-spin {
   0% {
     opacity: 0.15;
@@ -94,6 +100,10 @@ body {
     opacity: 1;
         }
     }
+  --color-gray-200: var(--ds-gray-200);
+  --color-gray-500: var(--ds-gray-500);
+  --color-ds-gray-500: var(----ds-gray-500);
+  --color-ds-gray-200: var(----ds-gray-200)
 }
 
 :root {
@@ -141,6 +151,14 @@ body {
     --ds-input-error-ring: 0 0 0 1px var(--ds-red-900), 0 0 0 4px var(--ds-red-300);
     --ds-input-error-hover-ring: 0 0 0 1px var(--ds-red-900), 0 0 0 4px var(--ds-red-500);
     --ds-gray-alpha-100: rgba(0, 0, 0, 0.05);
+    --radio-group-bg-default: #e1e1e1;
+    --radio-group-bg-active: #0a0a0a;
+    --radio-group-bg-hover: #00a6fb;
+    --radio-group-fg-default: #0a0a0a;
+    --radio-group-fg-active: #fff;
+    --radio-group-fg-hover: #fff;
+    --ds-gray-200: hsla(0, 0%, 92%, 1);
+    --ds-gray-500: hsla(0, 0%, 79%, 1);
 }
 
 .dark {
@@ -183,4 +201,12 @@ body {
     --geist-foreground: #fff;
     --ds-input-ring: 0 0 0 1px var(--ds-gray-alpha-600), 0 0 0 4px rgba(255, 255, 255, .24);
     --ds-gray-alpha-100: rgba(255, 255, 255, 0.06);
+    --radio-group-bg-default: #363636;
+    --radio-group-bg-active: #fff;
+    --radio-group-bg-hover: #00a6fb;
+    --radio-group-fg-default: #fff;
+    --radio-group-fg-active: #0a0a0a;
+    --radio-group-fg-hover: #fff;
+    --ds-gray-200: hsla(0, 0%, 12%, 1);
+    --ds-gray-500: hsla(0, 0%, 27%, 1);
 }

@@ -21,9 +21,6 @@ export const useDashboardData = () => {
       { id: '2', product: 'Mekanik Klavye', type: 'Fiyat Analizi', date: '2026-05-13' },
       { id: '3', product: 'Oyuncu Mouse', type: 'Pazar Analizi', date: '2026-05-12' },
     ],
-    alerts: [
-      { id: '1', message: 'Mekanik klavye stokları tükenmek üzere (Kalan: 3)', type: 'danger' as const },
-      { id: '2', message: 'Kablosuz kulaklık için yeni bir iade talebi var.', type: 'warning' as const },
-    ]
+    alerts: []
   };
 };
