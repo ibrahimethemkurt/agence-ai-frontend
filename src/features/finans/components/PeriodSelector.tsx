@@ -13,7 +13,7 @@ export const PeriodSelector = ({ periods, selectedPeriod, onSelect }: PeriodSele
           onClick={() => onSelect(period)}
           className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
             selectedPeriod === period 
-              ? 'bg-[var(--color-accent)] text-white shadow-sm' 
+              ? 'bg-white text-black shadow-sm' 
               : 'text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-border)]/50'
           }`}
         >

@@ -374,7 +374,7 @@ src/
   /* Color */
   --color-bg:       #0A0A0A;
   --color-fg:       #F5F5F5;
-  --color-accent:   #5B5BD6;
+  --color-accent:   #A07CFE;
   --color-muted:    #6B6B6B;
   --color-border:   rgba(255,255,255,0.08);
   --color-surface:  rgba(255,255,255,0.04);
