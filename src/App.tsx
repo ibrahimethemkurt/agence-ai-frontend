@@ -14,6 +14,7 @@ import { SatisSureciPage } from './pages/SatisSureciPage';
 import { SatisSonrasiPage } from './pages/SatisSonrasiPage';
 import { SatistaOlanUrunlerPage } from './pages/SatistaOlanUrunlerPage';
 import { AyarlarPage } from './pages/AyarlarPage';
+import { YardimPage } from './pages/YardimPage';
 import { SignInPage } from './components/sign-in';
 import { RegisterPage } from './components/register';
 
@@ -84,6 +85,7 @@ const App = () => {
               <Route path="satis-sonrasi" element={<SatisSonrasiPage />} />
             </Route>
             <Route path="ayarlar" element={<AyarlarPage />} />
+            <Route path="yardim" element={<YardimPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

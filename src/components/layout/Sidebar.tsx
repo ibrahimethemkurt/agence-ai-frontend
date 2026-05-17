@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
@@ -13,7 +13,8 @@ import {
   PackageCheck,
   Landmark,
   ChartSpline,
-  ShoppingBag
+  ShoppingBag,
+  Menu as MenuIcon
 } from "lucide-react";
 
 const MAIN_GROUPS = [
@@ -45,8 +46,10 @@ const SETTINGS_GROUP = {
 };
 
 export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: boolean, toggleSidebar?: () => void }) => {
+  const navigate = useNavigate();
+
   return (
-    <aside className={`h-screen bg-[#0A0A0A]/40 backdrop-blur-xl border-r border-[var(--color-border)] flex flex-col p-4 md:p-6 fixed left-0 top-0 transition-all duration-300 ease-in-out z-20 ${isCollapsed ? 'w-[80px]' : 'w-[240px]'}`}>
+    <aside className={`h-screen bg-[#0A0A0A]/40 backdrop-blur-xl border-r border-[var(--color-border)] flex flex-col p-4 md:p-6 fixed left-0 top-0 transition-all duration-300 ease-in-out z-20 overflow-hidden whitespace-nowrap ${isCollapsed ? 'w-[80px]' : 'w-[240px]'}`}>
 
       <div className={`flex items-center ${isCollapsed ? 'flex-col gap-4' : 'justify-between'}`}>
         {!isCollapsed ? (
@@ -62,7 +65,7 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
           onClick={toggleSidebar}
           className="text-[var(--color-fg)] opacity-50 hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-[var(--color-surface)]"
         >
-          {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+          <MenuIcon className="w-5 h-5" />
         </button>
       </div>
 
@@ -157,7 +160,7 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
           <Portal>
             <Menu.Positioner>
               <Menu.Content className="z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border border-[#2a2a2a] rounded-xl shadow-2xl p-1.5 min-w-[208px] focus-visible:outline-none font-body text-white">
-                <Menu.Item value="profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-[var(--color-surface)] cursor-pointer outline-none transition-colors">
+                <Menu.Item value="profile" onClick={() => navigate('/ayarlar')} className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-[var(--color-surface)] cursor-pointer outline-none transition-colors">
                   Profili Düzenle
                 </Menu.Item>
                 <Menu.Separator className="my-1 h-px bg-[#2a2a2a]" />

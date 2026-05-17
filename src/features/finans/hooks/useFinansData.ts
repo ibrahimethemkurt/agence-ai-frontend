@@ -32,11 +32,3 @@ export const useFinansSummary = (period: string) => {
         ]
   };
 };
-
-export const useExpenses = () => {
-  return [
-    { id: '1', date: '2026-05-14', category: 'Kargo', description: 'Aras Kargo Gönderimleri', amount: 450, isRecurring: true },
-    { id: '2', date: '2026-05-12', category: 'Platform Komisyonu', description: 'Trendyol Komisyon', amount: 1200, isRecurring: false },
-    { id: '3', date: '2026-05-10', category: 'Reklam', description: 'Instagram Ads', amount: 3000, isRecurring: true },
-  ];
-};

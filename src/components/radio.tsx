@@ -131,8 +131,3 @@ export const Radio = ({ disabled, checked, required, onChange, value }: RadioPro
     </label>
   );
 };
-
-
-export const useRadio = (props: RadioProps) => {
-  return { component: (<RadioGroupItem {...props} />) };
-};

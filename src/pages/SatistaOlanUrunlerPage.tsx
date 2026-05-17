@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { Reveal } from '../components/animation/Reveal';
 import { 
-  Download, Upload, Plus, Search, Filter, SlidersHorizontal, 
+  Download, Upload, Plus, Search, Filter, PanelLeftClose, 
   Image as ImageIcon, MoreHorizontal, ChevronDown, ChevronLeft, ChevronRight,
   Package
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
+import { Radio } from '../components/radio';
 
 // --- MOCK DATA ---
 const MOCK_PRODUCTS = [
@@ -18,6 +20,8 @@ const MOCK_PRODUCTS = [
     salePrice: "₺ 2,499.00",
     purchasePrice: "₺ 1,200.00",
     inventory: "45 adet",
+    salesCount: "1,250",
+    revenue: "₺ 3,123,750.00",
     channels: "Kendi Sitemiz, Trendyol",
     createdAt: "12 Mar 2026",
     updatedAt: "15 May 2026",
@@ -30,6 +34,8 @@ const MOCK_PRODUCTS = [
     salePrice: "₺ 850.00",
     purchasePrice: "₺ 350.00",
     inventory: "120 adet",
+    salesCount: "840",
+    revenue: "₺ 714,000.00",
     channels: "Kendi Sitemiz",
     createdAt: "05 Nis 2026",
     updatedAt: "10 May 2026",
@@ -42,6 +48,8 @@ const MOCK_PRODUCTS = [
     salePrice: "₺ 1,299.00",
     purchasePrice: "₺ 600.00",
     inventory: "Tükendi",
+    salesCount: "3,100",
+    revenue: "₺ 4,026,900.00",
     channels: "Trendyol, Hepsiburada",
     createdAt: "22 Şub 2026",
     updatedAt: "01 May 2026",
@@ -54,10 +62,96 @@ const MOCK_PRODUCTS = [
     salePrice: "₺ 1,850.00",
     purchasePrice: "₺ 900.00",
     inventory: "15 adet",
+    salesCount: "420",
+    revenue: "₺ 777,000.00",
     channels: "Kendi Sitemiz",
     createdAt: "18 Oca 2026",
     updatedAt: "14 May 2026",
     image: "https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=100&q=80"
+  },
+  {
+    id: "p5",
+    name: "Ergonomik Oyuncu Faresi",
+    variants: "Siyah, Beyaz",
+    salePrice: "₺ 1,150.00",
+    purchasePrice: "₺ 500.00",
+    inventory: "85 adet",
+    salesCount: "950",
+    revenue: "₺ 1,092,500.00",
+    channels: "Amazon, Kendi Sitemiz",
+    createdAt: "10 Oca 2026",
+    updatedAt: "12 May 2026",
+    image: "https://images.unsplash.com/photo-1527814050087-37938154798c?auto=format&fit=crop&w=100&q=80"
+  },
+  {
+    id: "p6",
+    name: "4K Aksiyon Kamerası",
+    variants: "Siyah",
+    salePrice: "₺ 4,500.00",
+    purchasePrice: "₺ 2,800.00",
+    inventory: "20 adet",
+    salesCount: "150",
+    revenue: "₺ 675,000.00",
+    channels: "Kendi Sitemiz",
+    createdAt: "25 Şub 2026",
+    updatedAt: "08 May 2026",
+    image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=100&q=80"
+  },
+  {
+    id: "p7",
+    name: "Taşınabilir Şarj Cihazı (Powerbank)",
+    variants: "20000mAh, 10000mAh",
+    salePrice: "₺ 650.00",
+    purchasePrice: "₺ 250.00",
+    inventory: "350 adet",
+    salesCount: "4,500",
+    revenue: "₺ 2,925,000.00",
+    channels: "Trendyol, Hepsiburada, Amazon",
+    createdAt: "01 Oca 2026",
+    updatedAt: "16 May 2026",
+    image: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=100&q=80"
+  },
+  {
+    id: "p8",
+    name: "Akıllı Ev Aydınlatma Seti",
+    variants: "RGB, 3'lü Paket",
+    salePrice: "₺ 1,450.00",
+    purchasePrice: "₺ 700.00",
+    inventory: "Tükendi",
+    salesCount: "1,120",
+    revenue: "₺ 1,624,000.00",
+    channels: "Kendi Sitemiz",
+    createdAt: "14 Mar 2026",
+    updatedAt: "05 May 2026",
+    image: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=100&q=80"
+  },
+  {
+    id: "p9",
+    name: "Gürültü Engelleyici Kulaklık",
+    variants: "Siyah, Bej",
+    salePrice: "₺ 3,200.00",
+    purchasePrice: "₺ 1,500.00",
+    inventory: "65 adet",
+    salesCount: "580",
+    revenue: "₺ 1,856,000.00",
+    channels: "Trendyol",
+    createdAt: "28 Nis 2026",
+    updatedAt: "15 May 2026",
+    image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=100&q=80"
+  },
+  {
+    id: "p10",
+    name: "Oyuncu Monitörü 144Hz",
+    variants: "27 inç, 24 inç",
+    salePrice: "₺ 6,500.00",
+    purchasePrice: "₺ 4,200.00",
+    inventory: "12 adet",
+    salesCount: "210",
+    revenue: "₺ 1,365,000.00",
+    channels: "Kendi Sitemiz, Hepsiburada",
+    createdAt: "10 Şub 2026",
+    updatedAt: "13 May 2026",
+    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=100&q=80"
   }
 ];
 
@@ -66,6 +160,8 @@ const COLUMNS_DEF = [
   { id: "name", label: "Ürün", defaultVisible: true },
   { id: "salePrice", label: "Satış Fiyatı", defaultVisible: true },
   { id: "inventory", label: "Envanter", defaultVisible: true },
+  { id: "salesCount", label: "Satış Adedi", defaultVisible: true },
+  { id: "revenue", label: "Toplam Getiri", defaultVisible: true },
   { id: "purchasePrice", label: "Alış Fiyatı", defaultVisible: false },
   { id: "channels", label: "Satış Kanalları", defaultVisible: false },
   { id: "createdAt", label: "Oluşturulma Tarihi", defaultVisible: false },
@@ -73,6 +169,7 @@ const COLUMNS_DEF = [
 ];
 
 export const SatistaOlanUrunlerPage = () => {
+  const navigate = useNavigate();
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
     new Set(COLUMNS_DEF.filter(c => c.defaultVisible).map(c => c.id))
@@ -101,7 +198,7 @@ export const SatistaOlanUrunlerPage = () => {
   };
 
   return (
-    <PageTransition className="w-full max-w-[1400px] mx-auto py-8 px-4 md:px-8">
+    <PageTransition className="w-full h-full flex flex-col py-8 px-4 md:px-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
@@ -121,7 +218,10 @@ export const SatistaOlanUrunlerPage = () => {
             <Upload className="w-4 h-4" />
             İçe Aktar
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] rounded-lg transition-colors shadow-[0_0_15px_rgba(160,124,254,0.3)]">
+          <button 
+            onClick={() => navigate('/ajanlar/satis-sureci')}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] rounded-lg transition-colors shadow-[0_0_15px_rgba(160,124,254,0.3)]"
+          >
             <Plus className="w-4 h-4" />
             Ürün Ekle
           </button>
@@ -129,7 +229,7 @@ export const SatistaOlanUrunlerPage = () => {
       </div>
 
       {/* Main Table Card */}
-      <Reveal variant="fadeUp" className="bg-[#0A0A0A] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <Reveal variant="fadeUp" className="bg-[#0A0A0A] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-1">
         
         {/* Toolbar */}
         <div className="p-4 border-b border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#121212]/50">
@@ -150,7 +250,7 @@ export const SatistaOlanUrunlerPage = () => {
 
           <Menu.Root positioning={{ placement: "bottom-end", gutter: 8 }}>
             <Menu.Trigger className="flex items-center justify-center p-2 text-[var(--color-fg)] border border-[var(--color-border)] rounded-lg hover:bg-[#1A1A1A] transition-colors outline-none cursor-pointer">
-              <SlidersHorizontal className="w-5 h-5 opacity-80" />
+              <PanelLeftClose className="w-5 h-5 opacity-80" />
             </Menu.Trigger>
             <Portal>
               <Menu.Positioner>
@@ -184,12 +284,14 @@ export const SatistaOlanUrunlerPage = () => {
             <thead>
               <tr className="bg-[#121212] border-b border-[var(--color-border)] text-xs uppercase tracking-wider text-[var(--color-muted)] font-semibold">
                 <th className="p-4 w-12 text-center">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 rounded border-[#333] bg-transparent accent-[var(--color-accent)] cursor-pointer"
-                    checked={selectedItems.size === MOCK_PRODUCTS.length && MOCK_PRODUCTS.length > 0}
-                    onChange={toggleAll}
-                  />
+                  <div 
+                    className="flex items-center justify-center cursor-pointer" 
+                    onClick={toggleAll}
+                  >
+                    <div className="pointer-events-none">
+                      <Radio checked={selectedItems.size === MOCK_PRODUCTS.length && MOCK_PRODUCTS.length > 0} />
+                    </div>
+                  </div>
                 </th>
                 {COLUMNS_DEF.map(col => visibleColumns.has(col.id) && (
                   <th key={col.id} className="p-4">{col.label}</th>
@@ -206,12 +308,14 @@ export const SatistaOlanUrunlerPage = () => {
                     className={`transition-colors hover:bg-white/[0.02] ${isSelected ? 'bg-[var(--color-accent)]/[0.05]' : ''}`}
                   >
                     <td className="p-4 text-center">
-                      <input 
-                        type="checkbox" 
-                        className="w-4 h-4 rounded border-[#333] bg-transparent accent-[var(--color-accent)] cursor-pointer"
-                        checked={isSelected}
-                        onChange={() => toggleSelection(product.id)}
-                      />
+                      <div 
+                        className="flex items-center justify-center cursor-pointer"
+                        onClick={() => toggleSelection(product.id)}
+                      >
+                        <div className="pointer-events-none">
+                          <Radio checked={isSelected} />
+                        </div>
+                      </div>
                     </td>
                     
                     {visibleColumns.has("image") && (
@@ -248,6 +352,20 @@ export const SatistaOlanUrunlerPage = () => {
                         }`}>
                           {product.inventory}
                         </span>
+                      </td>
+                    )}
+
+                    {visibleColumns.has("salesCount") && (
+                      <td className="p-4">
+                        <span className="font-medium text-[#10B981] bg-[#10B981]/10 px-2.5 py-1 rounded-md text-xs border border-[#10B981]/20">
+                          {product.salesCount} adet
+                        </span>
+                      </td>
+                    )}
+
+                    {visibleColumns.has("revenue") && (
+                      <td className="p-4">
+                        <span className="font-semibold text-[#8B5CF6]">{product.revenue}</span>
                       </td>
                     )}
 

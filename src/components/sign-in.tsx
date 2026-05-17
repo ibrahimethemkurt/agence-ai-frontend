@@ -19,13 +19,6 @@ const GoogleIcon = () => (
 
 // --- TYPE DEFINITIONS ---
 
-export interface Testimonial {
-  avatarSrc: string;
-  name: string;
-  handle: string;
-  text: string;
-}
-
 interface SignInPageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;

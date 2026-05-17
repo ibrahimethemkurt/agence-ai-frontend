@@ -1,5 +1,4 @@
-import { Combobox } from "@/components/ui/combobox";
-import { Sparkles, Mail, Bell } from "lucide-react";
+import { Sparkles, Mail, Bell, Search } from "lucide-react";
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
 
@@ -7,16 +6,14 @@ export const TopBar = ({ toggleAIAssistant }: { toggleAIAssistant?: () => void }
   return (
     <header className="h-[72px] bg-[#0A0A0A]/40 backdrop-blur-xl border-b border-[var(--color-border)] flex items-center justify-between px-8 sticky top-0 z-10">
       <div className="flex-1 max-w-md">
-        <Combobox placeholder="Arama yapın...">
-          <Combobox.Input />
-          <Combobox.List emptyMessage="Sonuç bulunamadı">
-            <Combobox.Option value="dashboard">Dashboard</Combobox.Option>
-            <Combobox.Option value="pazar-analizi">Pazar Analizi</Combobox.Option>
-            <Combobox.Option value="fiyat-analizi">Fiyat Analizi</Combobox.Option>
-            <Combobox.Option value="raporlar">Raporlar</Combobox.Option>
-            <Combobox.Option value="ayarlar">Ayarlar</Combobox.Option>
-          </Combobox.List>
-        </Combobox>
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)] group-focus-within:text-[var(--color-accent)] transition-colors" />
+          <input 
+            type="text" 
+            placeholder="Arama yapın..." 
+            className="w-full bg-[#1A1A1A]/50 border border-[var(--color-border)] rounded-lg pl-10 pr-4 py-2 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-accent)] focus:bg-[#1A1A1A] transition-all"
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-6">

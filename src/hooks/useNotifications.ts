@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 
 type Notification = {
   id: string;
@@ -16,5 +16,3 @@ export const NotificationsContext = createContext<NotificationsContextType>({
   notifications: [],
   isConnected: false,
 });
-
-export const useNotifications = () => useContext(NotificationsContext);
