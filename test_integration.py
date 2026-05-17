@@ -89,13 +89,12 @@ else:
 section("3. PRESALE (Pazar & Fiyat) ANALİZİ BAŞLATILIYOR")
 
 r = post("/departments/presale", {
-    "product_id": PRODUCT_ID,
-    "costs": {
-        "base_cost": 2500,
-        "shipping_cost": 80,
-        "commission_rate": 12,
-        "other_costs": 50
-    }
+    "product_name": "Sony WH-1000XM5 Kulaklık",
+    "stock": 50,
+    "base_cost": 2500.0,
+    "shipping_cost": 80.0,
+    "tax_rate": 20.0,
+    "commission_rate": 12.0
 })
 
 if r.status_code == 200:
@@ -110,7 +109,7 @@ else:
 # ── 4. LİSTİNG ANALİZİ ───────────────────────────────────────────────────────
 section("4. LISTING (SEO & Sosyal Medya) ANALİZİ BAŞLATILIYOR")
 
-r = post("/departments/listing", {"product_id": PRODUCT_ID})
+r = post("/departments/listing", {"product_id": 2}) # 2 because product 1 is created in step 2, product 2 is created in step 3
 
 if r.status_code == 200:
     job = r.json()

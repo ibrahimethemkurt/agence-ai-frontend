@@ -17,7 +17,14 @@ from src.tasks import (
 
 load_dotenv()
 
+import random
+
 def check_env():
+    gemini_keys = [v for k, v in os.environ.items() if k.startswith("GEMINI_API_KEY") and v]
+    
+    if gemini_keys and not os.getenv("GEMINI_API_KEY"):
+        os.environ["GEMINI_API_KEY"] = random.choice(gemini_keys)
+        
     if not os.getenv("GEMINI_API_KEY") or not os.getenv("SERPER_API_KEY"):
         raise ValueError("GEMINI_API_KEY veya SERPER_API_KEY eksik. Lütfen .env dosyasını kontrol edin.")
 
@@ -39,7 +46,7 @@ def run_presale_department(product_name: str, costs: dict) -> dict:
         agents=[researcher, insights_analyst, strategist, pricing_agent],
         tasks=[competitor_task, customer_task, trends_task, pricing_task],
         process=Process.sequential,
-        memory=True,
+        memory=False,
         verbose=True,
         max_rpm=10
     )
@@ -61,7 +68,7 @@ def run_listing_department(product_name: str) -> dict:
         agents=[seo_agent, social_media_agent],
         tasks=[seo_task, social_media_task],
         process=Process.sequential,
-        memory=True,
+        memory=False,
         verbose=True,
         max_rpm=10
     )
@@ -80,7 +87,7 @@ def run_support_department(product_name: str) -> dict:
         agents=[support_agent],
         tasks=[support_task],
         process=Process.sequential,
-        memory=True,
+        memory=False,
         verbose=True,
         max_rpm=10
     )
@@ -102,7 +109,7 @@ def run_finance_department(financial_data: dict) -> dict:
         agents=[accounting_agent, advisor_agent],
         tasks=[accounting_task, advisor_task],
         process=Process.sequential,
-        memory=True,
+        memory=False,
         verbose=True,
         max_rpm=10
     )
@@ -124,7 +131,7 @@ def run_feedback_department(review_text: str) -> dict:
         agents=[sentiment_agent, qa_agent],
         tasks=[sentiment_task, qa_task],
         process=Process.sequential,
-        memory=True,
+        memory=False,
         verbose=True,
         max_rpm=10
     )
@@ -146,7 +153,7 @@ def run_return_department(return_reason_text: str) -> dict:
         agents=[inspector_agent, logistics_agent],
         tasks=[inspection_task, logistics_task],
         process=Process.sequential,
-        memory=True,
+        memory=False,
         verbose=True,
         max_rpm=10
     )
