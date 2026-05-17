@@ -6,8 +6,6 @@ import {
   LayoutDashboard,
   Settings,
   BadgeHelp,
-  PanelLeftClose,
-  PanelLeftOpen,
   Search,
   ShoppingCart,
   PackageCheck,

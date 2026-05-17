@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { Reveal } from '../components/animation/Reveal';
 import { motion, AnimatePresence } from 'framer-motion';
