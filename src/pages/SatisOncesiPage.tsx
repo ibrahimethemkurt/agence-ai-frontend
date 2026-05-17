@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { useAnalysisForm } from '../features/satis-oncesi/hooks/useAnalysisForm';
 import { Reveal } from '../components/animation/Reveal';
-import { CheckCircle2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import AgentPlan from '../components/ui/agent-plan';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ const stepsData = [
 ];
 
 export const SatisOncesiPage = () => {
-  const { currentStep, formData, nextStep, prevStep, updateData, setStep } = useAnalysisForm();
+  const { currentStep, formData, nextStep, prevStep, updateData } = useAnalysisForm();
   const navigate = useNavigate();
 
   const currentStepData = stepsData.find(s => s.id === currentStep);

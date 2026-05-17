@@ -6,8 +6,6 @@ import {
   Search,
   ArrowUpRight,
   ArrowDownRight,
-  Landmark,
-  CreditCard,
   PlusCircle,
   MinusCircle
 } from 'lucide-react';

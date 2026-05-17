@@ -29,8 +29,6 @@ export interface Testimonial {
 interface SignInPageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  heroImageSrc?: string;
-  testimonials?: Testimonial[];
   onSignIn?: (event: React.FormEvent<HTMLFormElement>) => void;
   onGoogleSignIn?: () => void;
   onResetPassword?: () => void;
@@ -45,24 +43,11 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => (
-  <Reveal variant="fadeUp" className="flex items-start gap-3 rounded-3xl bg-[var(--color-surface)] backdrop-blur-xl border border-[var(--color-border)] p-5 w-64">
-    <img src={testimonial.avatarSrc} className="h-10 w-10 object-cover rounded-2xl" alt="avatar" />
-    <div className="text-sm leading-snug">
-      <p className="flex items-center gap-1 font-medium text-[var(--color-fg)]">{testimonial.name}</p>
-      <p className="text-[var(--color-muted)]">{testimonial.handle}</p>
-      <p className="mt-1 text-[var(--color-fg)]/80">{testimonial.text}</p>
-    </div>
-  </Reveal>
-);
-
 // --- MAIN COMPONENT ---
 
 export const SignInPage: React.FC<SignInPageProps> = ({
   title = <span className="font-light text-[var(--color-fg)] tracking-tighter">Hoş Geldiniz!</span>,
   description = "Giriş yapın ve yolculuğunuza devam edin",
-  heroImageSrc,
-  testimonials = [],
   onSignIn,
   onGoogleSignIn,
   onResetPassword,

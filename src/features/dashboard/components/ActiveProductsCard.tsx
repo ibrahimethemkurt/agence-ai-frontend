@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Reveal } from '../../../components/animation/Reveal';
 import { Package } from 'lucide-react';
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   CheckCircle2,
   Circle,
@@ -340,7 +340,7 @@ export default function Plan({ customTasks }: { customTasks?: Task[] }) {
                     className={` ${index !== 0 ? "mt-1 pt-2" : ""} `}
                     initial="hidden"
                     animate="visible"
-                    variants={taskVariants}
+                    variants={taskVariants as any}
                   >
                     {/* Task row */}
                     <motion.div 
@@ -436,7 +436,7 @@ export default function Plan({ customTasks }: { customTasks?: Task[] }) {
                                       ? "bg-red-500/20 text-red-400"
                                       : "bg-white/10 text-gray-400"
                             }`}
-                            variants={statusBadgeVariants}
+                            variants={statusBadgeVariants as any}
                             initial="initial"
                             animate="animate"
                             key={task.status} // Force animation on status change
@@ -452,7 +452,7 @@ export default function Plan({ customTasks }: { customTasks?: Task[] }) {
                       {isExpanded && task.subtasks.length > 0 && (
                         <motion.div 
                           className="relative overflow-hidden"
-                          variants={subtaskListVariants}
+                          variants={subtaskListVariants as any}
                           initial="hidden"
                           animate="visible"
                           exit="hidden"
@@ -472,7 +472,7 @@ export default function Plan({ customTasks }: { customTasks?: Task[] }) {
                                   onClick={() =>
                                     toggleSubtaskExpansion(task.id, subtask.id)
                                   }
-                                  variants={subtaskVariants}
+                                  variants={subtaskVariants as any}
                                   initial="hidden"
                                   animate="visible"
                                   exit="exit"
@@ -533,7 +533,7 @@ export default function Plan({ customTasks }: { customTasks?: Task[] }) {
                                     {isSubtaskExpanded && (
                                       <motion.div 
                                         className="text-muted-foreground border-foreground/20 mt-1 ml-1.5 border-l border-dashed pl-5 text-xs overflow-hidden"
-                                        variants={subtaskDetailsVariants}
+                                        variants={subtaskDetailsVariants as any}
                                         initial="hidden"
                                         animate="visible"
                                         exit="hidden"

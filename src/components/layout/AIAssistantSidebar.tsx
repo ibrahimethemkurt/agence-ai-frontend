@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, ShoppingCart, UserCog } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { PromptInputBox } from '@/components/ui/ai-prompt-box';
 
 interface AIAssistantSidebarProps {

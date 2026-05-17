@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Reveal } from '../../../components/animation/Reveal';
 import { Stagger } from '../../../components/animation/Stagger';
 import { TrendingUp, AlertCircle, Info } from 'lucide-react';

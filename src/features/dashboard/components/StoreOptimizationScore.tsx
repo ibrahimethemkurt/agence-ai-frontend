@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Reveal } from '../../../components/animation/Reveal';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Zap } from 'lucide-react';

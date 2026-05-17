@@ -190,27 +190,29 @@ const ComboboxInput = () => {
 
   return (
     <Input
-      prefix={<SearchIcon />}
-      prefixStyling={false}
-      suffix={context?.inputValue ? (
-        <Button
-          variant="unstyled"
-          svgOnly
-          className="fill-[var(--color-fg)] opacity-50 hover:opacity-100 -mr-3"
-          onClick={onCloseClick}
-        >
-          <CloseIcon className={clsx(context?.errored && "fill-red-900")} />
-        </Button>
-      ) : <ArrowBottomIcon className={clsx("duration-200", context?.isOpen && "rotate-180")} />}
-      suffixStyling={context?.disabled ? "cursor-not-allowed" : "cursor-pointer"}
+      {...({
+        prefix: <SearchIcon />,
+        prefixStyling: false,
+        suffix: context?.inputValue ? (
+          <Button
+            variant="unstyled"
+            svgOnly
+            className="fill-[var(--color-fg)] opacity-50 hover:opacity-100 -mr-3"
+            onClick={onCloseClick}
+          >
+            <CloseIcon className={clsx(context?.errored && "fill-red-900")} />
+          </Button>
+        ) : <ArrowBottomIcon className={clsx("duration-200", context?.isOpen && "rotate-180")} />,
+        suffixStyling: context?.disabled ? "cursor-not-allowed" : "cursor-pointer",
+        error: _errored,
+        size: context?.size,
+      } as any)}
       placeholder={context?.placeholder}
       onFocus={onFocus}
       onBlur={onBlur}
       value={context?.inputValue}
-      onChange={context?.onChangeInputValue}
+      onChange={(e) => context?.onChangeInputValue(e.target.value)}
       disabled={context?.disabled}
-      error={_errored}
-      size={context?.size}
       ref={context?.inputRef}
       className={clsx(context?.errored && "text-red-900")}
     />

@@ -100,7 +100,7 @@ const salesTasks: Task[] = [
 ];
 
 export const SatisSureciPage = () => {
-  const { currentStep, formData, nextStep, prevStep, updateData, setStep } = useListingWizard();
+  const { currentStep, formData, nextStep, prevStep, updateData } = useListingWizard();
   const navigate = useNavigate();
 
   const currentStepData = stepsData.find(s => s.id === currentStep);
