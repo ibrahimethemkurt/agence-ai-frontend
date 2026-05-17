@@ -41,10 +41,14 @@ const GlowCard: React.FC<GlowCardProps> = ({
       const { clientX: x, clientY: y } = e;
       
       if (cardRef.current) {
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
         cardRef.current.style.setProperty('--x', x.toFixed(2));
-        cardRef.current.style.setProperty('--xp', (x / window.innerWidth).toFixed(2));
+        cardRef.current.style.setProperty('--xp', (x / rect.width).toFixed(2));
         cardRef.current.style.setProperty('--y', y.toFixed(2));
-        cardRef.current.style.setProperty('--yp', (y / window.innerHeight).toFixed(2));
+        cardRef.current.style.setProperty('--yp', (y / rect.height).toFixed(2));
       }
     };
 

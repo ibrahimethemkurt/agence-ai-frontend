@@ -1,12 +1,22 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/animation/PageTransition';
-import { useSatisSonrasiData } from '../features/satis-sonrasi/hooks/useSatisSonrasiData';
-import { OrdersTab } from '../features/satis-sonrasi/components/OrdersTab';
+import { OperasyonTab } from '../features/satis-sonrasi/components/OperasyonTab';
+import { YorumlarTab } from '../features/satis-sonrasi/components/YorumlarTab';
+import { IadelerTab } from '../features/satis-sonrasi/components/IadelerTab';
 
 export const SatisSonrasiPage = () => {
-  const [activeTab, setActiveTab] = useState('Siparişler');
-  const tabs = ['Siparişler', 'Stok', 'Yorumlar', 'İadeler'];
-  const { orders } = useSatisSonrasiData();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  const activeTab = searchParams.get('tab') || 'Operasyon Merkezi';
+  
+  useEffect(() => {
+    if (!searchParams.get('tab')) {
+      setSearchParams({ tab: 'Operasyon Merkezi' }, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+  const tabs = ['Operasyon Merkezi', 'Yorumlar', 'İadeler'];
 
   return (
     <PageTransition className="space-y-6">
@@ -22,7 +32,7 @@ export const SatisSonrasiPage = () => {
           {tabs.map((tab) => (
             <button 
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setSearchParams({ tab })}
               className={`${activeTab === tab ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border)]'} border-b-2 whitespace-nowrap py-4 px-1 font-medium text-sm transition-colors`}
             >
               {tab}
@@ -31,8 +41,10 @@ export const SatisSonrasiPage = () => {
         </nav>
       </div>
 
-      {activeTab === 'Siparişler' && <OrdersTab orders={orders} />}
-      {activeTab !== 'Siparişler' && (
+      {activeTab === 'Operasyon Merkezi' && <OperasyonTab />}
+      {activeTab === 'Yorumlar' && <YorumlarTab />}
+      {activeTab === 'İadeler' && <IadelerTab />}
+      {activeTab !== 'Operasyon Merkezi' && activeTab !== 'Yorumlar' && activeTab !== 'İadeler' && (
         <div className="p-12 text-center border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-muted)]">
           Bu sekmenin içeriği eklenecektir.
         </div>

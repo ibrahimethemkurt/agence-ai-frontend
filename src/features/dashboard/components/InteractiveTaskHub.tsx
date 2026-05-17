@@ -10,9 +10,9 @@ import { RadioGroup as ShugarRadioGroup } from '../../../components/radio';
 
 import { GlowCard } from '../../../components/ui/glow-card';
 
-type TaskId = 'siparis' | 'stok' | 'yorum' | 'analiz';
+export type TaskId = 'siparis' | 'stok' | 'yorum' | 'analiz';
 
-interface TaskDef {
+export interface TaskDef {
   id: TaskId;
   title: string;
   count: number;
@@ -20,7 +20,7 @@ interface TaskDef {
   glowColor: 'blue' | 'purple' | 'green' | 'red' | 'orange';
 }
 
-const TASK_DEFINITIONS: TaskDef[] = [
+export const TASK_DEFINITIONS: TaskDef[] = [
   { id: 'siparis', title: 'Sipariş Geldi', count: 3, icon: Package, glowColor: 'blue' },
   { id: 'stok', title: 'Stok Uyarısı', count: 2, icon: AlertTriangle, glowColor: 'orange' },
   { id: 'yorum', title: 'Yorum Geldi', count: 5, icon: MessageSquare, glowColor: 'green' },
@@ -58,25 +58,12 @@ export const InteractiveTaskHub = () => {
       setIsSuccessAnim(true);
       setTimeout(() => {
         setIsSuccessAnim(false);
-        const newPending = pendingTasks.filter(t => t !== id);
-        setPendingTasks(newPending);
+        setPendingTasks(prev => prev.filter(t => t !== id));
         
-        if (newPending.length > 0) {
-          let foundNext = null;
-          const currentIndex = TASK_DEFINITIONS.findIndex(t => t.id === id);
-          for (let i = currentIndex + 1; i < TASK_DEFINITIONS.length; i++) {
-            if (newPending.includes(TASK_DEFINITIONS[i].id)) {
-              foundNext = TASK_DEFINITIONS[i].id;
-              break;
-            }
-          }
-          if (!foundNext) {
-            for (let i = 0; i < currentIndex; i++) {
-              if (newPending.includes(TASK_DEFINITIONS[i].id)) {
-                foundNext = TASK_DEFINITIONS[i].id;
-                break;
-              }
-            }
+        const foundNext = getNextTask(id);
+        if (foundNext) {
+          if (foundNext === id) {
+            setActiveTask(null);
           }
           setActiveTask(foundNext);
         } else {
@@ -179,7 +166,7 @@ export const InteractiveTaskHub = () => {
   );
 };
 
-interface ActiveTaskContentProps {
+export interface ActiveTaskContentProps {
   task: TaskDef;
   onClose: () => void;
   onAction: (id: TaskId, isComplete: boolean, customMessage?: string) => void;
@@ -188,7 +175,7 @@ interface ActiveTaskContentProps {
   navigate: (path: string) => void;
 }
 
-const ActiveTaskContent = ({ task, onClose, onAction, isSuccessAnim, successMessage, navigate }: ActiveTaskContentProps) => {
+export const ActiveTaskContent = ({ task, onClose, onAction, isSuccessAnim, successMessage, navigate }: ActiveTaskContentProps) => {
   // Sipariş State
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const orders = [
