@@ -1,12 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { api } from '../../../lib/api';
+
+export type Analysis = {
+  id: number;
+  product_name: string;
+  status: string;
+  created_at: string;
+  report_json: string | null;
+  inputs_json: string | null;
+};
 
 export const useAnalysisHistory = () => {
-  const [reports] = useState([
-    { id: '1', product: 'Kablosuz Kulaklık', type: 'Pazar Analizi', date: '2026-05-14', score: 85, status: 'tamamlandı' },
-    { id: '2', product: 'Mekanik Klavye', type: 'Fiyat Analizi', date: '2026-05-13', score: 92, status: 'tamamlandı' },
-    { id: '3', product: 'Oyuncu Mouse', type: 'Pazar Analizi', date: '2026-05-12', score: 78, status: 'tamamlandı' },
-    { id: '4', product: 'Webcam 4K', type: 'Pazar Analizi', date: '2026-05-10', score: 65, status: 'tamamlandı' },
-  ]);
+  const [reports, setReports] = useState<Analysis[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  return { reports };
+  const fetchAnalyses = async () => {
+    try {
+      const data = await api.getUserAnalyses();
+      setReports(data);
+    } catch (err: any) {
+      setError(err.message || 'Analizler yüklenemedi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalyses();
+    // Her 15 saniyede bir yenile (uzun süren analizler tamamlanınca görünsün)
+    const interval = setInterval(fetchAnalyses, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const completedReports = reports.filter(r => r.status === 'completed');
+  const activeAgents = reports.filter(r => r.status === 'bekliyor' || r.status === 'processing');
+
+  return { reports, completedReports, activeAgents, loading, error, refetch: fetchAnalyses };
 };

@@ -71,8 +71,8 @@ const App = () => {
     <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<SignInPage onSignIn={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onCreateAccount={() => window.location.href = '/register'} />} />
-          <Route path="/register" element={<RegisterPage onRegister={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onSignInClick={() => window.location.href = '/login'} />} />
+          <Route path="/login" element={<SignInPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="/login" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />

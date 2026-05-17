@@ -1,26 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useAnalysisHistory } from './useAnalysisHistory';
 
+// Aktif ajanları history hook'undan türet — ayrı mock veriye gerek yok
 export const useAgentStatus = () => {
-  const [agents, setAgents] = useState([
-    { id: '1', product: 'Kablosuz Kulaklık V2', type: 'Pazar Analizi', status: 'bekliyor', startTime: '10:45', progress: 45 },
-    { id: '2', product: 'Oyuncu Monitörü', type: 'Fiyat Analizi', status: 'aktif', startTime: '10:30', progress: 85 },
-  ]);
+  const { activeAgents, loading } = useAnalysisHistory();
 
-  // Mock polling effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAgents(prev => prev.map(agent => {
-        if (agent.status === 'aktif' && agent.progress < 100) {
-          return { ...agent, progress: agent.progress + 5 };
-        }
-        if (agent.progress >= 100 && agent.status !== 'tamamlandı') {
-          return { ...agent, status: 'tamamlandı' };
-        }
-        return agent;
-      }));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const agents = activeAgents.map(a => ({
+    id: String(a.id),
+    product: a.product_name,
+    type: 'Pazar Analizi',
+    status: a.status === 'processing' ? 'aktif' : 'bekliyor',
+    startTime: new Date(a.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+    progress: a.status === 'processing' ? 60 : 10,
+  }));
 
-  return { agents };
+  return { agents, loading };
 };

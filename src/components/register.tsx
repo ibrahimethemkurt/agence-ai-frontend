@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { Reveal } from './animation/Reveal';
 import { Stagger } from './animation/Stagger';
 import Grainient from './animation/GrainientBackground';
 import { Radio } from './radio';
-
-// --- HELPER COMPONENTS (ICONS) ---
+import { api } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
@@ -16,94 +16,112 @@ const GoogleIcon = () => (
   </svg>
 );
 
-
-// --- TYPE DEFINITIONS ---
-
-interface RegisterPageProps {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  onRegister?: (event: React.FormEvent<HTMLFormElement>) => void;
-  onGoogleSignIn?: () => void;
-  onSignInClick?: () => void;
-}
-
-// --- SUB-COMPONENTS ---
-
 const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-xl border border-[var(--color-border)] bg-[#121212] backdrop-blur-md transition-all duration-300 focus-within:border-[var(--color-accent)] focus-within:bg-[#1a1a1a]">
     {children}
   </div>
 );
 
-// --- MAIN COMPONENT ---
-
-export const RegisterPage: React.FC<RegisterPageProps> = ({
-  title = <span className="font-light text-[var(--color-fg)] tracking-tighter">Hesap Oluşturun</span>,
-  description = "Geleceğin e-ticaret dünyasına ilk adımınızı atın",
-  onRegister,
-  onGoogleSignIn,
-  onSignInClick,
-}) => {
+export const RegisterPage: React.FC = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!agreed) {
+      setError('Kullanıcı sözleşmesini kabul etmeniz gerekmektedir.');
+      return;
+    }
+    setError(null);
+    setLoading(true);
+
+    const form = e.currentTarget;
+    const firstName = (form.elements.namedItem('firstName') as HTMLInputElement).value;
+    const lastName = (form.elements.namedItem('lastName') as HTMLInputElement).value;
+    const company = (form.elements.namedItem('company') as HTMLInputElement).value;
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem('confirmPassword') as HTMLInputElement).value;
+
+    if (password !== confirmPassword) {
+      setError('Şifreler eşleşmiyor.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await api.register({
+        full_name: `${firstName} ${lastName}`.trim(),
+        company_name: company,
+        email,
+        password,
+        password_confirm: confirmPassword,
+      });
+      // Kayıt başarılı → otomatik giriş yap
+      await api.login(email, password);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="h-[100dvh] flex flex-col md:flex-row font-body w-[100dvw] bg-[var(--color-bg)] relative overflow-hidden" style={{ '--color-accent': '#8B5CF6' } as React.CSSProperties}>
-
-      {/* Global Background */}
+    <div
+      className="h-[100dvh] flex flex-col md:flex-row font-body w-[100dvw] bg-[var(--color-bg)] relative overflow-hidden"
+      style={{ '--color-accent': '#8B5CF6' } as React.CSSProperties}
+    >
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Grainient
-          color1="#05031a"
-          color2="#251a52"
-          color3="#13071e"
-          timeSpeed={0.5}
-          colorBalance={-0.1}
-          warpStrength={2}
-          warpFrequency={4}
-          warpSpeed={3}
-          warpAmplitude={50}
-          blendAngle={0.5}
-          blendSoftness={0.1}
-          rotationAmount={500}
-          noiseScale={2}
-          grainAmount={0.08}
-          grainScale={2}
-          grainAnimated={false}
-          contrast={1.3}
-          gamma={0.8}
-          saturation={0.9}
-          centerX={0}
-          centerY={0}
-          zoom={1}
+          color1="#05031a" color2="#251a52" color3="#13071e"
+          timeSpeed={0.5} colorBalance={-0.1} warpStrength={2} warpFrequency={4}
+          warpSpeed={3} warpAmplitude={50} blendAngle={0.5} blendSoftness={0.1}
+          rotationAmount={500} noiseScale={2} grainAmount={0.08} grainScale={2}
+          grainAnimated={false} contrast={1.3} gamma={0.8} saturation={0.9}
+          centerX={0} centerY={0} zoom={1}
         />
       </div>
 
-      {/* Left column: register form */}
       <section className="flex-1 flex items-center justify-center p-8 z-10 overflow-y-auto hidden-scrollbar">
         <div className="w-full max-w-md py-4">
           <Stagger className="flex flex-col gap-4" staggerDelay={0.25}>
             <Reveal variant="fadeUp">
-              <h1 className="text-3xl md:text-4xl font-display font-semibold leading-tight text-[var(--color-fg)]">{title}</h1>
+              <h1 className="text-3xl md:text-4xl font-display font-semibold leading-tight text-[var(--color-fg)]">
+                <span className="font-light tracking-tighter">Hesap Oluşturun</span>
+              </h1>
             </Reveal>
             <Reveal variant="fadeUp">
-              <p className="text-[var(--color-muted)] text-sm">{description}</p>
+              <p className="text-[var(--color-muted)] text-sm">Geleceğin e-ticaret dünyasına ilk adımınızı atın</p>
             </Reveal>
 
-            <form className="space-y-3" onSubmit={onRegister}>
-              
+            {/* Hata Mesajı */}
+            {error && (
+              <Reveal variant="fadeUp">
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <p className="text-sm">{error}</p>
+                </div>
+              </Reveal>
+            )}
+
+            <form className="space-y-3" onSubmit={handleSubmit}>
               <Reveal variant="fadeUp">
                 <div className="flex gap-3">
                   <div className="flex-1">
                     <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Ad</label>
                     <GlassInputWrapper>
-                      <input name="firstName" type="text" placeholder="Adınız" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                      <input name="firstName" type="text" placeholder="Adınız" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                     </GlassInputWrapper>
                   </div>
                   <div className="flex-1">
                     <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Soyad</label>
                     <GlassInputWrapper>
-                      <input name="lastName" type="text" placeholder="Soyadınız" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                      <input name="lastName" type="text" placeholder="Soyadınız" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                     </GlassInputWrapper>
                   </div>
                 </div>
@@ -112,14 +130,14 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
               <Reveal variant="fadeUp">
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şirket Adı</label>
                 <GlassInputWrapper>
-                  <input name="company" type="text" placeholder="Şirketinizin adı" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                  <input name="company" type="text" placeholder="Şirketinizin adı" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                 </GlassInputWrapper>
               </Reveal>
 
               <Reveal variant="fadeUp">
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Email Adresiniz</label>
                 <GlassInputWrapper>
-                  <input name="email" type="email" placeholder="Email adresinizi girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" required />
+                  <input name="email" type="email" placeholder="Email adresinizi girin" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
                 </GlassInputWrapper>
               </Reveal>
 
@@ -127,9 +145,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şifre</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Şifrenizi oluşturun" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" required />
+                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Şifrenizi oluşturun" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
-                      {showPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" /> : <Eye className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />}
+                      {showPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)]" /> : <Eye className="w-5 h-5 text-[var(--color-muted)]" />}
                     </button>
                   </div>
                 </GlassInputWrapper>
@@ -139,9 +157,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şifre (Tekrar)</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Şifrenizi tekrar girin" className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" required />
+                    <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Şifrenizi tekrar girin" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" />
                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-3 flex items-center">
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" /> : <Eye className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />}
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)]" /> : <Eye className="w-5 h-5 text-[var(--color-muted)]" />}
                     </button>
                   </div>
                 </GlassInputWrapper>
@@ -149,23 +167,26 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
 
               <Reveal variant="fadeUp">
                 <div className="flex items-start gap-3 mt-3 text-xs">
-                  <div className="flex items-center gap-3 cursor-pointer pt-0.5" onClick={(e) => { e.preventDefault(); setAgreed(!agreed); }}>
-                    <div className="pointer-events-none">
-                      <Radio checked={agreed} />
-                    </div>
+                  <div className="flex items-center gap-3 cursor-pointer pt-0.5" onClick={() => setAgreed(!agreed)}>
+                    <div className="pointer-events-none"><Radio checked={agreed} /></div>
                   </div>
                   <span className="text-[var(--color-fg)]/90 cursor-pointer select-none leading-relaxed" onClick={() => setAgreed(!agreed)}>
-                    <a href="#" className="text-[var(--color-accent)] hover:underline">Kullanıcı Sözleşmesini</a> ve <a href="#" className="text-[var(--color-accent)] hover:underline">Gizlilik Politikasını</a> okudum, kabul ediyorum.
+                    <a href="#" className="text-[var(--color-accent)] hover:underline">Kullanıcı Sözleşmesini</a> ve{' '}
+                    <a href="#" className="text-[var(--color-accent)] hover:underline">Gizlilik Politikasını</a> okudum, kabul ediyorum.
                   </span>
                 </div>
               </Reveal>
 
               <Reveal variant="fadeUp">
                 <div className="flex gap-3 mt-4">
-                  <button type="submit" className="flex-1 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-colors">
-                    Kayıt Ol
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {loading ? <><Loader2 size={18} className="animate-spin" /> Kaydediliyor...</> : 'Kayıt Ol'}
                   </button>
-                  <button type="button" onClick={onGoogleSignIn} className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors" title="Google ile Kayıt Ol">
+                  <button type="button" className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors" title="Google ile Kayıt Ol">
                     <GoogleIcon />
                   </button>
                 </div>
@@ -174,19 +195,20 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
 
             <Reveal variant="fadeUp">
               <p className="text-center text-sm text-[var(--color-muted)] mt-2">
-                Zaten üye misiniz? <button type="button" onClick={(e) => { e.preventDefault(); onSignInClick?.(); }} className="text-[var(--color-accent)] hover:underline transition-colors">Giriş Yapın</button>
+                Zaten üye misiniz?{' '}
+                <button type="button" onClick={() => navigate('/login')} className="text-[var(--color-accent)] hover:underline transition-colors">
+                  Giriş Yapın
+                </button>
               </p>
             </Reveal>
           </Stagger>
         </div>
       </section>
 
-      {/* Right column: animated visual */}
       <section className="hidden md:flex flex-1 relative p-4 items-center justify-center z-10">
         <Reveal variant="fadeIn" className="absolute inset-4 rounded-3xl overflow-hidden border border-[var(--color-border)] shadow-2xl bg-[#080808]">
-          <div className="absolute inset-0 bg-cover bg-[center_top] transition-transform duration-1000 hover:scale-105" style={{ backgroundImage: "url('/ecommerce-ai-agents.png')" }}></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] from-25% via-[#050505]/80 via-50% to-transparent"></div>
-          
+          <div className="absolute inset-0 bg-cover bg-[center_top] transition-transform duration-1000 hover:scale-105" style={{ backgroundImage: "url('/ecommerce-ai-agents.png')" }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] from-25% via-[#050505]/80 via-50% to-transparent" />
           <div className="absolute bottom-12 left-12 right-12 z-20">
             <Reveal variant="fadeUp">
               <h2 className="text-3xl lg:text-4xl font-display font-semibold text-white mb-4 leading-tight">

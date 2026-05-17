@@ -17,9 +17,10 @@ interface RevealProps {
   delay?: number;
   children: ReactNode;
   className?: string;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export const Reveal = ({ variant = 'fadeUp', delay = 0, children, className }: RevealProps) => {
+export const Reveal = ({ variant = 'fadeUp', delay = 0, children, className, onClick }: RevealProps) => {
   const selectedVariant = TRANSITIONS[variant];
   
   const transition = {
@@ -38,7 +39,7 @@ export const Reveal = ({ variant = 'fadeUp', delay = 0, children, className }: R
   });
 
   return (
-    <motion.div className={className} {...animationProps as any}>
+    <motion.div className={className} onClick={onClick} {...animationProps as any}>
       {children}
     </motion.div>
   );
