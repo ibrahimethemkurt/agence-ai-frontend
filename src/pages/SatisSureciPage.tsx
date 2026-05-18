@@ -1,121 +1,120 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { useListingWizard } from '../features/satis-sureci/hooks/useListingWizard';
+import { useAnalysisHistory } from '../features/analizler/hooks/useAnalysisHistory';
 import { Reveal } from '../components/animation/Reveal';
-import { CheckCircle2, ChevronLeft, ChevronRight, UploadCloud, Search, PlusCircle, ShoppingCart } from 'lucide-react';
-import AgentPlan, { type Task } from '../components/ui/agent-plan';
+import { CheckCircle2, ChevronLeft, ChevronRight, UploadCloud, Search, PlusCircle, ShoppingCart, Wand2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ShineBorder } from '../components/ui/ShineBorder';
+import { api } from '../lib/api';
 
 const stepsData = [
-  { id: 1, title: 'Kaynak' },
-  { id: 2, title: 'Ürün' },
-  { id: 3, title: 'Platform' },
-  { id: 4, title: 'Yapay Zeka' },
+  { id: 1, title: 'Görsel' },
+  { id: 2, title: 'SEO' },
+  { id: 3, title: 'Fiyat' },
+  { id: 4, title: 'Platform' },
   { id: 5, title: 'Onay' }
 ];
 
-const salesTasks: Task[] = [
-  {
-    id: "1",
-    title: "SEO Optimizasyonu ve Metin Üretimi",
-    description: "Platformların algoritmalarına uygun başlık ve açıklamalar üretiliyor",
-    status: "in-progress",
-    priority: "high",
-    level: 0,
-    dependencies: [],
-    subtasks: [
-      {
-        id: "1.1",
-        title: "Anahtar Kelime Taraması",
-        description: "En çok aranan ve dönüşüm getiren anahtar kelimeler belirleniyor",
-        status: "completed",
-        priority: "high",
-        tools: ["seo-analyzer"],
-      },
-      {
-        id: "1.2",
-        title: "Platform Spesifik Açıklamalar",
-        description: "Amazon, Trendyol ve diğer platformlar için ayrı HTML formatlı açıklamalar yazılıyor",
-        status: "in-progress",
-        priority: "high",
-        tools: ["content-generator"],
-      }
-    ],
-  },
-  {
-    id: "2",
-    title: "Görsel ve Fiyat Uyumlandırma",
-    description: "Yüklenen görseller ve girilen fiyat bilgisi platform kurallarına göre işleniyor",
-    status: "pending",
-    priority: "high",
-    level: 0,
-    dependencies: [],
-    subtasks: [
-      {
-        id: "2.1",
-        title: "Görsel Optimizasyonu",
-        description: "Beyaz arka plan kontrolü ve boyutlandırma işlemi yapılıyor",
-        status: "pending",
-        priority: "high",
-        tools: ["image-processor"],
-      },
-      {
-        id: "2.2",
-        title: "Platform Komisyonlu Fiyatlandırma",
-        description: "Seçilen her platformun kendi komisyonuna göre fiyat dengesi kuruluyor",
-        status: "pending",
-        priority: "medium",
-        tools: ["calculator-agent"],
-      }
-    ],
-  },
-  {
-    id: "3",
-    title: "Entegrasyon ve API Aktarımı",
-    description: "Hazırlanan ürün verileri ilgili pazar yerlerinin API'lerine iletiliyor",
-    status: "pending",
-    priority: "high",
-    level: 1,
-    dependencies: ["1", "2"],
-    subtasks: [
-      {
-        id: "3.1",
-        title: "Katalog Eşleştirme",
-        description: "Ürünlerin platform kataloglarındaki doğru kategoriye map edilmesi",
-        status: "pending",
-        priority: "high",
-        tools: ["api-connector"],
-      },
-      {
-        id: "3.2",
-        title: "Aktarım Onayı Bekleniyor",
-        description: "Platformlardan dönen onay veya hata mesajlarının denetimi",
-        status: "pending",
-        priority: "high",
-        tools: ["validation-bot"],
-      }
-    ],
-  }
-];
-
 export const SatisSureciPage = () => {
-  const { currentStep, formData, nextStep, prevStep, updateData } = useListingWizard();
+  const { currentStep, formData, nextStep, prevStep, updateData, setStep } = useListingWizard();
   const navigate = useNavigate();
+  const { completedReports } = useAnalysisHistory();
 
   const currentStepData = stepsData.find(s => s.id === currentStep);
-  const [showResultsButton, setShowResultsButton] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Polling for Step 2 (SEO & Görsel İşleme)
   useEffect(() => {
-    if (currentStep === 4) {
-      setShowResultsButton(false);
-      const timer = setTimeout(() => {
-        setShowResultsButton(true);
-      }, 5000);
-      return () => clearTimeout(timer);
+    if (currentStep === 2 && formData.listingId && !formData.seoTitle) {
+      setPolling(true);
+      const interval = setInterval(async () => {
+        try {
+          const listing = await api.getListing(formData.listingId as number);
+          if (listing.status === 'seo_completed' || listing.status === 'completed') {
+            clearInterval(interval);
+            setPolling(false);
+            
+            // Verileri doldur
+            let seoData = { title: '', description: '', tags: [] as string[] };
+            try {
+               seoData = JSON.parse(listing.agent_output_json || '{}');
+            } catch(e) {}
+            
+            updateData({
+              processedPhotoUrl: listing.processed_photo_url || listing.photo_url,
+              seoTitle: seoData.title || '',
+              seoDescription: seoData.description || '',
+              seoTags: seoData.tags || []
+            });
+          } else if (listing.status === 'failed') {
+            clearInterval(interval);
+            setPolling(false);
+            alert("Ajanlar işlem sırasında bir hatayla karşılaştı.");
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }, 3000);
+      return () => clearInterval(interval);
     }
-  }, [currentStep]);
+  }, [currentStep, formData.listingId, formData.seoTitle]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const data = await api.uploadImage(file);
+      updateData({ photoUrl: data.photo_url });
+    } catch (err) {
+      alert("Resim yüklenemedi");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handlePrepare = async () => {
+    setPreparing(true);
+    try {
+      const productName = formData.sourceType === 'analyzed' ? formData.selectedProduct : formData.productName;
+      const data = await api.prepareListing({
+        product_name: productName,
+        photo_url: formData.photoUrl,
+        source_type: formData.sourceType
+      });
+      updateData({ listingId: data.id, seoTitle: '' }); // Yeni listeleme için seoTitle temizlenir (polling başlasın diye)
+      nextStep();
+    } catch (err: any) {
+      alert(`Hazırlık başlatılamadı: ${err.message}`);
+    } finally {
+      setPreparing(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      await api.publishListing({
+        listing_id: formData.listingId!,
+        price: parseFloat(formData.price) || 0,
+        platforms: formData.platforms,
+        seo_title: formData.seoTitle,
+        seo_description: formData.seoDescription,
+        seo_tags: formData.seoTags
+      });
+      setIsPublished(true);
+    } catch (err: any) {
+      alert(`Yayınlanamadı: ${err.message}`);
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const togglePlatform = (platform: string) => {
     if (formData.platforms.includes(platform)) {
@@ -125,16 +124,65 @@ export const SatisSureciPage = () => {
     }
   };
 
+  const handleTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const tags = e.target.value.split(',').map(t => t.trim());
+    updateData({ seoTags: tags });
+  };
+
+  // Seçili ürün veya herhangi tamamlanmış rapordaki önerilen fiyatı çek
+  const getRecommendedPrice = () => {
+    const productName = formData.sourceType === 'analyzed'
+      ? formData.selectedProduct
+      : formData.productName;
+    // Önce ürün adına göre eşleşen raporu bul, yoksa ilk tamamlanmış raporu al
+    const report = productName
+      ? (completedReports.find(r => r.product_name === productName) || completedReports[0])
+      : completedReports[0];
+    if (!report || !report.report_json) return null;
+    
+    // 1. JSON formatında kayıtlıysa (eski raporlar)
+    try {
+      const parsed = JSON.parse(report.report_json);
+      if (parsed.onerilen_satis_fiyati) return String(parsed.onerilen_satis_fiyati);
+    } catch(e) {}
+    
+    // 2. Markdown formatındaysa (yeni raporlar) — regex ile fiyat çek
+    // "**265 TL**" veya "265 TL" veya "265,00 TL" formatlarını yakala
+    const text = report.report_json;
+    const patterns = [
+      /önerilen satış fiyatı[:\s*]+\**\s*(\d[\d.,]*)\s*tl/i,
+      /\*\*(\d[\d.,]+)\s*TL\*\*[^\n]*öneri/i,
+      /öneri[^\n]*\*\*(\d[\d.,]+)\s*TL\*\*/i,
+    ];
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        // Virgülü noktaya çevir, nokta binlik ayracıysa temizle
+        const raw = match[1].replace(/\./g, '').replace(',', '.');
+        return raw;
+      }
+    }
+    return null;
+  };
+  const recommendedPrice = getRecommendedPrice();
+
   return (
-    <PageTransition className="max-w-4xl mx-auto py-8">
+    <PageTransition className="max-w-5xl mx-auto py-8">
       
       {/* Top Custom Step Indicator */}
       <div className="flex justify-between items-end border-b border-[#2a2a2a] pb-6 mb-10 px-4">
         {stepsData.map((step) => {
           const isActive = currentStep === step.id;
+          const isPassed = currentStep > step.id;
           return (
-            <div key={step.id} className="flex flex-col items-center gap-3">
-              <div className={`w-4 h-4 rounded-full transition-all duration-300 ${isActive ? 'bg-white ring-4 ring-white/20' : 'bg-[#2a2a2a]'}`} />
+            <div key={step.id} className="flex flex-col items-center gap-3 relative">
+              {isPassed ? (
+                 <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                    <CheckCircle2 size={12} className="text-black" />
+                 </div>
+              ) : (
+                 <div className={`w-4 h-4 rounded-full transition-all duration-300 ${isActive ? 'bg-white ring-4 ring-white/20' : 'bg-[#2a2a2a]'}`} />
+              )}
               <span className={`text-sm transition-colors duration-300 ${isActive ? 'font-bold text-white' : 'font-medium text-[#737373]'}`}>
                 {step.title}
               </span>
@@ -145,69 +193,67 @@ export const SatisSureciPage = () => {
 
       {/* Main Card Container */}
       <div className="bg-[#121212] rounded-[32px] p-8 md:p-12 border border-white/5 shadow-2xl min-h-[500px] flex flex-col">
+        
+        {/* ADIM 1: GÖRSEL VE ÜRÜN */}
         {currentStep === 1 && (
           <Reveal variant="fadeIn" className="flex flex-col flex-1">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">Ürün Kaynağını Seçin</h2>
-              <p className="text-[#a3a3a3] text-base">Satış sürecini başlatmak için ürünün nasıl ekleneceğini belirleyin.</p>
+              <h2 className="text-3xl font-bold text-white mb-2">Ürün ve Görsel Seçimi</h2>
+              <p className="text-[#a3a3a3] text-base">Ürünün kaynağını ve optimize edilecek ana görselini yükleyin.</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
-              
-              {/* Option 1: Analiz Edilen Ürünler (Shine Border effect requested by user) */}
-              <div 
-                onClick={() => { updateData({ sourceType: 'analyzed' }); nextStep(); }}
-                className="group relative cursor-pointer h-64"
-              >
-                <ShineBorder 
-                  className="w-full h-full rounded-[24px] border border-[#2a2a2a] transition-transform group-hover:scale-[1.02]"
-                  innerClassName="bg-[#0a0a0a] flex flex-col items-center justify-center p-8"
-                  gradient="from-[#A07CFE] via-[#FE8FB5] to-[#FFBE7B]"
-                >
-                  <Search size={48} className="text-white mb-6" strokeWidth={1.5} />
-                  <h3 className="text-xl font-bold text-white mb-2 text-center">Analiz Edilen Ürünlerden Seç</h3>
-                  <p className="text-sm text-[#737373] text-center">Önceden maliyet ve pazar analizi yaptığınız ürünleri kullanarak hızlıca listeleme yapın.</p>
-                </ShineBorder>
-              </div>
-
-              {/* Option 2: Kendim Ürün Eklemek İstiyorum */}
-              <div 
-                onClick={() => { updateData({ sourceType: 'manual' }); nextStep(); }}
-                className="group w-full h-64 bg-[#0a0a0a] rounded-[24px] border border-[#2a2a2a] hover:border-white/20 hover:bg-[#111111] transition-all cursor-pointer flex flex-col items-center justify-center p-8 hover:scale-[1.02]"
-              >
-                <PlusCircle size={48} className="text-[#737373] group-hover:text-white mb-6 transition-colors" strokeWidth={1.5} />
-                <h3 className="text-xl font-bold text-[#a3a3a3] group-hover:text-white mb-2 text-center transition-colors">Kendim Ürün Eklemek İstiyorum</h3>
-                <p className="text-sm text-[#555] group-hover:text-[#737373] text-center transition-colors">Sisteme daha önce girmediğiniz, tamamen yeni bir ürünü manuel olarak sıfırdan ekleyin.</p>
-              </div>
-
-            </div>
-          </Reveal>
-        )}
-
-        {currentStep === 2 && (
-          <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">Ürün Detayları</h2>
-              <p className="text-[#a3a3a3] text-base">Ürününüzün temel listeleme verilerini tamamlayın.</p>
-            </div>
-            
-            <div className="space-y-6">
-              
-              {formData.sourceType === 'analyzed' ? (
-                <div>
-                  <label className="block text-sm font-bold text-white mb-2">Kayıtlı Analizlerden Seç</label>
-                  <select 
-                    value={formData.selectedProduct}
-                    onChange={(e) => updateData({ selectedProduct: e.target.value })}
-                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gray-500 appearance-none"
+            <div className="space-y-8 flex-1">
+               {/* Kaynak Seçimi Tabları */}
+               <div className="flex gap-4">
+                  <button 
+                     onClick={() => updateData({ sourceType: 'analyzed' })}
+                     className={`flex-1 py-3 rounded-xl border ${formData.sourceType === 'analyzed' ? 'bg-white/10 border-white text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#737373]'}`}
                   >
-                    <option value="" disabled>Ürün seçiniz...</option>
-                    <option value="iphone15">Apple iPhone 15 Pro Max 256GB Siyah</option>
-                    <option value="fabercastell">Faber-Castell 0.5mm Versatil Kalem</option>
-                  </select>
-                </div>
-              ) : (
-                <>
+                     Analiz Edilenlerden Seç
+                  </button>
+                  <button 
+                     onClick={() => updateData({ sourceType: 'manual' })}
+                     className={`flex-1 py-3 rounded-xl border ${formData.sourceType === 'manual' ? 'bg-white/10 border-white text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#737373]'}`}
+                  >
+                     Yeni Ürün (Manuel)
+                  </button>
+               </div>
+
+               {/* Dinamik Alan */}
+               {formData.sourceType === 'analyzed' && (
+                  <div>
+                    <label className="block text-sm font-bold text-white mb-2">Kayıtlı Analizlerden Seç</label>
+                    <select 
+                      value={formData.selectedProduct}
+                      onChange={(e) => {
+                        const selectedName = e.target.value;
+                        let defaultPrice = formData.price;
+                        
+                        const report = completedReports.find(r => r.product_name === selectedName);
+                        if (report && report.report_json) {
+                          try {
+                            const parsed = JSON.parse(report.report_json);
+                            if (parsed.onerilen_satis_fiyati) {
+                              defaultPrice = String(parsed.onerilen_satis_fiyati);
+                            }
+                          } catch (err) {}
+                        }
+                        
+                        updateData({ selectedProduct: selectedName, price: defaultPrice });
+                      }}
+                      className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gray-500 appearance-none"
+                    >
+                      <option value="" disabled>Ürün seçiniz...</option>
+                      {completedReports.map(report => (
+                          <option key={report.id} value={report.product_name}>
+                            {report.product_name}
+                          </option>
+                      ))}
+                    </select>
+                  </div>
+               )}
+
+               {formData.sourceType === 'manual' && (
                   <div>
                     <label className="block text-sm font-bold text-white mb-2">Ürün Adı</label>
                     <input 
@@ -218,40 +264,169 @@ export const SatisSureciPage = () => {
                       className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white placeholder-[#737373] focus:outline-none focus:border-gray-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-white mb-2">Ürün Açıklaması</label>
-                    <textarea 
-                      value={formData.description}
-                      onChange={(e) => updateData({ description: e.target.value })}
-                      placeholder="Ürün özelliklerini ve avantajlarını detaylıca yazınız..."
-                      rows={4}
-                      className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white placeholder-[#737373] focus:outline-none focus:border-gray-500 resize-none"
+               )}
+
+               {/* Görsel Yükleme Alanı */}
+               {(formData.sourceType) && (
+                 <div>
+                    <label className="block text-sm font-bold text-white mb-2">Ürün Görseli</label>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleImageUpload} 
                     />
-                  </div>
-                </>
-              )}
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-48 border-2 border-dashed border-[#2a2a2a] rounded-xl bg-[#0a0a0a] hover:bg-[#111] transition-colors flex flex-col items-center justify-center cursor-pointer overflow-hidden relative"
+                    >
+                      {uploading ? (
+                        <span className="text-sm text-[#737373]">Yükleniyor...</span>
+                      ) : formData.photoUrl ? (
+                        <img src={formData.photoUrl} alt="Preview" className="w-full h-full object-contain" />
+                      ) : (
+                        <>
+                          <UploadCloud size={32} className="text-[#737373] mb-3" />
+                          <span className="text-sm text-[#737373]">Görsel Yüklemek İçin Tıklayın</span>
+                        </>
+                      )}
+                    </div>
+                 </div>
+               )}
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-white mb-2">Ürün Görseli</label>
-                  <div className="w-full h-32 border-2 border-dashed border-[#2a2a2a] rounded-xl bg-[#0a0a0a] hover:bg-[#111] transition-colors flex flex-col items-center justify-center cursor-pointer">
-                    <UploadCloud size={24} className="text-[#737373] mb-2" />
-                    <span className="text-sm text-[#737373]">Görsel Yüklemek İçin Tıklayın</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-white mb-2">Hedef Satış Fiyatı (₺)</label>
-                  <input 
-                    type="number" 
-                    value={formData.price}
-                    onChange={(e) => updateData({ price: e.target.value })}
-                    placeholder="0.00"
-                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white placeholder-[#737373] focus:outline-none focus:border-gray-500"
-                  />
-                  <p className="text-xs text-[#555] mt-2 italic">* Ajanlarımız seçtiğiniz platformlara göre bu fiyatta komisyon optimizasyonu yapacaktır.</p>
-                </div>
-              </div>
+            <div className="mt-auto pt-12 flex justify-end">
+              <button 
+                onClick={handlePrepare} 
+                disabled={preparing || !formData.photoUrl || (formData.sourceType === 'analyzed' ? !formData.selectedProduct : !formData.productName)}
+                className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {preparing ? 'Hazırlanıyor...' : 'İleri (AI İşleme)'} <ChevronRight size={18} />
+              </button>
+            </div>
+          </Reveal>
+        )}
 
+        {/* ADIM 2: SEO VE GÖRSEL */}
+        {currentStep === 2 && (
+          <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
+            {polling ? (
+               <div className="flex flex-col items-center justify-center flex-1 py-20">
+                  <Wand2 className="text-[#A07CFE] mb-6 animate-pulse" size={64} />
+                  <h3 className="text-2xl font-bold text-white mb-2">Ajanlar Çalışıyor...</h3>
+                  <p className="text-[#737373] text-center max-w-sm">
+                     Ürün görseliniz optimize ediliyor (arka plan/parlaklık) ve platformlara uygun SEO başlık/açıklamaları Gemini tarafından üretiliyor.
+                  </p>
+               </div>
+            ) : (
+               <div className="flex flex-col flex-1">
+                  <div className="mb-8 flex justify-between items-end">
+                    <div>
+                      <h2 className="text-3xl font-bold text-white mb-2">SEO ve Optimizasyon</h2>
+                      <p className="text-[#a3a3a3] text-base">Ajanların ürettiği içerikleri düzenleyebilirsiniz.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
+                     {/* Görseller Yan Yana */}
+                     <div className="flex flex-col gap-4">
+                        <label className="text-sm font-bold text-white">Görsel Karşılaştırması</label>
+                        <div className="flex gap-4">
+                           <div className="flex-1 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-2 relative">
+                              <span className="absolute top-2 left-2 bg-black/50 px-2 py-1 text-xs rounded text-white backdrop-blur">Orijinal</span>
+                              <img src={formData.photoUrl} alt="Original" className="w-full h-40 object-cover rounded-lg" />
+                           </div>
+                           <div className="flex-1 bg-[#1a1a1a] border border-green-500/30 rounded-xl p-2 relative shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                              <span className="absolute top-2 left-2 bg-green-500/80 px-2 py-1 text-xs rounded text-black font-bold backdrop-blur">Optimize</span>
+                              <img src={formData.processedPhotoUrl} alt="Processed" className="w-full h-40 object-cover rounded-lg" />
+                           </div>
+                        </div>
+                     </div>
+
+                     {/* SEO Metinleri */}
+                     <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-bold text-white mb-2">SEO Başlığı</label>
+                          <input 
+                            type="text" 
+                            value={formData.seoTitle}
+                            onChange={(e) => updateData({ seoTitle: e.target.value })}
+                            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:border-green-500 focus:outline-none transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-white mb-2">SEO Açıklaması</label>
+                          <textarea 
+                            value={formData.seoDescription}
+                            onChange={(e) => updateData({ seoDescription: e.target.value })}
+                            rows={4}
+                            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:border-green-500 focus:outline-none transition-colors resize-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-white mb-2">Etiketler (Virgülle ayırın)</label>
+                          <input 
+                            type="text" 
+                            value={formData.seoTags.join(', ')}
+                            onChange={handleTagChange}
+                            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:border-green-500 focus:outline-none transition-colors"
+                          />
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="mt-auto pt-12 flex justify-between items-center">
+                    <button 
+                      onClick={prevStep} 
+                      className="flex items-center gap-2 bg-[#121212] border border-[#2a2a2a] text-[#a3a3a3] rounded-2xl px-6 py-3 font-medium hover:text-white hover:bg-[#1e1e1e] transition-colors"
+                    >
+                      <ChevronLeft size={18} /> Geri
+                    </button>
+                    <button 
+                      onClick={nextStep} 
+                      className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors"
+                    >
+                      İleri <ChevronRight size={18} />
+                    </button>
+                  </div>
+               </div>
+            )}
+          </Reveal>
+        )}
+
+        {/* ADIM 3: FİYAT */}
+        {currentStep === 3 && (
+          <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">Fiyat Belirleme</h2>
+              <p className="text-[#a3a3a3] text-base">Ürününüzün pazar yerlerindeki ana satış fiyatını girin.</p>
+            </div>
+            
+            <div className="flex-1 flex items-center justify-center">
+               <div className="w-full max-w-xl flex gap-6 items-start">
+                 {/* Fiyat Girişi */}
+                 <div className="flex-1">
+                   <label className="block text-sm font-bold text-white mb-4 text-center">Hedef Satış Fiyatı (₺)</label>
+                   <input 
+                     type="number" 
+                     value={formData.price}
+                     onChange={(e) => updateData({ price: e.target.value })}
+                     placeholder="0.00"
+                     className="w-full bg-[#0a0a0a] border-2 border-white/10 rounded-2xl px-6 py-6 text-4xl text-center text-white font-bold focus:outline-none focus:border-white transition-colors"
+                   />
+                   <p className="text-xs text-[#737373] mt-3 text-center">Pazar yeri komisyonları bu fiyata eklenir.</p>
+                 </div>
+
+                 {/* Önerilen Fiyat Kutusu — her zaman göster */}
+                 <div className="w-40 bg-[#0a0a0a] border border-[#2a2a2a] rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2 mt-8">
+                   <span className="text-xs text-[#737373] font-medium">Önerilen Fiyat</span>
+                   <span className="text-2xl font-bold text-green-400">
+                     {recommendedPrice ? `₺${recommendedPrice}` : '—'}
+                   </span>
+                   <span className="text-[10px] text-[#555]">Pazar Analizi</span>
+                 </div>
+               </div>
             </div>
 
             <div className="mt-auto pt-12 flex justify-between items-center">
@@ -263,8 +438,8 @@ export const SatisSureciPage = () => {
               </button>
               <button 
                 onClick={nextStep} 
-                disabled={formData.sourceType === 'analyzed' ? (!formData.selectedProduct || !formData.price) : (!formData.productName || !formData.price)}
-                className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!formData.price}
+                className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors disabled:opacity-50"
               >
                 İleri <ChevronRight size={18} />
               </button>
@@ -272,26 +447,27 @@ export const SatisSureciPage = () => {
           </Reveal>
         )}
 
-        {currentStep === 3 && (
+        {/* ADIM 4: PLATFORM */}
+        {currentStep === 4 && (
           <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">Platform Seçimi</h2>
               <p className="text-[#a3a3a3] text-base">Ürünün yayınlanacağı hedef pazar yerlerini seçin.</p>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-6 flex-1 content-center">
               {['Amazon', 'Trendyol', 'Hepsiburada', 'Çiçeksepeti'].map((platform) => {
                 const isSelected = formData.platforms.includes(platform);
                 return (
                   <div 
                     key={platform}
                     onClick={() => togglePlatform(platform)}
-                    className={`cursor-pointer border rounded-2xl p-6 flex flex-col items-center justify-center transition-all ${
-                      isSelected ? 'bg-white/10 border-white text-white shadow-lg shadow-white/5' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#737373] hover:border-white/30'
+                    className={`cursor-pointer border-2 rounded-2xl p-8 flex flex-col items-center justify-center transition-all ${
+                      isSelected ? 'bg-white/10 border-white text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#737373] hover:border-white/30'
                     }`}
                   >
-                    <ShoppingCart size={32} className="mb-4" />
-                    <span className="font-bold">{platform}</span>
+                    <ShoppingCart size={40} className="mb-4" />
+                    <span className="font-bold text-xl">{platform}</span>
                   </div>
                 );
               })}
@@ -307,57 +483,15 @@ export const SatisSureciPage = () => {
               <button 
                 onClick={nextStep} 
                 disabled={formData.platforms.length === 0}
-                className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors disabled:opacity-50"
               >
-                Ajanları Başlat <ChevronRight size={18} />
+                İleri <ChevronRight size={18} />
               </button>
             </div>
           </Reveal>
         )}
 
-        {currentStep === 4 && (
-          <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
-            <div className="mb-8 flex justify-between items-center">
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Ajanlar Devrede</h2>
-                <p className="text-[#a3a3a3] text-base">Ürününüz platformlar için özel olarak optimize ediliyor ve listeleniyor...</p>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-green-400 font-bold bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                Çalışıyor
-              </div>
-            </div>
-             
-            <div className="flex-1 overflow-hidden rounded-xl border border-[#2a2a2a] bg-[#0a0a0a]">
-               <AgentPlan customTasks={salesTasks} />
-            </div>
-
-            <div className="mt-12 flex justify-between items-center">
-              <button 
-                onClick={prevStep} 
-                className="flex items-center gap-2 bg-[#121212] border border-[#2a2a2a] text-[#a3a3a3] rounded-2xl px-6 py-3 font-medium hover:text-white hover:bg-[#1e1e1e] transition-colors"
-              >
-                <ChevronLeft size={18} /> İptal
-              </button>
-              {showResultsButton ? (
-                <button 
-                  onClick={nextStep} 
-                  className="flex items-center gap-2 bg-green-500 text-black rounded-2xl px-8 py-3 font-bold hover:bg-green-400 transition-colors"
-                >
-                  Sonuçları Gör <ChevronRight size={18} />
-                </button>
-              ) : (
-                <div className="text-sm text-[#737373] animate-pulse">
-                  Listelemeler yapılıyor, lütfen bekleyin...
-                </div>
-              )}
-            </div>
-          </Reveal>
-        )}
-
+        {/* ADIM 5: ONAY */}
         {currentStep === 5 && (
           <Reveal variant="fadeIn" className="flex flex-col flex-1 h-full">
             {!isPublished ? (
@@ -367,24 +501,31 @@ export const SatisSureciPage = () => {
                   <p className="text-[#a3a3a3] text-base">Ürününüz yayına alınmadan önce detayları son kez gözden geçirin.</p>
                 </div>
                 
-                <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-2xl p-6 flex-1 flex flex-col justify-center">
-                  <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-                    <div className="w-40 h-40 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl flex items-center justify-center flex-shrink-0">
-                       <UploadCloud size={40} className="text-[#737373]" />
+                <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-2xl p-8 flex-1 flex flex-col">
+                  <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="w-48 h-48 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden p-2">
+                        <img src={formData.processedPhotoUrl} alt="Product" className="w-full h-full object-cover rounded-lg" />
                     </div>
-                    <div className="flex flex-col">
-                      <h3 className="text-2xl font-bold text-white mb-3">{formData.sourceType === 'analyzed' ? (formData.selectedProduct === 'iphone15' ? 'Apple iPhone 15 Pro Max 256GB Siyah' : 'Faber-Castell 0.5mm Versatil Kalem') : formData.productName || 'Yeni Ürün'}</h3>
-                      <p className="text-[#a3a3a3] text-base mb-6 leading-relaxed">
-                        {formData.description || 'Bu ürün için SEO uyumlu başlık ve açıklamalar ajanlarımız tarafından başarıyla üretildi.'}
+                    <div className="flex flex-col w-full">
+                      <h3 className="text-2xl font-bold text-white mb-2">{formData.seoTitle}</h3>
+                      <p className="text-[#a3a3a3] text-sm mb-4 leading-relaxed line-clamp-3">
+                        {formData.seoDescription}
                       </p>
-                      <div className="flex gap-6 items-center flex-wrap">
-                        <div className="bg-[#1a1a1a] px-4 py-2 rounded-lg border border-[#2a2a2a]">
+                      
+                      <div className="flex flex-wrap gap-2 mb-6">
+                         {formData.seoTags.map(t => (
+                            <span key={t} className="text-xs bg-[#2a2a2a] text-[#a3a3a3] px-2 py-1 rounded">#{t}</span>
+                         ))}
+                      </div>
+
+                      <div className="flex gap-6 items-center flex-wrap pt-4 border-t border-[#2a2a2a] w-full">
+                        <div className="bg-[#1a1a1a] px-5 py-3 rounded-xl border border-green-500/20">
                           <span className="text-[#737373] text-xs block mb-1">Satış Fiyatı</span>
-                          <span className="text-xl font-bold text-green-400">₺{formData.price}</span>
+                          <span className="text-2xl font-bold text-green-400">₺{formData.price}</span>
                         </div>
                         <div className="flex gap-2">
                           {formData.platforms.map(p => (
-                            <span key={p} className="bg-white/10 text-white text-sm font-medium px-3 py-1.5 rounded-lg border border-white/10">{p}</span>
+                            <span key={p} className="bg-white/10 text-white text-sm font-medium px-4 py-2 rounded-xl border border-white/10">{p}</span>
                           ))}
                         </div>
                       </div>
@@ -400,10 +541,11 @@ export const SatisSureciPage = () => {
                     <ChevronLeft size={18} /> Geri Dön
                   </button>
                   <button 
-                    onClick={() => setIsPublished(true)}
+                    onClick={handlePublish}
+                    disabled={publishing}
                     className="flex items-center gap-2 bg-green-500 text-black rounded-2xl px-8 py-3 font-bold hover:bg-green-400 transition-colors"
                   >
-                    Onayla ve Yayınla <CheckCircle2 size={18} />
+                    {publishing ? 'Yayınlanıyor...' : 'Onayla ve Yayınla'} <CheckCircle2 size={18} />
                   </button>
                 </div>
               </>
@@ -414,7 +556,7 @@ export const SatisSureciPage = () => {
                 </div>
                 <h2 className="text-4xl font-bold mb-4 text-white">Ürün Yayında!</h2>
                 <p className="text-[#a3a3a3] text-center max-w-md mb-12 text-lg">
-                  Ajanlarımız ürün listelemelerini seçtiğiniz {formData.platforms.length} platform için optimize etti ve entegrasyon havuzuna başarıyla aktardı.
+                  Ajanlarımız ürün listelemelerini seçtiğiniz {formData.platforms.length} platform için senkronize etti ve kataloglara başarıyla aktardı.
                 </p>
                 
                 <div className="flex gap-4 w-full max-w-md">
@@ -430,12 +572,6 @@ export const SatisSureciPage = () => {
           </Reveal>
         )}
       </div>
-      
-      {/* Step Counter at Bottom */}
-      <div className="text-center text-sm font-medium text-[#737373] mt-8">
-        Adım {currentStep} / {stepsData.length}: <span className="text-white">{currentStepData?.title}</span>
-      </div>
-
     </PageTransition>
   );
 };

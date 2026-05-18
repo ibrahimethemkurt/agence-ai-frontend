@@ -6,6 +6,7 @@ interface OrdersTabProps {
     id: string;
     date: string;
     product: string;
+    customer?: string;
     platform: string;
     amount: number;
     status: string;
@@ -21,6 +22,7 @@ export const OrdersTab = ({ orders }: OrdersTabProps) => {
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg)]">
               <th className="p-4 text-sm font-medium text-[var(--color-muted)]">Sipariş No</th>
               <th className="p-4 text-sm font-medium text-[var(--color-muted)]">Tarih</th>
+              <th className="p-4 text-sm font-medium text-[var(--color-muted)]">Müşteri</th>
               <th className="p-4 text-sm font-medium text-[var(--color-muted)]">Ürün</th>
               <th className="p-4 text-sm font-medium text-[var(--color-muted)]">Platform</th>
               <th className="p-4 text-sm font-medium text-[var(--color-muted)]">Tutar</th>
@@ -32,6 +34,7 @@ export const OrdersTab = ({ orders }: OrdersTabProps) => {
               <tr key={order.id} className="hover:bg-[var(--color-border)]/20 transition-colors">
                 <td className="p-4 text-sm font-medium">{order.id}</td>
                 <td className="p-4 text-sm text-[var(--color-muted)]">{order.date}</td>
+                <td className="p-4 text-sm font-medium">{order.customer || '-'}</td>
                 <td className="p-4 text-sm">{order.product}</td>
                 <td className="p-4 text-sm text-[var(--color-muted)]">{order.platform}</td>
                 <td className="p-4 text-sm font-medium">₺{order.amount}</td>

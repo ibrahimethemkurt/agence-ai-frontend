@@ -1,159 +1,19 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { Reveal } from '../components/animation/Reveal';
 import { 
   Download, Upload, Plus, Search, Filter, PanelLeftClose, 
   Image as ImageIcon, MoreHorizontal, ChevronDown, ChevronLeft, ChevronRight,
-  Package
+  Package, Pencil, Trash2, X, Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
 import { Radio } from '../components/radio';
+import { api } from '../lib/api';
 
-// --- MOCK DATA ---
-const MOCK_PRODUCTS = [
-  {
-    id: "p1",
-    name: "Akıllı Saat Pro Max",
-    variants: "Siyah, Gümüş",
-    salePrice: "₺ 2,499.00",
-    purchasePrice: "₺ 1,200.00",
-    inventory: "45 adet",
-    salesCount: "1,250",
-    revenue: "₺ 3,123,750.00",
-    channels: "Kendi Sitemiz, Trendyol",
-    createdAt: "12 Mar 2026",
-    updatedAt: "15 May 2026",
-    image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p2",
-    name: "Minimalist Sırt Çantası",
-    variants: "Gri, Siyah, Lacivert",
-    salePrice: "₺ 850.00",
-    purchasePrice: "₺ 350.00",
-    inventory: "120 adet",
-    salesCount: "840",
-    revenue: "₺ 714,000.00",
-    channels: "Kendi Sitemiz",
-    createdAt: "05 Nis 2026",
-    updatedAt: "10 May 2026",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p3",
-    name: "Kablosuz Kulaklık V2",
-    variants: "Beyaz",
-    salePrice: "₺ 1,299.00",
-    purchasePrice: "₺ 600.00",
-    inventory: "Tükendi",
-    salesCount: "3,100",
-    revenue: "₺ 4,026,900.00",
-    channels: "Trendyol, Hepsiburada",
-    createdAt: "22 Şub 2026",
-    updatedAt: "01 May 2026",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p4",
-    name: "Mekanik Klavye RGB",
-    variants: "Switch: Kırmızı, Mavi",
-    salePrice: "₺ 1,850.00",
-    purchasePrice: "₺ 900.00",
-    inventory: "15 adet",
-    salesCount: "420",
-    revenue: "₺ 777,000.00",
-    channels: "Kendi Sitemiz",
-    createdAt: "18 Oca 2026",
-    updatedAt: "14 May 2026",
-    image: "https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p5",
-    name: "Ergonomik Oyuncu Faresi",
-    variants: "Siyah, Beyaz",
-    salePrice: "₺ 1,150.00",
-    purchasePrice: "₺ 500.00",
-    inventory: "85 adet",
-    salesCount: "950",
-    revenue: "₺ 1,092,500.00",
-    channels: "Amazon, Kendi Sitemiz",
-    createdAt: "10 Oca 2026",
-    updatedAt: "12 May 2026",
-    image: "https://images.unsplash.com/photo-1527814050087-37938154798c?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p6",
-    name: "4K Aksiyon Kamerası",
-    variants: "Siyah",
-    salePrice: "₺ 4,500.00",
-    purchasePrice: "₺ 2,800.00",
-    inventory: "20 adet",
-    salesCount: "150",
-    revenue: "₺ 675,000.00",
-    channels: "Kendi Sitemiz",
-    createdAt: "25 Şub 2026",
-    updatedAt: "08 May 2026",
-    image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p7",
-    name: "Taşınabilir Şarj Cihazı (Powerbank)",
-    variants: "20000mAh, 10000mAh",
-    salePrice: "₺ 650.00",
-    purchasePrice: "₺ 250.00",
-    inventory: "350 adet",
-    salesCount: "4,500",
-    revenue: "₺ 2,925,000.00",
-    channels: "Trendyol, Hepsiburada, Amazon",
-    createdAt: "01 Oca 2026",
-    updatedAt: "16 May 2026",
-    image: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p8",
-    name: "Akıllı Ev Aydınlatma Seti",
-    variants: "RGB, 3'lü Paket",
-    salePrice: "₺ 1,450.00",
-    purchasePrice: "₺ 700.00",
-    inventory: "Tükendi",
-    salesCount: "1,120",
-    revenue: "₺ 1,624,000.00",
-    channels: "Kendi Sitemiz",
-    createdAt: "14 Mar 2026",
-    updatedAt: "05 May 2026",
-    image: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p9",
-    name: "Gürültü Engelleyici Kulaklık",
-    variants: "Siyah, Bej",
-    salePrice: "₺ 3,200.00",
-    purchasePrice: "₺ 1,500.00",
-    inventory: "65 adet",
-    salesCount: "580",
-    revenue: "₺ 1,856,000.00",
-    channels: "Trendyol",
-    createdAt: "28 Nis 2026",
-    updatedAt: "15 May 2026",
-    image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=100&q=80"
-  },
-  {
-    id: "p10",
-    name: "Oyuncu Monitörü 144Hz",
-    variants: "27 inç, 24 inç",
-    salePrice: "₺ 6,500.00",
-    purchasePrice: "₺ 4,200.00",
-    inventory: "12 adet",
-    salesCount: "210",
-    revenue: "₺ 1,365,000.00",
-    channels: "Kendi Sitemiz, Hepsiburada",
-    createdAt: "10 Şub 2026",
-    updatedAt: "13 May 2026",
-    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=100&q=80"
-  }
-];
+// --- MOCK DATA FOR COLUMNS DEFINITION ---
+// MOCK DATA REMOVED
 
 const COLUMNS_DEF = [
   { id: "image", label: "Görsel", defaultVisible: true },
@@ -171,9 +31,157 @@ const COLUMNS_DEF = [
 export const SatistaOlanUrunlerPage = () => {
   const navigate = useNavigate();
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [listings, setListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Unified edit drawer state
+  const [editItem, setEditItem] = useState<any | null>(null);
+  const [draftTitle, setDraftTitle] = useState('');
+  const [draftPrice, setDraftPrice] = useState('');
+  const [draftDesc, setDraftDesc] = useState('');
+  const [draftTags, setDraftTags] = useState('');
+  const [draftImage, setDraftImage] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const fetchListings = async () => {
+    try {
+      const data = await api.getListings();
+      const formattedListings = data.map((item: any) => {
+          let channels = "Henüz Yok";
+          if (item.platforms_json) {
+            try {
+              const parsed = JSON.parse(item.platforms_json);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                channels = parsed.join(", ");
+              }
+            } catch (e) {}
+          }
+          
+          return {
+            id: String(item.id),
+            name: item.product_name,
+            variants: item.status === "removed" ? "Pasif" : (item.status === "completed" || item.status === "published") ? "Yayınlandı" : "İşleniyor...",
+            rawStatus: item.status,
+            salePrice: `₺ ${(item.price || 0).toLocaleString('tr-TR', {minimumFractionDigits: 2})}`,
+            purchasePrice: "Hesaplanıyor",
+            inventory: `${item.stock || 0} adet`,
+            salesCount: String(item.sales_count || 0),
+            revenue: `₺ ${(item.total_revenue || 0).toLocaleString('tr-TR', {minimumFractionDigits: 2})}`,
+            channels: channels,
+            createdAt: new Date(item.created_at).toLocaleDateString('tr-TR'),
+            updatedAt: new Date(item.created_at).toLocaleDateString('tr-TR'),
+            image: item.processed_photo_url || item.photo_url || null,
+            seoData: item.agent_output_json
+          };
+        });
+        setListings(formattedListings);
+      } catch (err) {
+        console.error("Satışlar yüklenirken hata", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchListings();
+  }, []);
+
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
     new Set(COLUMNS_DEF.filter(c => c.defaultVisible).map(c => c.id))
   );
+
+  const openEditDrawer = (product: any) => {
+    let parsed = { title: product.name, description: '', tags: '' };
+    try { parsed = JSON.parse(product.seoData || '{}'); } catch(e) {}
+    setEditItem(product);
+    setDraftTitle(parsed.title || product.name);
+    setDraftPrice(product.salePrice.replace(/[^\d.,]/g, '').replace(',', '.'));
+    setDraftDesc(parsed.description || '');
+    setDraftTags(parsed.tags || '');
+    setDraftImage(product.image || null);
+  };
+
+  const handleCloseDrawer = () => { setEditItem(null); };
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setImageUploading(true);
+      const uploaded = await api.uploadImage(file);
+      setDraftImage(uploaded.photo_url);
+    } catch (err) {
+      alert('Görsel yüklenemedi.');
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const handleSaveAll = async () => {
+    if (!editItem) return;
+    setIsSaving(true);
+    const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('access_token')}` };
+    try {
+      // SEO + title güncelle
+      await fetch(`${BASE}/listing/${editItem.id}/seo`, {
+        method: 'PATCH', headers,
+        body: JSON.stringify({ seo_title: draftTitle, seo_description: draftDesc, seo_tags: draftTags }),
+      });
+      // Fiyat güncelle
+      if (draftPrice) {
+        await fetch(`${BASE}/listing/${editItem.id}/price`, {
+          method: 'PATCH', headers,
+          body: JSON.stringify({ price: parseFloat(draftPrice) }),
+        });
+      }
+      // Görseli güncelle (varsa)
+      if (draftImage && draftImage !== editItem.image) {
+        await fetch(`${BASE}/listing/${editItem.id}/image`, {
+          method: 'PATCH', headers,
+          body: JSON.stringify({ image_url: draftImage }),
+        });
+      }
+      setListings(prev => prev.map(l => l.id === editItem.id ? {
+        ...l,
+        name: draftTitle,
+        salePrice: `₺ ${parseFloat(draftPrice || '0').toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        seoData: JSON.stringify({ title: draftTitle, description: draftDesc, tags: draftTags }),
+        image: draftImage,
+        variants: 'Yayınlandı', rawStatus: 'published'
+      } : l));
+      setEditItem(null);
+    } catch (err) {
+      alert('Kaydedilemedi, tekrar deneyin.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRemove = async (listingId: string) => {
+    if (!confirm('Bu ürünü satıştan kaldırmak istediğinize emin misiniz?')) return;
+    const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('access_token')}` };
+    try {
+      await fetch(`${BASE}/listing/${listingId}/remove`, { method: 'PATCH', headers });
+      setListings(prev => prev.map(l => l.id === listingId ? { ...l, variants: 'Pasif', rawStatus: 'removed' } : l));
+      if (editItem?.id === listingId) setEditItem(null);
+    } catch (err) {
+      alert('Kaldırılamıyor.');
+    }
+  };
+
+  const handleRepublish = async (listingId: string) => {
+    const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('access_token')}` };
+    try {
+      await fetch(`${BASE}/listing/${listingId}/republish`, { method: 'PATCH', headers });
+      setListings(prev => prev.map(l => l.id === listingId ? { ...l, variants: 'Yayınlandı', rawStatus: 'published' } : l));
+    } catch (err) { console.error(err); }
+  };
+
+
 
   const toggleSelection = (id: string) => {
     const newSet = new Set(selectedItems);
@@ -183,10 +191,10 @@ export const SatistaOlanUrunlerPage = () => {
   };
 
   const toggleAll = () => {
-    if (selectedItems.size === MOCK_PRODUCTS.length) {
+    if (selectedItems.size === listings.length) {
       setSelectedItems(new Set());
     } else {
-      setSelectedItems(new Set(MOCK_PRODUCTS.map(p => p.id)));
+      setSelectedItems(new Set(listings.map(p => p.id)));
     }
   };
 
@@ -289,7 +297,7 @@ export const SatistaOlanUrunlerPage = () => {
                     onClick={toggleAll}
                   >
                     <div className="pointer-events-none">
-                      <Radio checked={selectedItems.size === MOCK_PRODUCTS.length && MOCK_PRODUCTS.length > 0} />
+                      <Radio checked={selectedItems.size === listings.length && listings.length > 0} />
                     </div>
                   </div>
                 </th>
@@ -300,12 +308,17 @@ export const SatistaOlanUrunlerPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border)]">
-              {MOCK_PRODUCTS.map((product) => {
+              {loading ? (
+                <tr><td colSpan={10} className="p-8 text-center text-[var(--color-muted)]">Satıştaki ürünler yükleniyor...</td></tr>
+              ) : listings.length === 0 ? (
+                <tr><td colSpan={10} className="p-8 text-center text-[var(--color-muted)]">Henüz satışta olan bir ürününüz bulunmuyor. Satış Süreci sayfasından ürün ekleyebilirsiniz.</td></tr>
+              ) : listings.map((product) => {
                 const isSelected = selectedItems.has(product.id);
+                const isPassive = product.rawStatus === 'removed';
                 return (
                   <tr 
                     key={product.id} 
-                    className={`transition-colors hover:bg-white/[0.02] ${isSelected ? 'bg-[var(--color-accent)]/[0.05]' : ''}`}
+                    className={`transition-colors hover:bg-white/[0.02] ${isSelected ? 'bg-[var(--color-accent)]/[0.05]' : ''} ${isPassive ? 'opacity-50 grayscale' : ''}`}
                   >
                     <td className="p-4 text-center">
                       <div 
@@ -333,7 +346,7 @@ export const SatistaOlanUrunlerPage = () => {
                     {visibleColumns.has("name") && (
                       <td className="p-4">
                         <div className="font-medium text-[var(--color-fg)]">{product.name}</div>
-                        <div className="text-xs text-[var(--color-muted)] mt-1">{product.variants}</div>
+                        <div className={`text-xs mt-1 ${isPassive ? 'text-red-400 font-semibold' : 'text-[var(--color-muted)]'}`}>{product.variants}</div>
                       </td>
                     )}
 
@@ -386,10 +399,39 @@ export const SatistaOlanUrunlerPage = () => {
                     )}
 
                     <td className="p-4 text-right">
-                      <button className="p-2 text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:bg-[#1A1A1A] rounded-lg transition-colors">
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
-                    </td>
+                       <Menu.Root positioning={{ placement: "bottom-end", gutter: 8 }}>
+                         <Menu.Trigger className="p-2 text-[var(--color-muted)] hover:text-white hover:bg-[#1A1A1A] rounded-lg transition-colors outline-none cursor-pointer">
+                           <MoreHorizontal className="w-5 h-5" />
+                         </Menu.Trigger>
+                         <Portal>
+                           <Menu.Positioner>
+                             <Menu.Content className="z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border border-[#2a2a2a] rounded-xl shadow-2xl p-2 min-w-[180px] focus-visible:outline-none font-body text-white">
+                               <Menu.Item
+                                 value="edit"
+                                 onClick={() => openEditDrawer(product)}
+                                 className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-[#1a1a1a] cursor-pointer outline-none transition-colors"
+                               >
+                                 <Pencil className="w-4 h-4 text-[#8b5cf6]" />
+                                 <span>Ürünü Düzenle</span>
+                               </Menu.Item>
+                               <div className="border-t border-[#2a2a2a] my-1" />
+                               <Menu.Item
+                                 value="remove"
+                                 onClick={() => product.rawStatus === 'removed' ? handleRepublish(product.id) : handleRemove(product.id)}
+                                 className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg cursor-pointer outline-none transition-colors ${product.rawStatus === 'removed' ? 'hover:bg-green-500/10 text-green-400' : 'hover:bg-red-500/10 text-red-400'}`}
+                               >
+                                 {product.rawStatus === 'removed' ? (
+                                   <><Check className="w-4 h-4" /><span>Tekrar Yayına Al</span></>
+                                 ) : (
+                                   <><Trash2 className="w-4 h-4" /><span>Satıştan Kaldır</span></>
+                                 )}
+                               </Menu.Item>
+                             </Menu.Content>
+                           </Menu.Positioner>
+                         </Portal>
+                       </Menu.Root>
+                     </td>
+
                   </tr>
                 );
               })}
@@ -412,7 +454,7 @@ export const SatistaOlanUrunlerPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span>1-{MOCK_PRODUCTS.length} / {MOCK_PRODUCTS.length} adet</span>
+            <span>1-{listings.length} / {listings.length} adet</span>
             <div className="flex items-center gap-1">
               <button className="p-1 rounded-md hover:bg-[#1A1A1A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
                 <ChevronLeft className="w-5 h-5" />
@@ -425,6 +467,149 @@ export const SatistaOlanUrunlerPage = () => {
         </div>
 
       </Reveal>
+
+      {/* Unified Edit Drawer */}
+      {editItem && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[99] bg-black/50 backdrop-blur-sm"
+            onClick={handleCloseDrawer}
+          />
+          {/* Drawer */}
+          <div className="fixed right-0 top-0 h-full z-[100] w-full max-w-md bg-[#0d0d0d] border-l border-[#2a2a2a] shadow-2xl flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2a2a2a] shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#8b5cf6]/20 flex items-center justify-center">
+                  <Pencil className="w-4 h-4 text-[#8b5cf6]" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-white text-sm">Ürünü Düzenle</h2>
+                  <p className="text-xs text-[#737373] truncate max-w-[200px]">{editItem.name}</p>
+                </div>
+              </div>
+              <button onClick={handleCloseDrawer} className="p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors text-[#737373] hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 flex flex-col gap-6">
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-xs font-semibold text-[#737373] uppercase tracking-wider mb-3">Ürün Görseli</label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative w-full h-48 rounded-2xl border-2 border-dashed border-[#2a2a2a] hover:border-[#8b5cf6]/50 bg-[#0a0a0a] hover:bg-[#8b5cf6]/5 transition-all cursor-pointer flex items-center justify-center overflow-hidden group"
+                >
+                  {imageUploading ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-6 h-6 border-2 border-[#8b5cf6] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs text-[#737373]">Yükleniyor...</span>
+                    </div>
+                  ) : draftImage ? (
+                    <>
+                      <img src={draftImage} alt="Ürün görseli" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <ImageIcon className="w-5 h-5 text-white" />
+                        <span className="text-white text-sm font-medium">Değiştir</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 text-[#737373] group-hover:text-[#8b5cf6] transition-colors">
+                      <ImageIcon className="w-10 h-10" />
+                      <div className="text-center">
+                        <p className="text-sm font-medium">Görsel yükle</p>
+                        <p className="text-xs mt-1 opacity-70">PNG, JPG, WEBP desteklenir</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+              </div>
+
+              {/* Product Title */}
+              <div>
+                <label className="block text-xs font-semibold text-[#737373] uppercase tracking-wider mb-2">Ürün Başlığı</label>
+                <input
+                  type="text"
+                  value={draftTitle}
+                  onChange={(e) => setDraftTitle(e.target.value)}
+                  className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#8b5cf6] transition-colors placeholder:text-[#737373]"
+                  placeholder="Müşterilerin göreceği başlık..."
+                />
+              </div>
+
+              {/* Price */}
+              <div>
+                <label className="block text-xs font-semibold text-[#737373] uppercase tracking-wider mb-2">Satış Fiyatı (₺)</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#737373] font-bold text-sm">₺</span>
+                  <input
+                    type="number"
+                    value={draftPrice}
+                    onChange={(e) => setDraftPrice(e.target.value)}
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl pl-9 pr-4 py-3 text-white text-sm font-bold focus:outline-none focus:border-[#8b5cf6] transition-colors"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              {/* SEO Description */}
+              <div>
+                <label className="block text-xs font-semibold text-[#737373] uppercase tracking-wider mb-2">SEO Açıklaması</label>
+                <textarea
+                  value={draftDesc}
+                  onChange={(e) => setDraftDesc(e.target.value)}
+                  rows={5}
+                  className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#8b5cf6] resize-none transition-colors placeholder:text-[#737373]"
+                  placeholder="Satış artırıcı ürün açıklaması..."
+                />
+              </div>
+
+              {/* SEO Tags */}
+              <div>
+                <label className="block text-xs font-semibold text-[#737373] uppercase tracking-wider mb-2">Etiketler</label>
+                <input
+                  type="text"
+                  value={draftTags}
+                  onChange={(e) => setDraftTags(e.target.value)}
+                  className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#8b5cf6] transition-colors placeholder:text-[#737373]"
+                  placeholder="kalem, kırtasiye, versatil..."
+                />
+                <p className="text-xs text-[#737373] mt-2 ml-1">Virgülle ayırarak birden fazla etiket ekleyebilirsiniz</p>
+              </div>
+
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-6 py-4 border-t border-[#2a2a2a] bg-[#080808] shrink-0 flex flex-col gap-3">
+              <button
+                onClick={handleSaveAll}
+                disabled={isSaving || !draftTitle}
+                className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              >
+                {isSaving ? (
+                  <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>Kaydediliyor...</span></>
+                ) : (
+                  <><Check className="w-4 h-4" /><span>Kaydet ve Yayına Al</span></>
+                )}
+              </button>
+              <button
+                onClick={() => { handleRemove(editItem.id); }}
+                className="w-full py-2.5 rounded-xl font-medium text-red-400 hover:bg-red-500/10 transition-colors text-sm"
+              >
+                Satıştan Kaldır
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
     </PageTransition>
   );
 };
+
+

@@ -8,7 +8,13 @@ export const useListingWizard = () => {
     productName: '',
     description: '',
     price: '',
-    platforms: [] as string[]
+    photoUrl: '',
+    processedPhotoUrl: '',
+    listingId: null as number | null,
+    platforms: [] as string[],
+    seoTitle: '',
+    seoDescription: '',
+    seoTags: [] as string[]
   });
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));

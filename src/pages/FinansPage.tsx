@@ -14,6 +14,10 @@ export const FinansPage = () => {
   const [gelirFilter, setGelirFilter] = useState('Tümü');
   const [giderFilter, setGiderFilter] = useState('Tümü');
   const data = useFinansSummary(period);
+  
+  // Gelir ve Giderleri ayır
+  const incomes = (data.recentTransactions || []).filter((tx: any) => tx.amount > 0);
+  const expenses = (data.recentTransactions || []).filter((tx: any) => tx.amount < 0);
 
   return (
     <PageTransition className="space-y-6">
@@ -32,7 +36,7 @@ export const FinansPage = () => {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Left Column: Financial Dashboard */}
         <div className="xl:col-span-5">
-          <FinancialDashboard />
+          <FinancialDashboard activities={data.recentTransactions} />
         </div>
 
         {/* Right Column: Existing Summaries and Charts */}
@@ -76,23 +80,14 @@ export const FinansPage = () => {
           </div>
 
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {[
-              { name: 'Amazon Ödemesi', date: 'Bugün, 14:30', amount: 15450 },
-              { name: 'Hepsiburada Satışları', date: 'Dün, 09:15', amount: 8900 },
-              { name: 'Trendyol Hakediş', date: '12 Mayıs, 16:00', amount: 4200 },
-              { name: 'Çiçeksepeti Geliri', date: '10 Mayıs, 11:20', amount: 1850 },
-              { name: 'Amazon Ödemesi', date: '08 Mayıs, 10:00', amount: 12400 },
-              { name: 'Trendyol Hakediş', date: '05 Mayıs, 16:30', amount: 5100 },
-              { name: 'N11 Satışları', date: '02 Mayıs, 14:00', amount: 3200 },
-              { name: 'Hepsiburada Satışları', date: '01 Mayıs, 09:15', amount: 7600 },
-            ].filter(item => item.name.toLowerCase().includes(gelirSearch.toLowerCase())).map((item, i) => (
-              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a]">
-                <div>
-                  <p className="text-base font-semibold text-white">{item.name}</p>
-                  <p className="text-sm text-[#a3a3a3]">{item.date}</p>
+            {incomes.filter((item: any) => item.title.toLowerCase().includes(gelirSearch.toLowerCase())).map((item: any, i: number) => (
+              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a] gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-semibold text-white truncate">{item.title}</p>
+                  <p className="text-sm text-[#a3a3a3]">{item.time}</p>
                 </div>
-                <span className="text-base font-mono font-bold text-[#22c55e]">
-                  +₺{item.amount.toLocaleString('tr-TR')}
+                <span className="text-base font-mono font-bold text-[#22c55e] shrink-0">
+                  +₺{item.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
             ))}
@@ -130,23 +125,14 @@ export const FinansPage = () => {
           </div>
 
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {[
-              { name: 'Trendyol Komisyonu', date: 'Bugün, 10:00', amount: 1250 },
-              { name: 'Kargo Giderleri', date: 'Dün, 15:45', amount: 340.50 },
-              { name: 'Meta Reklamları', date: '11 Mayıs, 08:30', amount: 3000 },
-              { name: 'Ofis Giderleri', date: '05 Mayıs, 14:00', amount: 850 },
-              { name: 'Kargo Giderleri', date: '04 Mayıs, 16:00', amount: 420 },
-              { name: 'Google Reklamları', date: '02 Mayıs, 09:00', amount: 2500 },
-              { name: 'Amazon Komisyonu', date: '01 Mayıs, 11:30', amount: 1800 },
-              { name: 'Yazılım Abonelikleri', date: '01 Mayıs, 08:00', amount: 650 },
-            ].filter(item => item.name.toLowerCase().includes(giderSearch.toLowerCase())).map((item, i) => (
-              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a]">
-                <div>
-                  <p className="text-base font-semibold text-white">{item.name}</p>
-                  <p className="text-sm text-[#a3a3a3]">{item.date}</p>
+            {expenses.filter((item: any) => item.title.toLowerCase().includes(giderSearch.toLowerCase())).map((item: any, i: number) => (
+              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a] gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-semibold text-white truncate">{item.title}</p>
+                  <p className="text-sm text-[#a3a3a3]">{item.time}</p>
                 </div>
-                <span className="text-base font-mono font-bold text-[#ef4444]">
-                  -₺{item.amount.toLocaleString('tr-TR')}
+                <span className="text-base font-mono font-bold text-[#ef4444] shrink-0">
+                  -₺{Math.abs(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
             ))}

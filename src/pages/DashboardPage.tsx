@@ -16,7 +16,7 @@ export const DashboardPage = () => {
     <PageTransition className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-display font-bold text-[var(--color-fg)] mb-2">Merhaba, İbrahim Ethem Kurt</h1>
+          <h1 className="text-3xl font-display font-bold text-[var(--color-fg)] mb-2">Merhaba, Furkan Zengin</h1>
           <p className="text-[var(--color-muted)]">AjansAI'a hoş geldin, işte güncel özetin.</p>
         </div>
       </div>

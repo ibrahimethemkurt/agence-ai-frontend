@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ChevronLeft,
-  History,
-  Search,
-  ArrowUpRight,
-  ArrowDownRight,
-  PlusCircle,
-  MinusCircle
-} from 'lucide-react';
+import { Search, PlusCircle, MinusCircle, History, ChevronLeft, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { api } from '../../../lib/api';
 
 // --- TYPE DEFINITIONS ---
 type QuickAction = {
@@ -59,47 +52,45 @@ const LogoIcon = ({
   </div>
 );
 
-const MOCK_ACTIVITIES: Activity[] = [
-  {
-    id: '1',
-    icon: <LogoIcon letter="A" className="bg-[#A07CFE]" />,
-    title: 'Amazon Ödemesi',
-    time: '2 saat önce',
-    amount: 15450.0,
-  },
-  {
-    id: '2',
-    icon: <LogoIcon letter="T" className="bg-[#FE8FB5]" />,
-    title: 'Trendyol Komisyon Kesintisi',
-    time: '5 saat önce',
-    amount: -1250.0,
-  },
-  {
-    id: '3',
-    icon: <LogoIcon letter="K" className="bg-green-500" />,
-    title: 'Kargo Giderleri',
-    time: '1 gün önce',
-    amount: -340.5,
-  },
-  {
-    id: '4',
-    icon: <LogoIcon letter="H" className="bg-[#FFBE7B]" />,
-    title: 'Hepsiburada Satış Geliri',
-    time: '2 gün önce',
-    amount: 8900.0,
-  },
-];
-
 const QUICK_ACTIONS: QuickAction[] = [
   { id: 'income', icon: ArrowUpRight, title: 'Gelir Ekle', description: 'Yeni Giriş' },
   { id: 'expense', icon: ArrowDownRight, title: 'Gider Ekle', description: 'Ödeme/Fatura' },
 ];
 
-export const FinancialDashboard = () => {
+export const FinancialDashboard = ({ activities = [] }: { activities?: any[] }) => {
   const [view, setView] = useState<'dashboard' | 'income' | 'expense'>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Form States
+  const [txTitle, setTxTitle] = useState('');
+  const [txAmount, setTxAmount] = useState('');
+  const [txCategory, setTxCategory] = useState('Diğer');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const filteredActivities = MOCK_ACTIVITIES.filter(activity => 
+  const handleSubmit = async (type: 'income' | 'expense') => {
+    if (!txTitle || !txAmount) return;
+    try {
+      setIsSubmitting(true);
+      await api.addTransaction({
+        title: txTitle,
+        amount: parseFloat(txAmount),
+        category: txCategory,
+        type: type
+      });
+      setView('dashboard');
+      setTxTitle('');
+      setTxAmount('');
+      setTxCategory('Diğer');
+      window.location.reload(); // Refresh the page to load new data
+    } catch (err) {
+      console.error(err);
+      alert('İşlem kaydedilemedi');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredActivities = activities.filter(activity => 
     activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     activity.amount.toString().includes(searchTerm)
   );
@@ -194,9 +185,12 @@ export const FinancialDashboard = () => {
                 className="flex items-center justify-between p-2 hover:bg-[#1a1a1a] rounded-xl transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  {activity.icon}
-                  <div>
-                    <p className="font-medium text-sm text-white">{activity.title}</p>
+                  <LogoIcon 
+                    letter={activity.title.charAt(0)} 
+                    className={activity.amount > 0 ? "bg-green-500" : "bg-red-500"} 
+                  />
+                  <div className="flex-1 min-w-0 pr-4">
+                    <p className="font-medium text-sm text-white truncate">{activity.title}</p>
                     <p className="text-xs text-[#737373]">
                       {activity.time}
                     </p>
@@ -211,7 +205,7 @@ export const FinancialDashboard = () => {
                   )}
                 >
                   {activity.amount > 0 ? '+' : ''}₺
-                  {Math.abs(activity.amount).toLocaleString('tr-TR')}
+                  {Math.abs(activity.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </motion.li>
             ))}
@@ -257,6 +251,8 @@ export const FinancialDashboard = () => {
           <label className="block text-xs font-medium text-[#737373] mb-1.5">İşlem Adı</label>
           <input 
             type="text" 
+            value={txTitle}
+            onChange={(e) => setTxTitle(e.target.value)}
             placeholder="Örn: Trendyol Hakedişi"
             className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none"
           />
@@ -265,30 +261,47 @@ export const FinancialDashboard = () => {
           <label className="block text-xs font-medium text-[#737373] mb-1.5">Tutar (₺)</label>
           <input 
             type="number" 
+            value={txAmount}
+            onChange={(e) => setTxAmount(e.target.value)}
             placeholder="0.00"
             className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none"
           />
         </div>
         <div>
           <label className="block text-xs font-medium text-[#737373] mb-1.5">Kategori</label>
-          <select className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-[#a3a3a3] focus:border-white/20 outline-none appearance-none">
-            <option>Pazaryeri Satışı</option>
-            <option>Kargo Gideri</option>
-            <option>Reklam Gideri</option>
-            <option>Diğer</option>
+          <select 
+            value={txCategory}
+            onChange={(e) => setTxCategory(e.target.value)}
+            className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-[#a3a3a3] focus:border-white/20 outline-none appearance-none"
+          >
+            {type === 'income' ? (
+              <>
+                <option value="sale">Pazaryeri Satışı</option>
+                <option value="other">Diğer Gelir</option>
+              </>
+            ) : (
+              <>
+                <option value="commission">Platform Komisyonu</option>
+                <option value="shipping">Kargo Gideri</option>
+                <option value="ads">Reklam Gideri</option>
+                <option value="cogs">Ürün Maliyeti</option>
+                <option value="other">Diğer Gider</option>
+              </>
+            )}
           </select>
         </div>
       </div>
 
       <div className="mt-8">
         <button 
-          onClick={() => setView('dashboard')}
+          disabled={isSubmitting || !txTitle || !txAmount}
+          onClick={() => handleSubmit(type)}
           className={cn(
-            "w-full py-3 rounded-xl font-bold text-black transition-colors",
+            "w-full py-3 rounded-xl font-bold text-black transition-colors disabled:opacity-50",
             type === 'income' ? "bg-green-500 hover:bg-green-400" : "bg-red-500 hover:bg-red-400"
           )}
         >
-          {type === 'income' ? 'Geliri Kaydet' : 'Gideri Kaydet'}
+          {isSubmitting ? 'Kaydediliyor...' : type === 'income' ? 'Geliri Kaydet' : 'Gideri Kaydet'}
         </button>
       </div>
     </motion.div>

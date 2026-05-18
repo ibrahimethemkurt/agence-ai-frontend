@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
 import { PromptInputBox } from '@/components/ui/ai-prompt-box';
+import { api } from '../../lib/api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface AIAssistantSidebarProps {
   isOpen: boolean;
@@ -42,19 +45,29 @@ export const AIAssistantSidebar: React.FC<AIAssistantSidebarProps> = ({ isOpen, 
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: activeAgent === 'eticaret' 
-          ? 'Anlıyorum. E-Ticaret sisteminizdeki verileri analiz ederek size bir rapor hazırlayabilirim.' 
-          : 'Danışman modunda size süreçlerinizle ilgili en iyi pratikleri önerebilirim.',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-      setIsTyping(false);
-    }, 1500);
+    // Call AI API
+    api.chatWithAssistant({ message, mode: activeAgent })
+      .then((data) => {
+        const aiMsg: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      })
+      .catch((err) => {
+        const errorMsg: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Üzgünüm, şu anda yanıt veremiyorum. Lütfen tekrar deneyin.',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+      })
+      .finally(() => {
+        setIsTyping(false);
+      });
   };
 
   return (
@@ -106,10 +119,16 @@ export const AIAssistantSidebar: React.FC<AIAssistantSidebarProps> = ({ isOpen, 
                     className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       msg.role === 'user'
                         ? 'bg-white text-black rounded-br-sm'
-                        : 'bg-[#121212] border border-[#2a2a2a] text-white rounded-bl-sm'
+                        : 'bg-[#121212] border border-[#2a2a2a] text-white rounded-bl-sm prose prose-invert prose-p:leading-relaxed prose-pre:p-0 prose-sm'
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === 'user' ? (
+                      msg.content
+                    ) : (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    )}
                   </div>
                 </div>
               ))}
