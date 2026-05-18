@@ -23,6 +23,18 @@ export const api = {
     return data;
   },
 
+  async googleLogin(token: string) {
+    const res = await fetch(`${BASE_URL}/auth/google-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Google girişi başarısız');
+    const data = await res.json();
+    localStorage.setItem('access_token', data.access_token);
+    return data;
+  },
+
   async register(payload: {
     full_name: string;
     company_name: string;

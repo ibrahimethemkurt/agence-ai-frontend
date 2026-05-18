@@ -8,6 +8,7 @@ import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useToast } from '../context/ToastContext';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
@@ -31,6 +32,26 @@ export const SignInPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successRedirect, setSuccessRedirect] = useState(false);
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+        setError(null);
+        await api.googleLogin(tokenResponse.access_token);
+        setSuccessRedirect(true);
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      } catch (err: any) {
+        setError(err.message || 'Google girişi başarısız.');
+        setLoading(false);
+      }
+    },
+    onError: () => {
+      setError('Google ile giriş yapılamadı.');
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -162,29 +183,38 @@ export const SignInPage: React.FC = () => {
               )}
 
               <Reveal variant="fadeUp">
-                <button
-                  type="submit"
-                  disabled={loading || successRedirect}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
-                >
-                  {successRedirect ? (
-                    <span className="text-emerald-700 font-semibold animate-pulse">Başarıyla Giriş Yapıldı!</span>
-                  ) : loading ? (
-                    <><Loader2 size={18} className="animate-spin" /> Giriş yapılıyor...</>
-                  ) : (
-                    'Giriş Yap'
-                  )}
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={loading || successRedirect}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
+                  >
+                    {successRedirect ? (
+                      <span className="text-emerald-700 font-semibold animate-pulse">Başarıyla Giriş Yapıldı!</span>
+                    ) : loading ? (
+                      <><Loader2 size={18} className="animate-spin" /> Giriş yapılıyor...</>
+                    ) : (
+                      'Giriş Yap'
+                    )}
 
-                  {/* Sleek green progress line at the bottom of the button */}
-                  {successRedirect && (
-                    <motion.div
-                      initial={{ width: '0%' }}
-                      animate={{ width: '100%' }}
-                      transition={{ duration: 2, ease: 'linear' }}
-                      className="absolute bottom-0 left-0 h-1 bg-emerald-500"
-                    />
-                  )}
-                </button>
+                    {successRedirect && (
+                      <motion.div
+                        initial={{ width: '0%' }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 2, ease: 'linear' }}
+                        className="absolute bottom-0 left-0 h-1 bg-emerald-500"
+                      />
+                    )}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => handleGoogleLogin()}
+                    className="flex-none flex items-center justify-center w-[56px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors cursor-pointer" 
+                    title="Google ile Giriş Yap"
+                  >
+                    <GoogleIcon />
+                  </button>
+                </div>
               </Reveal>
             </form>
 

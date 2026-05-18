@@ -8,6 +8,7 @@ import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useToast } from '../context/ToastContext';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
@@ -32,6 +33,26 @@ export const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successRedirect, setSuccessRedirect] = useState(false);
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+        setError(null);
+        await api.googleLogin(tokenResponse.access_token);
+        setSuccessRedirect(true);
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      } catch (err: any) {
+        setError(err.message || 'Google ile kayıt/giriş başarısız.');
+        setLoading(false);
+      }
+    },
+    onError: () => {
+      setError('Google ile giriş yapılamadı.');
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -295,7 +316,12 @@ export const RegisterPage: React.FC = () => {
                       />
                     )}
                   </button>
-                  <button type="button" className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors cursor-pointer" title="Google ile Kayıt Ol">
+                  <button 
+                    type="button" 
+                    onClick={() => handleGoogleLogin()}
+                    className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors cursor-pointer" 
+                    title="Google ile Kayıt Ol"
+                  >
                     <GoogleIcon />
                   </button>
                 </div>
