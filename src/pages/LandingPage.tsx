@@ -1,23 +1,52 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { LineChart, Sparkles, MessageSquareHeart, LayoutDashboard, CheckCircle2, UploadCloud, Tag, ShoppingBag } from 'lucide-react';
 import { Reveal } from '../components/animation/Reveal';
 import { BorderBeam } from '../components/ui/border-beam';
 import Spline from '@splinetool/react-spline';
 
+const SLOGANS = [
+  "odaklanın, operasyonu yapay zekaya bırakın.",
+  "açılmanın en otonom ve akıllı yolu.",
+  "giden yolda tüm yükünüzü hafifletiyoruz.",
+  "hükmedin, arka planı ajanlarımız yönetsin.",
+  "inmenin en zahmetsiz, en teknolojik yolu.",
+  "çıkın, e-ticaretin karmaşasını geride bırakın."
+];
+
 export const LandingPage = () => {
   const navigate = useNavigate();
+  const [sloganIndex, setSloganIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSloganIndex((prev) => (prev + 1) % SLOGANS.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-body relative overflow-x-hidden selection:bg-gray-900 selection:text-white">
 
+      {/* Spline Background (Locked to the first screen/hero section) */}
+      <div className="absolute top-0 left-0 w-full h-screen z-0 pointer-events-auto overflow-hidden">
+        {/* We make the canvas 100px taller. The center shifts down slightly, 
+            but the bottom-right logo gets pushed exactly into the hidden overflow area! */}
+        <div className="absolute top-0 left-0 w-full h-[calc(100%+100px)]">
+          <Spline scene="https://prod.spline.design/K-fd31LMtV67Aidp/scene.splinecode" className="w-full h-full cursor-grab active:cursor-grabbing" />
+        </div>
+      </div>
+
       {/* Navbar */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">
+      <nav className="relative z-20 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto pointer-events-none">
         {/* Logo */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+        <div className="flex items-center gap-2 cursor-pointer pointer-events-auto" onClick={() => navigate('/')}>
           <img src="/pazaralogo-dark.svg" alt="Pazara" className="h-9 w-auto" />
         </div>
-        
+
         {/* Links */}
-        <div className="hidden md:flex items-center gap-10 text-sm font-semibold text-gray-600">
+        <div className="hidden md:flex items-center gap-10 text-sm font-semibold text-gray-600 pointer-events-auto">
           <a href="#ozellikler" className="hover:text-[#9333ff] transition-colors">Özellikler</a>
           <a href="#cozumler" className="hover:text-[#9333ff] transition-colors">Çözümler</a>
           <a href="#sss" className="hover:text-[#9333ff] transition-colors">SSS</a>
@@ -25,7 +54,7 @@ export const LandingPage = () => {
         </div>
 
         {/* Auth Buttons */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 pointer-events-auto">
           <button onClick={() => navigate('/login')} className="text-sm font-semibold text-gray-600 hover:text-[#9333ff] transition-colors">
             Giriş Yap
           </button>
@@ -41,14 +70,354 @@ export const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <main className="relative z-10 flex-1 w-full h-[calc(100vh-100px)] flex items-center justify-end px-4 overflow-hidden">
-        {/* We make the wrapper wider than the screen and shift it left. 
-            This keeps the robot perfectly centered, but pushes the bottom-right logo completely off the screen! */}
-        <Reveal variant="fadeUp" className="absolute top-0 left-[-300px] w-[calc(100%+600px)] h-full cursor-grab active:cursor-grabbing">
-          <Spline scene="https://prod.spline.design/K-fd31LMtV67Aidp/scene.splinecode" />
-        </Reveal>
+      <main className="relative z-20 flex-1 w-full h-[calc(100vh-100px)] flex items-center px-6 md:px-12 max-w-7xl mx-auto pointer-events-none">
+
+        {/* Text Content - Left Side (Drops from top after 4 seconds) */}
+        <motion.div
+          initial={{ opacity: 0, y: -60, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ delay: 2, duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full md:w-[50%] flex flex-col items-start text-left pb-20 mt-10 pointer-events-auto"
+        >
+
+          {/* Logo as the subject */}
+          <img src="/pazaralogo-dark.svg" alt="Pazara" className="h-12 md:h-14 lg:h-16 w-auto mb-6 drop-shadow-sm" />
+
+          {/* Rotating Slogans */}
+          <div className="w-full">
+            <div className="h-[100px] md:h-[120px] w-full relative mb-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={sloganIndex}
+                  initial={{ opacity: 0, y: 15, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -15, filter: 'blur(4px)' }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  className="absolute top-0 left-0 text-2xl md:text-3xl lg:text-[34px] font-display font-medium text-gray-800 tracking-tight leading-[1.3] max-w-[500px]"
+                >
+                  {SLOGANS[sloganIndex]}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Static Description */}
+          <p className="text-base md:text-lg text-gray-700 max-w-lg mb-10 leading-relaxed font-medium">
+            Karmaşık panellerle uğraşmayın. Akıllı ajanlarımız <span className="whitespace-nowrap">e-ticaret</span> süreçlerinizi baştan sona otomatikleştirip kolaylaştırarak size sadece satışları artırmayı bırakır.
+          </p>
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <button onClick={() => navigate('/register')} className="bg-black text-white px-8 py-3.5 rounded-full text-[15px] font-medium hover:bg-gray-800 transition-all w-full sm:w-auto shadow-xl hover:shadow-2xl hover:-translate-y-0.5">
+              Hemen Başlayın — Ücretsiz
+            </button>
+            <button onClick={() => navigate('/dashboard')} className="border border-gray-200 bg-white/80 backdrop-blur-md text-black px-8 py-3.5 rounded-full text-[15px] font-medium hover:bg-gray-50 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+              Demoyu İncele
+            </button>
+          </div>
+
+        </motion.div>
       </main>
 
+      {/* Features Section Container with Solid White Background */}
+      <div className="w-full bg-white relative z-20">
+        <section id="ozellikler" className="w-full px-6 md:px-12 py-12 md:py-16 max-w-7xl mx-auto min-h-screen flex flex-col justify-center">
+          
+          {/* Top Row: Title (Left) & Description (Right) */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 w-full">
+            <div className="max-w-2xl">
+              <Reveal variant="fadeUp">
+                <h2 className="text-3xl md:text-4xl lg:text-[40px] font-display font-semibold text-gray-900 tracking-tight leading-[1.2]">
+                  E-ticaretin tüm yükünü <br className="hidden md:block"/> yapay zeka ajanlarına devredin.
+                </h2>
+              </Reveal>
+            </div>
+            <div className="max-w-sm">
+              <Reveal variant="fadeUp" delay={0.2}>
+                <p className="text-sm md:text-base text-gray-700 leading-relaxed text-left md:text-right">
+                  Pazara ile tanışın. Sizin yerinize pazar analizi yapan, ürün yükleyen ve müşteri destek süreçlerini yöneten otonom ajan ekibiniz.
+                </p>
+              </Reveal>
+            </div>
+          </div>
+
+          {/* Middle Row: Image (Constrained height to fit one screen) */}
+          <Reveal variant="fadeUp" delay={0.4} className="w-full mb-8">
+            <div className="relative w-full h-[250px] md:h-[350px] lg:h-[400px] rounded-2xl overflow-hidden border border-gray-100 shadow-xl bg-white">
+              <img src="/landingpanel.svg" alt="Pazara Dashboard" className="w-full h-full object-cover object-top" />
+              {/* Minimal White Fade Gradient */}
+              <div className="absolute bottom-0 left-0 w-full h-16 md:h-24 bg-gradient-to-t from-white to-transparent"></div>
+            </div>
+          </Reveal>
+
+          {/* Bottom Row: 4 Agent Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+             {/* Card 1 */}
+             <Reveal variant="fadeUp" delay={0.5}>
+               <div className="relative bg-white border border-gray-100 rounded-xl p-5 shadow-sm overflow-hidden group h-full hover:shadow-md transition-shadow">
+                  <BorderBeam size={80} duration={12} delay={0} colorFrom="#a855f7" colorTo="#d8b4fe" borderWidth={1.5} />
+                  <div className="mb-3">
+                    <LineChart className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1.5">Satış Öncesi</h3>
+                  <p className="text-gray-700 text-xs font-medium leading-relaxed">
+                    Pazar ve fiyat analizi çıkaran özel takımımız.
+                  </p>
+               </div>
+             </Reveal>
+             
+             {/* Card 2 */}
+             <Reveal variant="fadeUp" delay={0.6}>
+               <div className="relative bg-white border border-gray-100 rounded-xl p-5 shadow-sm overflow-hidden group h-full hover:shadow-md transition-shadow">
+                  <BorderBeam size={80} duration={12} delay={3} colorFrom="#3b82f6" colorTo="#93c5fd" borderWidth={1.5} />
+                  <div className="mb-3">
+                    <Sparkles className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1.5">Satış Süreci</h3>
+                  <p className="text-gray-700 text-xs font-medium leading-relaxed">
+                    Görsel, SEO ve platform entegrasyonu ajanı.
+                  </p>
+               </div>
+             </Reveal>
+
+             {/* Card 3 */}
+             <Reveal variant="fadeUp" delay={0.7}>
+               <div className="relative bg-white border border-gray-100 rounded-xl p-5 shadow-sm overflow-hidden group h-full hover:shadow-md transition-shadow">
+                  <BorderBeam size={80} duration={12} delay={6} colorFrom="#10b981" colorTo="#6ee7b7" borderWidth={1.5} />
+                  <div className="mb-3">
+                    <MessageSquareHeart className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1.5">Satış Sonrası</h3>
+                  <p className="text-gray-700 text-xs font-medium leading-relaxed">
+                    Yorum, iade analizi ve anlık müşteri bildirimleri.
+                  </p>
+               </div>
+             </Reveal>
+
+             {/* Card 4 */}
+             <Reveal variant="fadeUp" delay={0.8}>
+               <div className="relative bg-white border border-gray-100 rounded-xl p-5 shadow-sm overflow-hidden group h-full hover:shadow-md transition-shadow">
+                  <BorderBeam size={80} duration={12} delay={9} colorFrom="#f97316" colorTo="#fdba74" borderWidth={1.5} />
+                  <div className="mb-3">
+                    <LayoutDashboard className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1.5">Dashboard</h3>
+                  <p className="text-gray-700 text-xs font-medium leading-relaxed">
+                    Tüm e-ticaret sisteminizi karmaşadan uzak yönetin.
+                  </p>
+               </div>
+             </Reveal>
+          </div>
+
+        </section>
+      </div>
+
+      {/* Işık Hızında Satış Bölümü */}
+      <section className="w-full bg-gray-50 relative z-20 py-12 md:py-16 min-h-screen flex flex-col justify-center border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col gap-8 w-full">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-2xl mx-auto">
+            <Reveal variant="fadeUp">
+              <h2 className="text-3xl md:text-4xl lg:text-[40px] font-display font-semibold text-gray-900 tracking-tight mb-4">
+                Ürün Ekleme Sürecinin Basitliği
+              </h2>
+            </Reveal>
+            <Reveal variant="fadeUp" delay={0.2}>
+              <p className="text-gray-600 text-base md:text-lg">
+                Sadece ürün adını ve görselini yükle, gerisini bize bırak. Işık hızında tüm pazar yerlerinde satışa başla.
+              </p>
+            </Reveal>
+          </div>
+
+          {/* Automated Process Box */}
+          <Reveal variant="fadeUp" delay={0.4} className="w-full">
+            <AutomatedProcess />
+          </Reveal>
+
+          {/* Platform Logos Marquee */}
+          <Reveal variant="fadeUp" delay={0.6} className="w-full mt-4">
+            <Logos />
+          </Reveal>
+
+        </div>
+      </section>
+
+    </div>
+  );
+};
+
+/* --- Internal Components for Landing Page --- */
+
+const Logos = () => {
+  // Kullanıcının public klasörüne yüklediği tam dosya isimleri
+  const baseLogos = [
+    "amazon-com-logo-svgrepo-com.svg",
+    "Çiçek Sepeti.svg",
+    "Hepsiburada_logo_official.svg",
+    "Trendyol_logo.svg"
+  ];
+  
+  // Logoları daha uzun bir şerit yapmak için diziyi kopyalıyoruz (Büyük ekranlarda boşluk kalmaması için)
+  const displayLogos = [...baseLogos, ...baseLogos, ...baseLogos];
+
+  const getLogoClass = (logoName: string) => {
+    const baseClasses = "w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300 max-w-[200px] md:max-w-[280px]";
+    const name = logoName.toLowerCase();
+    
+    if (name.includes("amazon")) {
+      return `${baseClasses} h-8 md:h-12 lg:h-16`;
+    }
+    if (name.includes("çiçek") || name.includes("cicek")) {
+      return `${baseClasses} h-8 md:h-10 lg:h-12`;
+    }
+    if (name.includes("hepsiburada")) {
+      return `${baseClasses} h-4 md:h-5 lg:h-6`; // Hepsiburada'yı çok daha küçük yapıyoruz ki diğerleriyle dengelensin
+    }
+    return `${baseClasses} h-5 md:h-7 lg:h-8`; // Trendyol
+  };
+
+  return (
+    <div className="w-full overflow-hidden flex relative mt-4">
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 35s linear infinite;
+          display: flex;
+          width: max-content;
+        }
+      `}</style>
+      
+      {/* Fade edges for smooth entrance/exit */}
+      <div className="absolute inset-y-0 left-0 w-20 md:w-32 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute inset-y-0 right-0 w-20 md:w-32 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
+
+      <div className="animate-marquee items-center py-4">
+         {/* First Block */}
+         <div className="flex items-center justify-around gap-12 md:gap-24 px-6 md:px-12">
+           {displayLogos.map((logo, i) => (
+             <img 
+               key={i} 
+               src={`/${logo}`} 
+               alt={logo.split('.')[0]} 
+               className={getLogoClass(logo)}
+             />
+           ))}
+         </div>
+         {/* Second Block for perfect seamless loop */}
+         <div className="flex items-center justify-around gap-12 md:gap-24 px-6 md:px-12">
+           {displayLogos.map((logo, i) => (
+             <img 
+               key={`dup-${i}`} 
+               src={`/${logo}`} 
+               alt={logo.split('.')[0]} 
+               className={getLogoClass(logo)}
+             />
+           ))}
+         </div>
+      </div>
+    </div>
+  );
+};
+
+const AutomatedProcess = () => {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStep((prev) => (prev >= 4 ? 0 : prev + 1));
+    }, 2000); // 2 seconds per step
+    return () => clearInterval(timer);
+  }, []);
+
+  const steps = [
+    { title: "Ürün Analizi", icon: <UploadCloud className="w-5 h-5 text-purple-400" /> },
+    { title: "SEO ve İçerik", icon: <Sparkles className="w-5 h-5 text-blue-400" /> },
+    { title: "Fiyatlandırma", icon: <Tag className="w-5 h-5 text-emerald-400" /> },
+    { title: "Platform Seçimi", icon: <ShoppingBag className="w-5 h-5 text-orange-400" /> },
+    { title: "Sipariş Yayında", icon: <CheckCircle2 className="w-5 h-5 text-green-500" /> }
+  ];
+
+  return (
+    <div className="w-full bg-[#0a0a0a] rounded-3xl border border-[#2a2a2a] p-6 md:p-10 shadow-2xl overflow-hidden relative">
+      <div className="flex flex-col md:flex-row gap-8 h-auto md:h-[320px]">
+        
+        {/* Left: Stepper */}
+        <div className="flex flex-col justify-center gap-6 w-full md:w-1/2">
+          {steps.map((s, i) => (
+            <div key={i} className={`flex items-center gap-4 transition-all duration-300 ${step === i ? 'opacity-100 translate-x-2' : (step > i ? 'opacity-50' : 'opacity-20')}`}>
+               <div className={`w-10 h-10 rounded-full flex flex-shrink-0 items-center justify-center border transition-colors ${step === i ? 'border-gray-500 bg-gray-800' : 'border-gray-800 bg-transparent'}`}>
+                 {step > i ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : s.icon}
+               </div>
+               <span className={`text-lg font-medium transition-colors ${step === i ? 'text-white' : 'text-gray-400'}`}>{s.title}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Right: Dynamic Content Mockup */}
+        <div className="w-full md:w-1/2 h-[220px] md:h-full bg-[#121212] rounded-2xl border border-[#2a2a2a] flex items-center justify-center p-8 relative overflow-hidden">
+           {/* Animated border for active states */}
+           {step !== 4 && <BorderBeam size={200} duration={8} delay={0} colorFrom="#3b82f6" colorTo="#10b981" borderWidth={1.5} />}
+           
+           <AnimatePresence mode="wait">
+             {step === 0 && (
+               <motion.div key="step0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 w-full">
+                 <div className="w-16 h-16 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl flex items-center justify-center animate-pulse">
+                    <UploadCloud className="w-8 h-8 text-gray-500" />
+                 </div>
+                 <p className="text-gray-400 text-sm font-medium">Görseller analiz ediliyor...</p>
+                 <div className="w-full max-w-[200px] h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.8, ease: "linear" }} className="h-full bg-purple-500 rounded-full"></motion.div>
+                 </div>
+               </motion.div>
+             )}
+             
+             {step === 1 && (
+               <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-3 w-full max-w-[280px]">
+                 <div className="h-6 w-3/4 bg-blue-500/20 rounded-md border border-blue-500/30"></div>
+                 <div className="h-3 w-full bg-gray-800 rounded mt-2"></div>
+                 <div className="h-3 w-5/6 bg-gray-800 rounded"></div>
+                 <div className="h-3 w-4/6 bg-gray-800 rounded"></div>
+                 <div className="flex gap-2 mt-2">
+                    <span className="px-2 py-1 bg-gray-800 rounded text-[10px] text-gray-400">SEO Score: 98/100</span>
+                 </div>
+               </motion.div>
+             )}
+             
+             {step === 2 && (
+               <motion.div key="step2" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-2">
+                 <span className="text-gray-400 text-sm">Önerilen Satış Fiyatı</span>
+                 <span className="text-5xl font-bold text-emerald-400">₺1.499</span>
+                 <span className="text-emerald-500/50 text-xs mt-1">Rakip analizi tamamlandı</span>
+               </motion.div>
+             )}
+             
+             {step === 3 && (
+               <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 w-full">
+                 <p className="text-gray-400 text-sm">API Bağlantıları Kuruluyor</p>
+                 <div className="flex flex-wrap gap-3 justify-center w-full">
+                   <span className="px-4 py-2 bg-orange-500/10 text-orange-500 font-medium rounded-lg border border-orange-500/20">Trendyol</span>
+                   <span className="px-4 py-2 bg-purple-500/10 text-purple-400 font-medium rounded-lg border border-purple-500/20">Hepsiburada</span>
+                   <span className="px-4 py-2 bg-white/10 text-white font-medium rounded-lg border border-white/20">Amazon</span>
+                 </div>
+               </motion.div>
+             )}
+             
+             {step === 4 && (
+               <motion.div key="step4" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ type: "spring", bounce: 0.5 }} className="flex flex-col items-center gap-4">
+                 <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/20 relative">
+                    <CheckCircle2 className="w-12 h-12 text-green-500" />
+                    <motion.div initial={{ scale: 1, opacity: 1 }} animate={{ scale: 1.5, opacity: 0 }} transition={{ duration: 1, repeat: Infinity }} className="absolute inset-0 rounded-full border border-green-500/50"></motion.div>
+                 </div>
+                 <span className="text-2xl font-bold text-white tracking-tight">Sipariş Yayında!</span>
+               </motion.div>
+             )}
+           </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 };
