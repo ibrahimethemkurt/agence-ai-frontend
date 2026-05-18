@@ -30,7 +30,16 @@ const MAIN_GROUPS = [
     links: [
       { to: '/ajanlar/satis-oncesi', label: 'Satış Öncesi', icon: Search },
       { to: '/ajanlar/satis-sureci', label: 'Satış Süreci', icon: ShoppingCart },
-      { to: '/ajanlar/satis-sonrasi', label: 'Satış Sonrası', icon: PackageCheck },
+      { 
+        to: '/ajanlar/satis-sonrasi', 
+        label: 'Satış Sonrası', 
+        icon: PackageCheck,
+        subLinks: [
+          { to: '/ajanlar/satis-sonrasi?tab=Operasyon Merkezi', label: 'Operasyon Merkezi' },
+          { to: '/ajanlar/satis-sonrasi?tab=Yorumlar', label: 'Yorumlar' },
+          { to: '/ajanlar/satis-sonrasi?tab=İadeler', label: 'İadeler' }
+        ]
+      },
     ],
   },
 ];
@@ -77,9 +86,10 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
             )}
             <ul className="flex flex-col gap-1 w-full">
               {group.links.map((link) => (
-                <li key={link.to} className={isCollapsed ? 'flex justify-center' : ''}>
+                <li key={link.to} className={isCollapsed ? 'flex justify-center flex-col items-center gap-1' : 'flex flex-col gap-1'}>
                   <NavLink
                     to={link.to}
+                    end={!link.subLinks}
                     className={({ isActive }) =>
                       `block rounded-md font-body text-sm transition-colors ${isCollapsed ? 'p-2' : 'px-3 py-2'
                       } ${isActive
@@ -98,6 +108,28 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
                       {!isCollapsed && <span>{link.label}</span>}
                     </motion.div>
                   </NavLink>
+                  {link.subLinks && !isCollapsed && (
+                    <div className="flex flex-col gap-1 mt-1 ml-4 border-l border-white/10 pl-2">
+                      {link.subLinks.map(sub => (
+                        <NavLink
+                          key={sub.to}
+                          to={sub.to}
+                          className={({ isActive }) => {
+                            const isSearchActive = window.location.search.includes(sub.to.split('?')[1]);
+                            return `block rounded-md font-body text-xs transition-colors px-3 py-1.5 ${
+                              isSearchActive
+                                ? 'text-[var(--color-accent)] font-medium'
+                                : 'text-[var(--color-fg)] opacity-50 hover:opacity-100 hover:bg-white/5'
+                            }`;
+                          }}
+                        >
+                          <motion.div whileHover={{ x: 2 }} transition={{ duration: 0.2 }}>
+                            {sub.label}
+                          </motion.div>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
