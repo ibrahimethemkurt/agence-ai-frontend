@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 
 // --- Platform renk, kısaltma ve logo tanımları ---
 const PLATFORM_MAP: Record<string, { label: string; bg: string; text: string; border: string; logoUrl: string }> = {
-  trendyol:    { label: 'T',  bg: '#F27A1A', text: '#fff',    border: '#c95f00', logoUrl: '/logos/trendyol.png' },
-  hepsiburada: { label: 'H',  bg: '#FF6000', text: '#fff',    border: '#c94b00', logoUrl: '/logos/hepsiburada.png' },
-  amazon:      { label: 'a',  bg: '#232F3E', text: '#FF9900', border: '#131921', logoUrl: '/logos/amazon.png' },
-  ciceksepeti: { label: 'Ç',  bg: '#7B2D8B', text: '#fff',    border: '#5a1f66', logoUrl: '/logos/ciceksepeti.png' },
+  trendyol:    { label: 'T',  bg: '#F27A1A', text: '#fff',    border: '#c95f00', logoUrl: '/Trendyol_logo.svg' },
+  hepsiburada: { label: 'H',  bg: '#FF6000', text: '#fff',    border: '#c94b00', logoUrl: '/Hepsiburada_logo_official.svg' },
+  amazon:      { label: 'A',  bg: '#232F3E', text: '#FF9900', border: '#131921', logoUrl: '/amazon-com-logo-svgrepo-com.svg' },
+  ciceksepeti: { label: 'Ç',  bg: '#7B2D8B', text: '#fff',    border: '#5a1f66', logoUrl: '/Çiçek Sepeti.svg' },
   etsy:        { label: 'E',  bg: '#F45800', text: '#fff',    border: '#b84300', logoUrl: '/logos/etsy.png' },
   n11:         { label: 'N',  bg: '#7D00BE', text: '#fff',    border: '#5a008a', logoUrl: '/logos/n11.png' },
   gittigidiyor:{ label: 'G',  bg: '#E1251B', text: '#fff',    border: '#a81a12', logoUrl: '/logos/gittigidiyor.png' },
