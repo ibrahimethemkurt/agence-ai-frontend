@@ -1,17 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { api } from '../../../lib/api';
 
 export const useSatisSonrasiData = () => {
-  const [orders] = useState([
-    { id: 'ORD-1234', date: '2026-05-14', product: 'Kablosuz Kulaklık V2', platform: 'Trendyol', amount: 899, status: 'bekliyor' },
-    { id: 'ORD-1235', date: '2026-05-13', product: 'Oyuncu Monitörü', platform: 'Hepsiburada', amount: 4500, status: 'tamamlandı' },
-    { id: 'ORD-1236', date: '2026-05-12', product: 'Mekanik Klavye', platform: 'Amazon', amount: 1200, status: 'tamamlandı' },
-  ]);
+  const [operations, setOperations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [stock] = useState([
-    { id: '1', product: 'Kablosuz Kulaklık V2', quantity: 45, threshold: 20 },
-    { id: '2', product: 'Mekanik Klavye', quantity: 12, threshold: 15 },
-    { id: '3', product: 'Oyuncu Monitörü', quantity: 3, threshold: 5 },
-  ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Using our existing fetch implementation in api.ts
+        // Wait, we need to add getOperations to api.ts first!
+        // For now let's use standard fetch with token
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('http://localhost:8000/api/v1/support/operations', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setOperations(data);
+        } else {
+          console.error("API Error Status:", res.status);
+          const errorData = await res.text();
+          console.error("API Error Data:", errorData);
+        }
+      } catch (error) {
+        console.error("Operasyon verileri çekilemedi:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  return { orders, stock };
+  return { operations, loading };
 };

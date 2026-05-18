@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
 import Grainient from './components/animation/GrainientBackground';
 import { NotificationsContext } from './hooks/useNotifications';
+import { InsightsProvider } from './hooks/useInsights';
 import { AIAssistantSidebar } from './components/layout/AIAssistantSidebar';
 
 import { DashboardPage } from './pages/DashboardPage';
@@ -66,30 +67,36 @@ const Layout = () => {
   );
 };
 
+import { ToastProvider } from './context/ToastContext';
+
 const App = () => {
   return (
-    <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<SignInPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate to="/login" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="finans" element={<FinansPage />} />
-            <Route path="analizler" element={<AnalizlerPage />} />
-            <Route path="satista-olan-urunler" element={<SatistaOlanUrunlerPage />} />
-            <Route path="ajanlar">
-              <Route path="satis-oncesi" element={<SatisOncesiPage />} />
-              <Route path="satis-sureci" element={<SatisSureciPage />} />
-              <Route path="satis-sonrasi" element={<SatisSonrasiPage />} />
-            </Route>
-            <Route path="ayarlar" element={<AyarlarPage />} />
-            <Route path="yardim" element={<YardimPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </NotificationsContext.Provider>
+    <ToastProvider>
+      <InsightsProvider>
+        <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<SignInPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Navigate to="/login" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="finans" element={<FinansPage />} />
+                <Route path="analizler" element={<AnalizlerPage />} />
+                <Route path="satista-olan-urunler" element={<SatistaOlanUrunlerPage />} />
+                <Route path="ajanlar">
+                  <Route path="satis-oncesi" element={<SatisOncesiPage />} />
+                  <Route path="satis-sureci" element={<SatisSureciPage />} />
+                  <Route path="satis-sonrasi" element={<SatisSonrasiPage />} />
+                </Route>
+                <Route path="ayarlar" element={<AyarlarPage />} />
+                <Route path="yardim" element={<YardimPage />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </NotificationsContext.Provider>
+      </InsightsProvider>
+    </ToastProvider>
   );
 };
 

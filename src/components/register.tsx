@@ -6,6 +6,7 @@ import Grainient from './animation/GrainientBackground';
 import { Radio } from './radio';
 import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
@@ -30,10 +31,13 @@ export const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { showToast } = useToast();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!agreed) {
       setError('Kullanıcı sözleşmesini kabul etmeniz gerekmektedir.');
+      showToast('Kullanıcı sözleşmesini kabul etmelisiniz.', 'error');
       return;
     }
     setError(null);
@@ -48,7 +52,9 @@ export const RegisterPage: React.FC = () => {
     const confirmPassword = (form.elements.namedItem('confirmPassword') as HTMLInputElement).value;
 
     if (password !== confirmPassword) {
-      setError('Şifreler eşleşmiyor.');
+      const errMsg = 'Şifreler eşleşmiyor.';
+      setError(errMsg);
+      showToast(errMsg, 'error');
       setLoading(false);
       return;
     }
@@ -61,11 +67,14 @@ export const RegisterPage: React.FC = () => {
         password,
         password_confirm: confirmPassword,
       });
+      showToast('Hesap başarıyla oluşturuldu! Giriş yapılıyor...', 'success');
       // Kayıt başarılı → otomatik giriş yap
       await api.login(email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
+      const errMsg = err.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.';
+      setError(errMsg);
+      showToast(errMsg, 'error');
     } finally {
       setLoading(false);
     }

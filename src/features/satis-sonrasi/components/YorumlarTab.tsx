@@ -97,7 +97,7 @@ const PIE_COLORS = ['#10B981', '#EF4444'];
 export const YorumlarTab = () => {
   const {
     products, reviews, analysisData,
-    selectedProductId, setSelectedProductId, stats
+    selectedProductId, setSelectedProductId, stats, loading
   } = useYorumlarData();
 
   const [sentimentFilter, setSentimentFilter] = useState<'all' | 'positive' | 'negative'>('all');
@@ -106,6 +106,15 @@ export const YorumlarTab = () => {
   const filteredBysentiment = sentimentFilter === 'all'
     ? reviews
     : reviews.filter(r => r.sentiment === sentimentFilter);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-24 space-y-4">
+        <div className="w-10 h-10 border-4 border-t-emerald-500 border-white/10 rounded-full animate-spin"></div>
+        <p className="text-[var(--color-muted)] font-medium animate-pulse">Yorumlar yükleniyor...</p>
+      </div>
+    );
+  }
 
   const pieData = [
     { name: 'Pozitif', value: stats.positiveRatio },

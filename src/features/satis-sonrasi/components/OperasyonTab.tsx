@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, AlertTriangle, Sparkles, MessageSquare } from 'lucide-react';
+import { Package, AlertTriangle, Sparkles, MessageSquare, ShieldAlert, FlaskConical, Brain } from 'lucide-react';
 import { Reveal } from '../../../components/animation/Reveal';
 import { GlowCard } from '../../../components/ui/glow-card';
 import { TASK_DEFINITIONS, ActiveTaskContent, type TaskId, type TaskDef } from '../../dashboard/components/InteractiveTaskHub';
 import { BorderBeam } from '../../../components/ui/border-beam';
+import { useInsights, type InsightType } from '../../../hooks/useInsights';
 
 const OPERASYON_PRODUCTS = [
   {
@@ -43,7 +44,88 @@ const OPERASYON_PRODUCTS = [
   }
 ];
 
+import { useSatisSonrasiData } from '../hooks/useSatisSonrasiData';
+
+// ─── Severity helpers ──────────────────────────────────────────────────────────
+const severityConfig = {
+  high: { border: 'border-red-500/30', bg: 'bg-red-500/5', dot: 'bg-red-500', label: 'Kritik' },
+  medium: { border: 'border-orange-400/30', bg: 'bg-orange-400/5', dot: 'bg-orange-400', label: 'Önemli' },
+  low: { border: 'border-emerald-400/30', bg: 'bg-emerald-400/5', dot: 'bg-emerald-400', label: 'Bilgi' },
+};
+
+const typeConfig = {
+  root_cause: { icon: AlertTriangle, label: 'Kök Neden', color: 'text-yellow-400' },
+  crisis_management: { icon: ShieldAlert, label: 'Kriz Yönetimi', color: 'text-red-400' },
+  supplier_advice: { icon: FlaskConical, label: 'Tedarikçi', color: 'text-orange-400' },
+};
+
+const InsightsPanel = () => {
+  const { insights, loading } = useInsights();
+
+  if (loading) {
+    return (
+      <Reveal variant="fadeUp" delay={0.45}>
+        <div className="flex items-center gap-3 px-5 py-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+          <Brain className="w-5 h-5 text-[var(--color-accent)] animate-pulse shrink-0" />
+          <p className="text-sm text-[var(--color-muted)] animate-pulse">Kalite Kontrol Ajanı mağazanı analiz ediyor...</p>
+        </div>
+      </Reveal>
+    );
+  }
+
+  if (!insights.length) return null;
+
+  return (
+    <Reveal variant="fadeUp" delay={0.45}>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Brain className="w-4 h-4 text-[var(--color-accent)]" />
+          <h3 className="text-sm font-semibold text-white/80 tracking-wide uppercase">AI Operasyon Uyarıları</h3>
+          <span className="ml-auto text-xs text-[var(--color-muted)]">{insights.length} tespit</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {insights.map((insight, i) => {
+            const sev = severityConfig[insight.severity] ?? severityConfig.low;
+            const typ = typeConfig[insight.type] ?? typeConfig.root_cause;
+            const Icon = typ.icon;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * i }}
+                className={`relative flex flex-col gap-2 p-4 rounded-2xl border ${sev.border} ${sev.bg} overflow-hidden`}
+              >
+                <div className="flex items-start gap-2.5">
+                  <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${typ.color}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">{typ.label}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                      <span className="text-[11px] text-white/40">{sev.label}</span>
+                    </div>
+                    <p className="text-sm font-semibold text-white/90 leading-tight mt-1">{insight.title}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-[var(--color-muted)] leading-relaxed pl-6">{insight.message}</p>
+                {insight.product_name && (
+                  <div className="pl-6">
+                    <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+                      📦 {insight.product_name}
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </Reveal>
+  );
+};
+
 export const OperasyonTab = () => {
+  const { operations, loading } = useSatisSonrasiData();
   const [activeTask, setActiveTask] = useState<TaskId | null>(null);
   const [isSuccessAnim, setIsSuccessAnim] = useState(false);
   const [successMessage, setSuccessMessage] = useState("İşlem Başarılı!");
@@ -64,6 +146,15 @@ export const OperasyonTab = () => {
       setActiveTask(null);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-24 space-y-4">
+        <div className="w-10 h-10 border-4 border-t-emerald-500 border-white/10 rounded-full animate-spin"></div>
+        <p className="text-[var(--color-muted)] font-medium animate-pulse">Operasyon Ajanı verileri analiz ediyor...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -99,6 +190,9 @@ export const OperasyonTab = () => {
         })}
       </div>
 
+      {/* ═══════════ AI INSIGHTS PANEL ═══════════ */}
+      <InsightsPanel />
+
       {/* ═══════════ PRODUCTS TABLE ═══════════ */}
       <Reveal variant="fadeUp" delay={0.5}>
         <div className="bg-[#0A0A0A] border border-[var(--color-border)] rounded-2xl overflow-hidden flex flex-col shadow-2xl">
@@ -113,7 +207,7 @@ export const OperasyonTab = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {OPERASYON_PRODUCTS.map((product) => {
+                {operations.map((product) => {
                   const taskDef = product.task ? TASK_DEFINITIONS.find(t => t.id === product.task) : null;
                   
                   return (

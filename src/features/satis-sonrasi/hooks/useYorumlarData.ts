@@ -1,6 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-// --- TYPES ---
+const BASE_URL = 'http://localhost:8000/api/v1';
+
+function getToken() {
+  return localStorage.getItem('access_token');
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 export interface ReviewTag {
   label: string;
   sentiment: 'positive' | 'negative';
@@ -15,6 +22,7 @@ export interface Review {
   text: string;
   tags: ReviewTag[];
   date: string;
+  customer?: string;
 }
 
 export interface ReviewProduct {
@@ -31,126 +39,177 @@ export interface AnalysisMetric {
   negative: number;
 }
 
-// --- MOCK PRODUCTS ---
-const PRODUCTS: ReviewProduct[] = [
-  { id: 'rp1', name: 'Akıllı Saat Pro Max', image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=100&q=80', rating: 4.5, reviewCount: 312 },
-  { id: 'rp2', name: 'Minimalist Sırt Çantası', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=100&q=80', rating: 4.2, reviewCount: 187 },
-  { id: 'rp3', name: 'Kablosuz Kulaklık V2', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80', rating: 3.8, reviewCount: 534 },
-  { id: 'rp4', name: 'Mekanik Klavye RGB', image: 'https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=100&q=80', rating: 4.7, reviewCount: 96 },
-  { id: 'rp5', name: 'Ergonomik Oyuncu Faresi', image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=100&q=80', rating: 4.1, reviewCount: 245 },
-  { id: 'rp6', name: 'USB-C Hub Adaptör', image: 'https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=100&q=80', rating: 3.5, reviewCount: 78 },
+// ─── Sentiment & Tag helpers ───────────────────────────────────────────────────
+
+function getSentiment(rating: number): 'positive' | 'negative' {
+  return rating >= 4 ? 'positive' : 'negative';
+}
+
+// Keyword → tag label mapping (Turkish e-commerce common complaint categories)
+const TAG_RULES: Array<{ keywords: string[]; label: string }> = [
+  { keywords: ['kargo', 'teslimat', 'gönderim', 'kurye', 'ulaşt', 'paket'], label: 'KARGO' },
+  { keywords: ['kalite', 'sağlam', 'dayanıklı', 'bozuldu', 'kırıldı', 'koptu', 'çalışmıyor', 'arıza'], label: 'KALİTE' },
+  { keywords: ['boyut', 'küçük', 'büyük', 'beden', 'ölçü', 'uymuyor'], label: 'BOYUT' },
+  { keywords: ['fiyat', 'pahalı', 'ucuz', 'değer', 'para'], label: 'FİYAT' },
+  { keywords: ['paket', 'kutu', 'ambalaj', 'ezil', 'hasar'], label: 'PAKETLEME' },
+  { keywords: ['satıcı', 'mağaza', 'iletişim', 'yanıt', 'müşteri hizmet'], label: 'SATICI' },
+  { keywords: ['renk', 'görünüm', 'farklı', 'fotoğraf', 'resim', 'görsel'], label: 'GÖRÜNÜM' },
+  { keywords: ['ürün', 'özellik', 'performans', 'kullanım'], label: 'ÜRÜN' },
 ];
 
-// --- MOCK REVIEWS ---
-const ALL_REVIEWS: Review[] = [
-  // Akıllı Saat Pro Max
-  { id: 'r1', productId: 'rp1', productName: 'Akıllı Saat Pro Max', rating: 5, sentiment: 'positive', text: 'Harika bir ürün, kalitesi çok iyi. Pil ömrü 3 gün rahat gidiyor.', tags: [{ label: 'ÜRÜN', sentiment: 'positive' }, { label: 'KALİTE', sentiment: 'positive' }], date: '15 May 2026' },
-  { id: 'r2', productId: 'rp1', productName: 'Akıllı Saat Pro Max', rating: 4, sentiment: 'positive', text: 'Güzel saat ama kayış biraz sert, zamanla yumuşar umarım.', tags: [{ label: 'ÜRÜN', sentiment: 'positive' }, { label: 'KALİTE', sentiment: 'negative' }], date: '14 May 2026' },
-  { id: 'r3', productId: 'rp1', productName: 'Akıllı Saat Pro Max', rating: 2, sentiment: 'negative', text: 'Ekran çok küçük, beklediğimden farklı. İade edeceğim.', tags: [{ label: 'BOYUT', sentiment: 'negative' }, { label: 'ÜRÜN', sentiment: 'negative' }], date: '12 May 2026' },
-  // Minimalist Sırt Çantası
-  { id: 'r4', productId: 'rp2', productName: 'Minimalist Sırt Çantası', rating: 5, sentiment: 'positive', text: 'Tam istediğim gibi, çok şık ve kullanışlı. Laptop bölmesi mükemmel.', tags: [{ label: 'ÜRÜN', sentiment: 'positive' }, { label: 'KALİTE', sentiment: 'positive' }, { label: 'PAKETLEME', sentiment: 'positive' }], date: '13 May 2026' },
-  { id: 'r5', productId: 'rp2', productName: 'Minimalist Sırt Çantası', rating: 3, sentiment: 'negative', text: 'Rengi fotoğraftakinden farklı geldi, biraz hayal kırıklığı.', tags: [{ label: 'ÜRÜN', sentiment: 'negative' }, { label: 'SATICI', sentiment: 'negative' }], date: '10 May 2026' },
-  // Kablosuz Kulaklık V2
-  { id: 'r6', productId: 'rp3', productName: 'Kablosuz Kulaklık V2', rating: 4, sentiment: 'positive', text: 'Ses kalitesi gayet iyi, bass seviyesi tatmin edici.', tags: [{ label: 'ÜRÜN', sentiment: 'positive' }, { label: 'KALİTE', sentiment: 'positive' }], date: '14 May 2026' },
-  { id: 'r7', productId: 'rp3', productName: 'Kablosuz Kulaklık V2', rating: 1, sentiment: 'negative', text: 'Kargo 10 gün sürdü ve kutu ezilmiş geldi. Ürün çalışmıyor, çok kötü.', tags: [{ label: 'KARGO', sentiment: 'negative' }, { label: 'PAKETLEME', sentiment: 'negative' }, { label: 'ÜRÜN', sentiment: 'negative' }], date: '11 May 2026' },
-  { id: 'r8', productId: 'rp3', productName: 'Kablosuz Kulaklık V2', rating: 5, sentiment: 'positive', text: 'Bu fiyata bu kalite harika! Kargo da çok hızlı geldi.', tags: [{ label: 'FİYAT', sentiment: 'positive' }, { label: 'KARGO', sentiment: 'positive' }, { label: 'ÜRÜN', sentiment: 'positive' }], date: '09 May 2026' },
-  { id: 'r9', productId: 'rp3', productName: 'Kablosuz Kulaklık V2', rating: 2, sentiment: 'negative', text: 'Boyutu çok büyük, kulağıma oturmuyor. İade ettim.', tags: [{ label: 'BOYUT', sentiment: 'negative' }], date: '08 May 2026' },
-  // Mekanik Klavye RGB
-  { id: 'r10', productId: 'rp4', productName: 'Mekanik Klavye RGB', rating: 5, sentiment: 'positive', text: 'Mükemmel tuş hissi! RGB aydınlatma çok güzel. Oyunlar için birebir.', tags: [{ label: 'ÜRÜN', sentiment: 'positive' }, { label: 'KALİTE', sentiment: 'positive' }], date: '15 May 2026' },
-  { id: 'r11', productId: 'rp4', productName: 'Mekanik Klavye RGB', rating: 4, sentiment: 'positive', text: 'Fiyat performans olarak çok iyi. Paketleme de özenli.', tags: [{ label: 'FİYAT', sentiment: 'positive' }, { label: 'PAKETLEME', sentiment: 'positive' }], date: '12 May 2026' },
-  // Ergonomik Oyuncu Faresi
-  { id: 'r12', productId: 'rp5', productName: 'Ergonomik Oyuncu Faresi', rating: 4, sentiment: 'positive', text: 'El kavraması çok rahat, uzun süre kullanımda yormuyor.', tags: [{ label: 'ÜRÜN', sentiment: 'positive' }, { label: 'KALİTE', sentiment: 'positive' }], date: '13 May 2026' },
-  { id: 'r13', productId: 'rp5', productName: 'Ergonomik Oyuncu Faresi', rating: 2, sentiment: 'negative', text: 'Scroll tuşu 1 haftada bozuldu. Kalitesiz malzeme kullanılmış.', tags: [{ label: 'KALİTE', sentiment: 'negative' }, { label: 'ÜRÜN', sentiment: 'negative' }], date: '10 May 2026' },
-  { id: 'r14', productId: 'rp5', productName: 'Ergonomik Oyuncu Faresi', rating: 3, sentiment: 'negative', text: 'Fiyatına göre idare eder ama satıcı iletişimi çok kötü.', tags: [{ label: 'FİYAT', sentiment: 'negative' }, { label: 'SATICI', sentiment: 'negative' }], date: '07 May 2026' },
-  // USB-C Hub Adaptör
-  { id: 'r15', productId: 'rp6', productName: 'USB-C Hub Adaptör', rating: 3, sentiment: 'negative', text: 'İdare eder ama ısınma sorunu var, uzun süre kullanınca yanıyor.', tags: [{ label: 'KALİTE', sentiment: 'negative' }, { label: 'ÜRÜN', sentiment: 'negative' }], date: '11 May 2026' },
-  { id: 'r16', productId: 'rp6', productName: 'USB-C Hub Adaptör', rating: 5, sentiment: 'positive', text: 'Kompakt tasarım, tüm portları çalışıyor. Çok memnunum.', tags: [{ label: 'ÜRÜN', sentiment: 'positive' }, { label: 'BOYUT', sentiment: 'positive' }], date: '09 May 2026' },
-];
+function extractTags(comment: string, sentiment: 'positive' | 'negative'): ReviewTag[] {
+  if (!comment) return [{ label: 'ÜRÜN', sentiment }];
+  const lower = comment.toLowerCase();
+  const found: ReviewTag[] = [];
+  for (const rule of TAG_RULES) {
+    if (rule.keywords.some(kw => lower.includes(kw))) {
+      // Determine tag sentiment: if overall negative review and tag is complaint keyword → negative
+      const tagSentiment: 'positive' | 'negative' =
+        sentiment === 'negative' &&
+        ['KARGO', 'KALİTE', 'BOYUT', 'SATICI', 'PAKETLEME', 'GÖRÜNÜM'].includes(rule.label)
+          ? 'negative'
+          : sentiment;
+      found.push({ label: rule.label, sentiment: tagSentiment });
+    }
+  }
+  return found.length > 0 ? found.slice(0, 3) : [{ label: 'ÜRÜN', sentiment }];
+}
 
-// --- ANALYSIS DATA PER PRODUCT ---
-const ANALYSIS_DATA: Record<string, AnalysisMetric[]> = {
-  all: [
-    { category: 'Ürün', positive: 248, negative: 173 },
-    { category: 'Kargo', positive: 34, negative: 12 },
-    { category: 'Fiyat', positive: 15, negative: 9 },
-    { category: 'Paketleme', positive: 22, negative: 38 },
-    { category: 'Kalite', positive: 58, negative: 168 },
-    { category: 'Boyut', positive: 14, negative: 342 },
-    { category: 'Satıcı', positive: 4, negative: 8 },
-  ],
-  rp1: [
-    { category: 'Ürün', positive: 60, negative: 20 },
-    { category: 'Kargo', positive: 8, negative: 2 },
-    { category: 'Fiyat', positive: 5, negative: 3 },
-    { category: 'Paketleme', positive: 10, negative: 5 },
-    { category: 'Kalite', positive: 40, negative: 10 },
-    { category: 'Boyut', positive: 5, negative: 30 },
-    { category: 'Satıcı', positive: 2, negative: 1 },
-  ],
-  rp2: [
-    { category: 'Ürün', positive: 45, negative: 15 },
-    { category: 'Kargo', positive: 5, negative: 3 },
-    { category: 'Fiyat', positive: 3, negative: 2 },
-    { category: 'Paketleme', positive: 8, negative: 4 },
-    { category: 'Kalite', positive: 20, negative: 8 },
-    { category: 'Boyut', positive: 6, negative: 10 },
-    { category: 'Satıcı', positive: 1, negative: 5 },
-  ],
-  rp3: [
-    { category: 'Ürün', positive: 80, negative: 60 },
-    { category: 'Kargo', positive: 10, negative: 8 },
-    { category: 'Fiyat', positive: 6, negative: 3 },
-    { category: 'Paketleme', positive: 3, negative: 20 },
-    { category: 'Kalite', positive: 15, negative: 50 },
-    { category: 'Boyut', positive: 4, negative: 120 },
-    { category: 'Satıcı', positive: 1, negative: 2 },
-  ],
-  rp4: [
-    { category: 'Ürün', positive: 30, negative: 5 },
-    { category: 'Kargo', positive: 4, negative: 1 },
-    { category: 'Fiyat', positive: 2, negative: 1 },
-    { category: 'Paketleme', positive: 3, negative: 2 },
-    { category: 'Kalite', positive: 10, negative: 3 },
-    { category: 'Boyut', positive: 2, negative: 5 },
-    { category: 'Satıcı', positive: 0, negative: 1 },
-  ],
-  rp5: [
-    { category: 'Ürün', positive: 25, negative: 40 },
-    { category: 'Kargo', positive: 2, negative: 1 },
-    { category: 'Fiyat', positive: 1, negative: 2 },
-    { category: 'Paketleme', positive: 1, negative: 5 },
-    { category: 'Kalite', positive: 5, negative: 60 },
-    { category: 'Boyut', positive: 2, negative: 100 },
-    { category: 'Satıcı', positive: 1, negative: 1 },
-  ],
-  rp6: [
-    { category: 'Ürün', positive: 10, negative: 30 },
-    { category: 'Kargo', positive: 1, negative: 0 },
-    { category: 'Fiyat', positive: 1, negative: 1 },
-    { category: 'Paketleme', positive: 0, negative: 4 },
-    { category: 'Kalite', positive: 3, negative: 29 },
-    { category: 'Boyut', positive: 1, negative: 65 },
-    { category: 'Satıcı', positive: 0, negative: 0 },
-  ],
-};
+function buildAnalysisData(reviews: Review[]): AnalysisMetric[] {
+  const cats: Record<string, { positive: number; negative: number }> = {
+    Ürün: { positive: 0, negative: 0 },
+    Kargo: { positive: 0, negative: 0 },
+    Fiyat: { positive: 0, negative: 0 },
+    Paketleme: { positive: 0, negative: 0 },
+    Kalite: { positive: 0, negative: 0 },
+    Boyut: { positive: 0, negative: 0 },
+    Satıcı: { positive: 0, negative: 0 },
+  };
 
-// --- HOOK ---
+  const labelToKey: Record<string, string> = {
+    ÜRÜN: 'Ürün', KARGO: 'Kargo', FİYAT: 'Fiyat',
+    PAKETLEME: 'Paketleme', KALİTE: 'Kalite', BOYUT: 'Boyut',
+    SATICI: 'Satıcı', GÖRÜNÜM: 'Ürün',
+  };
+
+  for (const review of reviews) {
+    for (const tag of review.tags) {
+      const key = labelToKey[tag.label] ?? 'Ürün';
+      if (cats[key]) cats[key][tag.sentiment === 'positive' ? 'positive' : 'negative']++;
+    }
+  }
+
+  return Object.entries(cats).map(([category, counts]) => ({ category, ...counts }));
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
 export const useYorumlarData = () => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [products, setProducts] = useState<ReviewProduct[]>([]);
+  const [allReviews, setAllReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = PRODUCTS;
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = getToken();
+      if (!token) return;
 
+      try {
+        setLoading(true);
+
+        // Fetch reviews
+        const reviewsRes = await fetch(`${BASE_URL}/support/reviews`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // Fetch products (via operations endpoint which has image + name)
+        const productsRes = await fetch(`${BASE_URL}/support/operations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!reviewsRes.ok || !productsRes.ok) return;
+
+        const rawReviews = await reviewsRes.json();
+        const rawProducts = await productsRes.json();
+
+        // Build product map for quick lookup
+        const productMap: Record<string, { name: string; image: string }> = {};
+        for (const p of rawProducts) {
+          productMap[String(p.id)] = { name: p.name, image: p.image };
+        }
+
+        // Transform reviews
+        const transformed: Review[] = rawReviews
+          .filter((r: any) => r.comment) // only reviews with text
+          .map((r: any) => {
+            const sentiment = getSentiment(r.rating);
+            const tags = extractTags(r.comment || '', sentiment);
+            return {
+              id: String(r.id),
+              productId: String(r.product_id),
+              productName: r.product || 'Bilinmiyor',
+              rating: r.rating,
+              sentiment,
+              text: r.comment,
+              tags,
+              date: r.date,
+              customer: r.customer,
+            } as Review;
+          });
+
+        // Build ReviewProduct list from operations data
+        const productReviewMap: Record<string, { ratings: number[]; count: number }> = {};
+        for (const r of transformed) {
+          if (!productReviewMap[r.productId]) productReviewMap[r.productId] = { ratings: [], count: 0 };
+          productReviewMap[r.productId].ratings.push(r.rating);
+          productReviewMap[r.productId].count++;
+        }
+
+        const builtProducts: ReviewProduct[] = rawProducts.map((p: any) => {
+          const pid = String(p.id);
+          const pData = productReviewMap[pid];
+          const avgRating = pData
+            ? +(pData.ratings.reduce((a: number, b: number) => a + b, 0) / pData.ratings.length).toFixed(1)
+            : 0;
+          return {
+            id: pid,
+            name: p.name,
+            image: p.image,
+            rating: avgRating,
+            reviewCount: pData?.count ?? 0,
+          };
+        }).filter((p: ReviewProduct) => p.reviewCount > 0); // only products with reviews
+
+        setAllReviews(transformed);
+        setProducts(builtProducts);
+      } catch (e) {
+        console.error('[useYorumlarData] fetch error:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Filter by selected product
   const filteredReviews = selectedProductId
-    ? ALL_REVIEWS.filter(r => r.productId === selectedProductId)
-    : ALL_REVIEWS;
+    ? allReviews.filter(r => r.productId === selectedProductId)
+    : allReviews;
 
-  const analysisData = ANALYSIS_DATA[selectedProductId || 'all'];
+  // Analysis data
+  const analysisData = buildAnalysisData(filteredReviews);
 
-  const totalReviews = PRODUCTS.reduce((sum, p) => sum + p.reviewCount, 0);
-  const avgRating = +(PRODUCTS.reduce((sum, p) => sum + p.rating * p.reviewCount, 0) / totalReviews).toFixed(1);
-  const positiveCount = ALL_REVIEWS.filter(r => r.sentiment === 'positive').length;
-  const positiveRatio = Math.round((positiveCount / ALL_REVIEWS.length) * 100);
-  const topProduct = [...PRODUCTS].sort((a, b) => b.reviewCount - a.reviewCount)[0];
+  // Stats
+  const totalReviews = allReviews.length;
+  const avgRating =
+    totalReviews > 0
+      ? +(allReviews.reduce((s, r) => s + r.rating, 0) / totalReviews).toFixed(1)
+      : 0;
+  const positiveCount = allReviews.filter(r => r.sentiment === 'positive').length;
+  const positiveRatio = totalReviews > 0 ? Math.round((positiveCount / totalReviews) * 100) : 0;
+  const topProduct = [...products].sort((a, b) => b.reviewCount - a.reviewCount)[0] ?? null;
 
   return {
     products,
@@ -158,6 +217,7 @@ export const useYorumlarData = () => {
     analysisData,
     selectedProductId,
     setSelectedProductId,
+    loading,
     stats: {
       totalReviews,
       avgRating,

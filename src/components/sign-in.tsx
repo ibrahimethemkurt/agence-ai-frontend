@@ -6,6 +6,7 @@ import Grainient from './animation/GrainientBackground';
 import { Radio } from './radio';
 import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
@@ -29,6 +30,8 @@ export const SignInPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { showToast } = useToast();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -40,9 +43,12 @@ export const SignInPage: React.FC = () => {
 
     try {
       await api.login(email, password);
+      showToast('Giriş başarılı! Hoş geldiniz.', 'success');
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Giriş başarısız. Email veya şifrenizi kontrol edin.');
+      const errMsg = err.message || 'Giriş başarısız. Email veya şifrenizi kontrol edin.';
+      setError(errMsg);
+      showToast(errMsg, 'error');
     } finally {
       setLoading(false);
     }
