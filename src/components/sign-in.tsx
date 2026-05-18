@@ -6,6 +6,7 @@ import Grainient from './animation/GrainientBackground';
 import { Radio } from './radio';
 import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useToast } from '../context/ToastContext';
 
 const GoogleIcon = () => (
@@ -29,8 +30,7 @@ export const SignInPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const { showToast } = useToast();
+  const [successRedirect, setSuccessRedirect] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,14 +43,13 @@ export const SignInPage: React.FC = () => {
 
     try {
       await api.login(email, password);
-      showToast('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+      setSuccessRedirect(true);
       setTimeout(() => {
         navigate('/dashboard');
       }, 2000);
     } catch (err: any) {
       const errMsg = err.message || 'Giriş başarısız. Email veya şifrenizi kontrol edin.';
       setError(errMsg);
-      showToast(errMsg, 'error');
       setLoading(false);
     }
   };
@@ -136,13 +135,40 @@ export const SignInPage: React.FC = () => {
                 </div>
               </Reveal>
 
+              {successRedirect && (
+                <Reveal variant="fadeUp">
+                  <div className="flex flex-col gap-2 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                    <div className="flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin text-emerald-400 shrink-0" />
+                      <p className="text-sm font-semibold text-white/90">Giriş Başarılı! Yönlendiriliyorsunuz...</p>
+                    </div>
+                  </div>
+                </Reveal>
+              )}
+
               <Reveal variant="fadeUp">
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={loading || successRedirect}
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden"
                 >
-                  {loading ? <><Loader2 size={18} className="animate-spin" /> Giriş yapılıyor...</> : 'Giriş Yap'}
+                  {successRedirect ? (
+                    <span className="text-emerald-700 font-semibold animate-pulse">Başarıyla Giriş Yapıldı!</span>
+                  ) : loading ? (
+                    <><Loader2 size={18} className="animate-spin" /> Giriş yapılıyor...</>
+                  ) : (
+                    'Giriş Yap'
+                  )}
+
+                  {/* Sleek green progress line at the bottom of the button */}
+                  {successRedirect && (
+                    <motion.div
+                      initial={{ width: '0%' }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 2, ease: 'linear' }}
+                      className="absolute bottom-0 left-0 h-1 bg-emerald-500"
+                    />
+                  )}
                 </button>
               </Reveal>
             </form>

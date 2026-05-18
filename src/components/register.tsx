@@ -6,6 +6,7 @@ import Grainient from './animation/GrainientBackground';
 import { Radio } from './radio';
 import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useToast } from '../context/ToastContext';
 
 const GoogleIcon = () => (
@@ -30,14 +31,12 @@ export const RegisterPage: React.FC = () => {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const { showToast } = useToast();
+  const [successRedirect, setSuccessRedirect] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!agreed) {
       setError('Kullanıcı sözleşmesini kabul etmeniz gerekmektedir.');
-      showToast('Kullanıcı sözleşmesini kabul etmelisiniz.', 'error');
       return;
     }
     setError(null);
@@ -54,7 +53,6 @@ export const RegisterPage: React.FC = () => {
     if (password !== confirmPassword) {
       const errMsg = 'Şifreler eşleşmiyor.';
       setError(errMsg);
-      showToast(errMsg, 'error');
       setLoading(false);
       return;
     }
@@ -67,7 +65,7 @@ export const RegisterPage: React.FC = () => {
         password,
         password_confirm: confirmPassword,
       });
-      showToast('Hesap başarıyla oluşturuldu! Yönlendiriliyorsunuz...', 'success');
+      setSuccessRedirect(true);
       // Kayıt başarılı → otomatik giriş yap
       await api.login(email, password);
       setTimeout(() => {
@@ -76,7 +74,6 @@ export const RegisterPage: React.FC = () => {
     } catch (err: any) {
       const errMsg = err.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.';
       setError(errMsg);
-      showToast(errMsg, 'error');
       setLoading(false);
     }
   };
@@ -187,14 +184,41 @@ export const RegisterPage: React.FC = () => {
                 </div>
               </Reveal>
 
+              {successRedirect && (
+                <Reveal variant="fadeUp">
+                  <div className="flex flex-col gap-2 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mt-3">
+                    <div className="flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin text-emerald-400 shrink-0" />
+                      <p className="text-sm font-semibold text-white/90">Kayıt Başarılı! Yönlendiriliyorsunuz...</p>
+                    </div>
+                  </div>
+                </Reveal>
+              )}
+
               <Reveal variant="fadeUp">
                 <div className="flex gap-3 mt-4">
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                    disabled={loading || successRedirect}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden"
                   >
-                    {loading ? <><Loader2 size={18} className="animate-spin" /> Kaydediliyor...</> : 'Kayıt Ol'}
+                    {successRedirect ? (
+                      <span className="text-emerald-700 font-semibold animate-pulse">Başarıyla Kayıt Olundu!</span>
+                    ) : loading ? (
+                      <><Loader2 size={18} className="animate-spin" /> Kaydediliyor...</>
+                    ) : (
+                      'Kayıt Ol'
+                    )}
+
+                    {/* Sleek green progress line at the bottom of the button */}
+                    {successRedirect && (
+                      <motion.div
+                        initial={{ width: '0%' }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 2, ease: 'linear' }}
+                        className="absolute bottom-0 left-0 h-1 bg-emerald-500"
+                      />
+                    )}
                   </button>
                   <button type="button" className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors" title="Google ile Kayıt Ol">
                     <GoogleIcon />
