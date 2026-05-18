@@ -4,7 +4,7 @@ import { Reveal } from '../components/animation/Reveal';
 import { 
   Download, Upload, Plus, Search, Filter, PanelLeftClose, 
   Image as ImageIcon, MoreHorizontal, ChevronDown, ChevronLeft, ChevronRight,
-  Package, Pencil, Trash2, X, Check
+  Package, Pencil, Trash2, X, Check, ShoppingCart
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Menu } from "@ark-ui/react/menu";
@@ -23,7 +23,7 @@ const COLUMNS_DEF = [
   { id: "salesCount", label: "Satış Adedi", defaultVisible: true },
   { id: "revenue", label: "Toplam Getiri", defaultVisible: true },
   { id: "purchasePrice", label: "Alış Fiyatı", defaultVisible: false },
-  { id: "channels", label: "Satış Kanalları", defaultVisible: false },
+  { id: "channels", label: "Satış Kanalları", defaultVisible: true },
   { id: "createdAt", label: "Oluşturulma Tarihi", defaultVisible: false },
   { id: "updatedAt", label: "Güncellenme Tarihi", defaultVisible: false },
 ];
@@ -41,6 +41,7 @@ export const SatistaOlanUrunlerPage = () => {
   const [draftDesc, setDraftDesc] = useState('');
   const [draftTags, setDraftTags] = useState('');
   const [draftImage, setDraftImage] = useState<string | null>(null);
+  const [draftPlatforms, setDraftPlatforms] = useState<string[]>([]);
   const [imageUploading, setImageUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -98,8 +99,15 @@ export const SatistaOlanUrunlerPage = () => {
     setDraftTitle(parsed.title || product.name);
     setDraftPrice(product.salePrice.replace(/[^\d.,]/g, '').replace(',', '.'));
     setDraftDesc(parsed.description || '');
-    setDraftTags(parsed.tags || '');
+    const tagsString = parsed.tags ? (Array.isArray(parsed.tags) ? parsed.tags.join(', ') : parsed.tags) : '';
+    setDraftTags(tagsString);
     setDraftImage(product.image || null);
+
+    let platforms: string[] = [];
+    if (product.channels && product.channels !== "Henüz Yok") {
+      platforms = product.channels.split(", ");
+    }
+    setDraftPlatforms(platforms);
   };
 
   const handleCloseDrawer = () => { setEditItem(null); };
@@ -143,12 +151,19 @@ export const SatistaOlanUrunlerPage = () => {
           body: JSON.stringify({ image_url: draftImage }),
         });
       }
+      // Platformları güncelle
+      await fetch(`${BASE}/listing/${editItem.id}/platforms`, {
+        method: 'PATCH', headers,
+        body: JSON.stringify({ platforms: draftPlatforms }),
+      });
+
       setListings(prev => prev.map(l => l.id === editItem.id ? {
         ...l,
         name: draftTitle,
         salePrice: `₺ ${parseFloat(draftPrice || '0').toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
         seoData: JSON.stringify({ title: draftTitle, description: draftDesc, tags: draftTags }),
         image: draftImage,
+        channels: draftPlatforms.length > 0 ? draftPlatforms.join(', ') : 'Henüz Yok',
         variants: 'Yayınlandı', rawStatus: 'published'
       } : l));
       setEditItem(null);
@@ -205,6 +220,77 @@ export const SatistaOlanUrunlerPage = () => {
     setVisibleColumns(newCols);
   };
 
+  const exportToExcel = () => {
+    let table = '<table border="1"><thead><tr><th>Ürün Adı</th><th>Satış Fiyatı</th><th>Envanter</th><th>Satış Adedi</th><th>Toplam Getiri</th></tr></thead><tbody>';
+    listings.forEach(item => {
+      table += `<tr><td>${item.name}</td><td>${item.salePrice}</td><td>${item.inventory}</td><td>${item.salesCount}</td><td>${item.revenue}</td></tr>`;
+    });
+    table += '</tbody></table>';
+    
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="UTF-8"></head><body>${table}</body></html>
+    `;
+    
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Urunler.xls';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToPDF = () => {
+    let tableRows = '';
+    listings.forEach(item => {
+      tableRows += `<tr><td>${item.name}</td><td>${item.salePrice}</td><td>${item.inventory}</td><td>${item.salesCount}</td><td>${item.revenue}</td></tr>`;
+    });
+
+    const html = `
+      <html>
+        <head>
+          <title>Ürünler Raporu</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; }
+            h1 { text-align: center; color: #333; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th { background-color: #f4f4f4; color: #333; font-weight: bold; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+          </style>
+        </head>
+        <body>
+          <h1>Satıştaki Ürünler Raporu</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Ürün Adı</th>
+                <th>Satış Fiyatı</th>
+                <th>Envanter</th>
+                <th>Satış Adedi</th>
+                <th>Toplam Getiri</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          </script>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+  };
+
   return (
     <PageTransition className="w-full h-full flex flex-col py-8 px-4 md:px-8">
       {/* Header */}
@@ -218,14 +304,32 @@ export const SatistaOlanUrunlerPage = () => {
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-fg)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-white/5 transition-colors">
-            <Download className="w-4 h-4" />
-            Dışa Aktar
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-fg)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-white/5 transition-colors">
-            <Upload className="w-4 h-4" />
-            İçe Aktar
-          </button>
+          <Menu.Root positioning={{ placement: "bottom-end", gutter: 8 }}>
+            <Menu.Trigger className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-fg)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-white/5 transition-colors outline-none cursor-pointer">
+              <Download className="w-4 h-4" />
+              Dışa Aktar
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content className="z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border border-[#2a2a2a] rounded-xl shadow-2xl p-2 min-w-[150px] focus-visible:outline-none font-body text-white">
+                  <Menu.Item 
+                    value="excel" 
+                    onClick={exportToExcel}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-[#1a1a1a] cursor-pointer outline-none transition-colors"
+                  >
+                     Excel İndir (.xls)
+                  </Menu.Item>
+                  <Menu.Item 
+                    value="pdf" 
+                    onClick={exportToPDF}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-[#1a1a1a] cursor-pointer outline-none transition-colors"
+                  >
+                     PDF İndir (.pdf)
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
           <button 
             onClick={() => navigate('/ajanlar/satis-sureci')}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] rounded-lg transition-colors shadow-[0_0_15px_rgba(160,124,254,0.3)]"
@@ -580,6 +684,34 @@ export const SatistaOlanUrunlerPage = () => {
                   placeholder="kalem, kırtasiye, versatil..."
                 />
                 <p className="text-xs text-[#737373] mt-2 ml-1">Virgülle ayırarak birden fazla etiket ekleyebilirsiniz</p>
+              </div>
+
+              {/* Platforms */}
+              <div>
+                <label className="block text-xs font-semibold text-[#737373] uppercase tracking-wider mb-3">Satış Kanalları</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {['Amazon', 'Trendyol', 'Hepsiburada', 'Çiçeksepeti'].map((platform) => {
+                    const isSelected = draftPlatforms.includes(platform);
+                    return (
+                      <div 
+                        key={platform}
+                        onClick={() => {
+                          if (isSelected) {
+                            setDraftPlatforms(draftPlatforms.filter(p => p !== platform));
+                          } else {
+                            setDraftPlatforms([...draftPlatforms, platform]);
+                          }
+                        }}
+                        className={`cursor-pointer border rounded-xl p-3 flex flex-col items-center justify-center transition-all ${
+                          isSelected ? 'bg-white/10 border-white text-white shadow-[0_0_10px_rgba(255,255,255,0.05)]' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#737373] hover:border-white/30'
+                        }`}
+                      >
+                        <ShoppingCart size={20} className="mb-2" />
+                        <span className="font-bold text-sm">{platform}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
             </div>

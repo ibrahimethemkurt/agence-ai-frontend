@@ -9,11 +9,12 @@ import { ShineBorder } from '../components/ui/ShineBorder';
 import { api } from '../lib/api';
 
 const stepsData = [
-  { id: 1, title: 'Görsel' },
-  { id: 2, title: 'SEO' },
-  { id: 3, title: 'Fiyat' },
-  { id: 4, title: 'Platform' },
-  { id: 5, title: 'Onay' }
+  { id: 1, title: 'Kaynak' },
+  { id: 2, title: 'Ürün' },
+  { id: 3, title: 'SEO' },
+  { id: 4, title: 'Fiyat' },
+  { id: 5, title: 'Platform' },
+  { id: 6, title: 'Onay' }
 ];
 
 export const SatisSureciPage = () => {
@@ -29,9 +30,9 @@ export const SatisSureciPage = () => {
   const [publishing, setPublishing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Polling for Step 2 (SEO & Görsel İşleme)
+  // Polling for Step 3 (SEO & Görsel İşleme)
   useEffect(() => {
-    if (currentStep === 2 && formData.listingId && !formData.seoTitle) {
+    if (currentStep === 3 && formData.listingId && !formData.seoTitle) {
       setPolling(true);
       const interval = setInterval(async () => {
         try {
@@ -194,8 +195,48 @@ export const SatisSureciPage = () => {
       {/* Main Card Container */}
       <div className="bg-[#121212] rounded-[32px] p-8 md:p-12 border border-white/5 shadow-2xl min-h-[500px] flex flex-col">
         
-        {/* ADIM 1: GÖRSEL VE ÜRÜN */}
+        {/* ADIM 1: KAYNAK SEÇİMİ (GitHub orijinal tasarım) */}
         {currentStep === 1 && (
+          <Reveal variant="fadeIn" className="flex flex-col flex-1">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">Ürün Kaynağını Seçin</h2>
+              <p className="text-[#a3a3a3] text-base">Satış sürecini başlatmak için ürünün nasıl ekleneceğini belirleyin.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
+              
+              {/* Option 1: Analiz Edilen Ürünler */}
+              <div 
+                onClick={() => { updateData({ sourceType: 'analyzed' }); nextStep(); }}
+                className="group relative cursor-pointer h-64"
+              >
+                <ShineBorder 
+                  className="w-full h-full rounded-[24px] border border-[#2a2a2a] transition-transform group-hover:scale-[1.02]"
+                  innerClassName="bg-[#0a0a0a] flex flex-col items-center justify-center p-8"
+                  gradient="from-[#A07CFE] via-[#FE8FB5] to-[#FFBE7B]"
+                >
+                  <Search size={48} className="text-white mb-6" strokeWidth={1.5} />
+                  <h3 className="text-xl font-bold text-white mb-2 text-center">Analiz Edilen Ürünlerden Seç</h3>
+                  <p className="text-sm text-[#737373] text-center">Önceden maliyet ve pazar analizi yaptığınız ürünleri kullanarak hızlıca listeleme yapın.</p>
+                </ShineBorder>
+              </div>
+
+              {/* Option 2: Manuel Ürün Ekleme */}
+              <div 
+                onClick={() => { updateData({ sourceType: 'manual' }); nextStep(); }}
+                className="group w-full h-64 bg-[#0a0a0a] rounded-[24px] border border-[#2a2a2a] hover:border-white/20 hover:bg-[#111111] transition-all cursor-pointer flex flex-col items-center justify-center p-8 hover:scale-[1.02]"
+              >
+                <PlusCircle size={48} className="text-[#737373] group-hover:text-white mb-6 transition-colors" strokeWidth={1.5} />
+                <h3 className="text-xl font-bold text-[#a3a3a3] group-hover:text-white mb-2 text-center transition-colors">Kendim Ürün Eklemek İstiyorum</h3>
+                <p className="text-sm text-[#555] group-hover:text-[#737373] text-center transition-colors">Sisteme daha önce girmediğiniz, tamamen yeni bir ürünü manuel olarak sıfırdan ekleyin.</p>
+              </div>
+
+            </div>
+          </Reveal>
+        )}
+
+        {/* ADIM 2: ÜRÜN DETAYLARI VE GÖRSEL */}
+        {currentStep === 2 && (
           <Reveal variant="fadeIn" className="flex flex-col flex-1">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">Ürün ve Görsel Seçimi</h2>
@@ -203,23 +244,7 @@ export const SatisSureciPage = () => {
             </div>
             
             <div className="space-y-8 flex-1">
-               {/* Kaynak Seçimi Tabları */}
-               <div className="flex gap-4">
-                  <button 
-                     onClick={() => updateData({ sourceType: 'analyzed' })}
-                     className={`flex-1 py-3 rounded-xl border ${formData.sourceType === 'analyzed' ? 'bg-white/10 border-white text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#737373]'}`}
-                  >
-                     Analiz Edilenlerden Seç
-                  </button>
-                  <button 
-                     onClick={() => updateData({ sourceType: 'manual' })}
-                     className={`flex-1 py-3 rounded-xl border ${formData.sourceType === 'manual' ? 'bg-white/10 border-white text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#737373]'}`}
-                  >
-                     Yeni Ürün (Manuel)
-                  </button>
-               </div>
-
-               {/* Dinamik Alan */}
+               {/* Analiz Edilenlerden Seç */}
                {formData.sourceType === 'analyzed' && (
                   <div>
                     <label className="block text-sm font-bold text-white mb-2">Kayıtlı Analizlerden Seç</label>
@@ -253,6 +278,7 @@ export const SatisSureciPage = () => {
                   </div>
                )}
 
+               {/* Manuel Ürün Adı */}
                {formData.sourceType === 'manual' && (
                   <div>
                     <label className="block text-sm font-bold text-white mb-2">Ürün Adı</label>
@@ -296,7 +322,13 @@ export const SatisSureciPage = () => {
                )}
             </div>
 
-            <div className="mt-auto pt-12 flex justify-end">
+            <div className="mt-auto pt-12 flex justify-between items-center">
+              <button 
+                onClick={prevStep} 
+                className="flex items-center gap-2 bg-[#121212] border border-[#2a2a2a] text-[#a3a3a3] rounded-2xl px-6 py-3 font-medium hover:text-white hover:bg-[#1e1e1e] transition-colors"
+              >
+                <ChevronLeft size={18} /> Geri
+              </button>
               <button 
                 onClick={handlePrepare} 
                 disabled={preparing || !formData.photoUrl || (formData.sourceType === 'analyzed' ? !formData.selectedProduct : !formData.productName)}
@@ -308,8 +340,9 @@ export const SatisSureciPage = () => {
           </Reveal>
         )}
 
-        {/* ADIM 2: SEO VE GÖRSEL */}
-        {currentStep === 2 && (
+
+        {/* ADIM 3: SEO VE GÖRSEL */}
+        {currentStep === 3 && (
           <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
             {polling ? (
                <div className="flex flex-col items-center justify-center flex-1 py-20">
@@ -395,8 +428,8 @@ export const SatisSureciPage = () => {
           </Reveal>
         )}
 
-        {/* ADIM 3: FİYAT */}
-        {currentStep === 3 && (
+        {/* ADIM 4: FİYAT */}
+        {currentStep === 4 && (
           <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">Fiyat Belirleme</h2>
@@ -447,8 +480,8 @@ export const SatisSureciPage = () => {
           </Reveal>
         )}
 
-        {/* ADIM 4: PLATFORM */}
-        {currentStep === 4 && (
+        {/* ADIM 5: PLATFORM */}
+        {currentStep === 5 && (
           <Reveal variant="fadeIn" className="flex flex-col h-full flex-1">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">Platform Seçimi</h2>
@@ -491,8 +524,8 @@ export const SatisSureciPage = () => {
           </Reveal>
         )}
 
-        {/* ADIM 5: ONAY */}
-        {currentStep === 5 && (
+        {/* ADIM 6: ONAY */}
+        {currentStep === 6 && (
           <Reveal variant="fadeIn" className="flex flex-col flex-1 h-full">
             {!isPublished ? (
               <>

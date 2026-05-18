@@ -301,7 +301,10 @@ export const SatisOncesiPage = () => {
             )}
 
             <div className="flex-1 overflow-hidden rounded-xl border border-[#2a2a2a] bg-[#0a0a0a]">
-              <AgentPlan />
+              <AgentPlan 
+                isSimulating={analysisStatus === 'bekliyor' || analysisStatus === 'processing'} 
+                isFinished={analysisStatus === 'completed' || analysisStatus === 'failed'} 
+              />
             </div>
 
             {/* Durum göstergesi */}

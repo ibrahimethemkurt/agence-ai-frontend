@@ -3,7 +3,7 @@ import { useDashboardData } from '../features/dashboard/hooks/useDashboardData';
 import { InteractiveTaskHub } from '../features/dashboard/components/InteractiveTaskHub';
 import { AlertBanner } from '../features/dashboard/components/AlertBanner';
 import { IncomeExpenseChart } from '../features/dashboard/components/IncomeExpenseChart';
-import { GrowthTrendChart } from '../features/dashboard/components/GrowthTrendChart';
+import { ReviewsSummaryDashboard } from '../features/dashboard/components/ReviewsSummaryDashboard';
 import { ActiveAgentsList } from '../features/dashboard/components/ActiveAgentsList';
 import { ActiveProductsList } from '../features/dashboard/components/ActiveProductsList';
 import { StoreOptimizationScore } from '../features/dashboard/components/StoreOptimizationScore';
@@ -43,9 +43,9 @@ export const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Row 3: Growth Trend */}
+      {/* Row 3: Reviews Summary */}
       <div className="grid grid-cols-1 gap-6">
-        <GrowthTrendChart data={data.growthTrend} />
+        <ReviewsSummaryDashboard />
       </div>
 
       {/* Row 4: AI Store Optimization Score + AI Insights */}

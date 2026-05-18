@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CheckCircle2,
   Circle,
@@ -124,7 +124,7 @@ const initialTasks: Task[] = [
   }
 ];
 
-export default function Plan({ customTasks }: { customTasks?: Task[] }) {
+export default function Plan({ customTasks, isSimulating = false, isFinished = false }: { customTasks?: Task[], isSimulating?: boolean, isFinished?: boolean }) {
   const [tasks, setTasks] = useState<Task[]>(customTasks || initialTasks);
   const [expandedTasks, setExpandedTasks] = useState<string[]>(["1"]);
   const [expandedSubtasks, setExpandedSubtasks] = useState<{
@@ -144,6 +144,96 @@ export default function Plan({ customTasks }: { customTasks?: Task[] }) {
         : [...prev, taskId],
     );
   };
+
+  // --- Simulation Logic ---
+  useEffect(() => {
+    if (isFinished) {
+      // Tamamlandığında her şeyi "completed" yap
+      setTasks(currentTasks => 
+        currentTasks.map(t => ({
+          ...t,
+          status: "completed",
+          subtasks: t.subtasks.map(s => ({ ...s, status: "completed" }))
+        }))
+      );
+      // Hepsini aç ki tam görünüm olsun
+      setExpandedTasks(currentTasks => currentTasks.map(t => t.id));
+      return;
+    }
+
+    if (!isSimulating) return;
+
+    const SIMULATION_SPEED_MS = 2500; // 2.5 saniyede bir adım
+    
+    const interval = setInterval(() => {
+      setTasks(currentTasks => {
+        const nextTasks = [...currentTasks];
+        let stateChanged = false;
+        
+        for (let i = 0; i < nextTasks.length; i++) {
+          if (stateChanged) break;
+          
+          let task = { ...nextTasks[i] };
+          
+          if (task.status === "completed") continue;
+          
+          // Ana görev henüz başlamamışsa başlat ve o menüyü genişlet
+          if (task.status === "pending") {
+             task.status = "in-progress";
+             nextTasks[i] = task;
+             setExpandedTasks(prev => prev.includes(task.id) ? prev : [...prev, task.id]);
+             stateChanged = true;
+             break;
+          }
+          
+          // Görev in-progress ise alt görevleri ilerlet
+          let allSubCompleted = true;
+          const newSubtasks = [...task.subtasks];
+          
+          for (let j = 0; j < newSubtasks.length; j++) {
+            let sub = { ...newSubtasks[j] };
+            if (sub.status === "completed") continue;
+            
+            allSubCompleted = false;
+            
+            // Sıradaki pending ise in-progress yap
+            if (sub.status === "pending") {
+              sub.status = "in-progress";
+              newSubtasks[j] = sub;
+              stateChanged = true;
+              break;
+            } 
+            // Zaten in-progress ise completed yap
+            else if (sub.status === "in-progress") {
+              sub.status = "completed";
+              newSubtasks[j] = sub;
+              stateChanged = true;
+              break;
+            }
+          }
+          
+          if (allSubCompleted) {
+            task.status = "completed";
+            // Bir sonraki görevi açmak için (eğer varsa)
+            if (i + 1 < nextTasks.length) {
+              const nextId = nextTasks[i + 1].id;
+              setExpandedTasks(prev => prev.includes(nextId) ? prev : [...prev, nextId]);
+            }
+          }
+          
+          task.subtasks = newSubtasks;
+          nextTasks[i] = task;
+          
+          if (stateChanged) break;
+        }
+        
+        return nextTasks;
+      });
+    }, SIMULATION_SPEED_MS);
+
+    return () => clearInterval(interval);
+  }, [isSimulating, isFinished]);
+  // -------------------------
 
   // Toggle subtask expansion
   const toggleSubtaskExpansion = (taskId: string, subtaskId: string) => {
