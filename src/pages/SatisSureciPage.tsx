@@ -130,40 +130,46 @@ export const SatisSureciPage = () => {
     updateData({ seoTags: tags });
   };
 
+  const extractPriceFromReport = (reportText?: string | null) => {
+    if (!reportText) return null;
+    
+    // 1. JSON parse
+    try {
+      const parsed = JSON.parse(reportText);
+      if (parsed.onerilen_satis_fiyati) return String(parsed.onerilen_satis_fiyati);
+    } catch(e) {}
+
+    // 2. Regex ile farklı markdown formatlarından çekme
+    const patterns = [
+      /önerilen satış fiyatı[^\d]*?(\d[\d.,]*)\s*tl/i,
+      /(\d[\d.,]*)\s*tl[^\n]*?önerilen/i,
+      /en az\s*(\d[\d.,]*)\s*tl/i,
+      /(\d[\d.,]*)\s*tl\s*satış fiyatı ile/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = reportText.match(pattern);
+      if (match) {
+        let raw = match[1];
+        raw = raw.replace(/\./g, '');
+        raw = raw.split(',')[0];
+        return raw;
+      }
+    }
+    return null;
+  };
+
   // Seçili ürün veya herhangi tamamlanmış rapordaki önerilen fiyatı çek
   const getRecommendedPrice = () => {
     const productName = formData.sourceType === 'analyzed'
       ? formData.selectedProduct
       : formData.productName;
-    // Önce ürün adına göre eşleşen raporu bul, yoksa ilk tamamlanmış raporu al
     const report = productName
       ? (completedReports.find(r => r.product_name === productName) || completedReports[0])
       : completedReports[0];
+      
     if (!report || !report.report_json) return null;
-    
-    // 1. JSON formatında kayıtlıysa (eski raporlar)
-    try {
-      const parsed = JSON.parse(report.report_json);
-      if (parsed.onerilen_satis_fiyati) return String(parsed.onerilen_satis_fiyati);
-    } catch(e) {}
-    
-    // 2. Markdown formatındaysa (yeni raporlar) — regex ile fiyat çek
-    // "**265 TL**" veya "265 TL" veya "265,00 TL" formatlarını yakala
-    const text = report.report_json;
-    const patterns = [
-      /önerilen satış fiyatı[:\s*]+\**\s*(\d[\d.,]*)\s*tl/i,
-      /\*\*(\d[\d.,]+)\s*TL\*\*[^\n]*öneri/i,
-      /öneri[^\n]*\*\*(\d[\d.,]+)\s*TL\*\*/i,
-    ];
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      if (match) {
-        // Virgülü noktaya çevir, nokta binlik ayracıysa temizle
-        const raw = match[1].replace(/\./g, '').replace(',', '.');
-        return raw;
-      }
-    }
-    return null;
+    return extractPriceFromReport(report.report_json);
   };
   const recommendedPrice = getRecommendedPrice();
 
@@ -256,12 +262,10 @@ export const SatisSureciPage = () => {
                         
                         const report = completedReports.find(r => r.product_name === selectedName);
                         if (report && report.report_json) {
-                          try {
-                            const parsed = JSON.parse(report.report_json);
-                            if (parsed.onerilen_satis_fiyati) {
-                              defaultPrice = String(parsed.onerilen_satis_fiyati);
-                            }
-                          } catch (err) {}
+                          const extracted = extractPriceFromReport(report.report_json);
+                          if (extracted) {
+                            defaultPrice = extracted;
+                          }
                         }
                         
                         updateData({ selectedProduct: selectedName, price: defaultPrice });
