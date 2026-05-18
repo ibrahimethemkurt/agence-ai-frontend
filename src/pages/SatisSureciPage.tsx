@@ -349,7 +349,7 @@ export const SatisSureciPage = () => {
                   <Wand2 className="text-[#A07CFE] mb-6 animate-pulse" size={64} />
                   <h3 className="text-2xl font-bold text-white mb-2">Ajanlar Çalışıyor...</h3>
                   <p className="text-[#737373] text-center max-w-sm">
-                     Ürün görseliniz optimize ediliyor (arka plan/parlaklık) ve platformlara uygun SEO başlık/açıklamaları Gemini tarafından üretiliyor.
+                     Ürün görselinin arka planı yapay zeka ile temizleniyor ve platformlara uygun SEO başlık/açıklamaları Gemini tarafından üretiliyor.
                   </p>
                </div>
             ) : (
@@ -372,7 +372,7 @@ export const SatisSureciPage = () => {
                            </div>
                            <div className="flex-1 bg-[#1a1a1a] border border-green-500/30 rounded-xl p-2 relative shadow-[0_0_15px_rgba(34,197,94,0.1)]">
                               <span className="absolute top-2 left-2 bg-green-500/80 px-2 py-1 text-xs rounded text-black font-bold backdrop-blur">Optimize</span>
-                              <img src={formData.processedPhotoUrl} alt="Processed" className="w-full h-40 object-cover rounded-lg" />
+                              <img src={formData.processedPhotoUrl} alt="Processed" className="w-full h-40 object-contain rounded-lg bg-[#111]" />
                            </div>
                         </div>
                      </div>
