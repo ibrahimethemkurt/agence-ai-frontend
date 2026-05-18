@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, PlusCircle, MinusCircle, History, ChevronLeft, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { api } from '../../../lib/api';
+import { PlatformLogo } from '../../../components/PlatformLogo';
 
 // --- TYPE DEFINITIONS ---
 type QuickAction = {
@@ -167,7 +168,7 @@ export const FinancialDashboard = ({ activities = [] }: { activities?: any[] }) 
       </motion.div>
 
       {/* Recent Activity */}
-      <motion.div variants={itemVariants} className="flex-1 flex flex-col">
+      <motion.div variants={itemVariants} className="flex-1 flex flex-col min-h-0">
         <div className="flex items-center gap-2 mb-4">
           <History className="w-4 h-4 text-[#737373]" />
           <h2 className="text-sm font-medium text-[#a3a3a3]">Geçmiş Aktiviteler</h2>
@@ -176,7 +177,7 @@ export const FinancialDashboard = ({ activities = [] }: { activities?: any[] }) 
         {filteredActivities.length > 0 ? (
           <motion.ul
             variants={containerVariants}
-            className="space-y-1"
+            className="space-y-1 flex-1 overflow-y-auto pr-2 custom-scrollbar"
           >
             {filteredActivities.map((activity) => (
               <motion.li
@@ -185,9 +186,11 @@ export const FinancialDashboard = ({ activities = [] }: { activities?: any[] }) 
                 className="flex items-center justify-between p-2 hover:bg-[#1a1a1a] rounded-xl transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <LogoIcon 
-                    letter={activity.title.charAt(0)} 
-                    className={activity.amount > 0 ? "bg-green-500" : "bg-red-500"} 
+                  <PlatformLogo
+                    title={activity.title}
+                    rawType={activity.rawType}
+                    amount={activity.amount}
+                    size={36}
                   />
                   <div className="flex-1 min-w-0 pr-4">
                     <p className="font-medium text-sm text-white truncate">{activity.title}</p>

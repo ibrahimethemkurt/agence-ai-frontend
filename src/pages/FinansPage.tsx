@@ -5,6 +5,7 @@ import { PeriodSelector } from '../features/finans/components/PeriodSelector';
 import { FinansSummary } from '../features/finans/components/FinansSummary';
 import { RevenueExpenseChart } from '../features/finans/components/RevenueExpenseChart';
 import { FinancialDashboard } from '../features/finans/components/FinancialDashboard';
+import { PlatformLogo } from '../components/PlatformLogo';
 import { Search } from 'lucide-react';
 
 export const FinansPage = () => {
@@ -81,12 +82,18 @@ export const FinansPage = () => {
 
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {incomes.filter((item: any) => item.title.toLowerCase().includes(gelirSearch.toLowerCase())).map((item: any, i: number) => (
-              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a] gap-4">
+              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a] gap-3">
+                <PlatformLogo
+                  title={item.title}
+                  rawType={item.rawType}
+                  amount={item.amount}
+                  size={36}
+                />
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-white truncate">{item.title}</p>
-                  <p className="text-sm text-[#a3a3a3]">{item.time}</p>
+                  <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+                  <p className="text-xs text-[#a3a3a3]">{item.time}</p>
                 </div>
-                <span className="text-base font-mono font-bold text-[#22c55e] shrink-0">
+                <span className="text-sm font-mono font-bold text-[#22c55e] shrink-0">
                   +₺{item.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
@@ -126,12 +133,18 @@ export const FinansPage = () => {
 
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {expenses.filter((item: any) => item.title.toLowerCase().includes(giderSearch.toLowerCase())).map((item: any, i: number) => (
-              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a] gap-4">
+              <div key={i} className="flex justify-between items-center p-3 hover:bg-[#1a1a1a] rounded-xl transition-colors border border-transparent hover:border-[#2a2a2a] gap-3">
+                <PlatformLogo
+                  title={item.title}
+                  rawType={item.rawType}
+                  amount={item.amount}
+                  size={36}
+                />
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-white truncate">{item.title}</p>
-                  <p className="text-sm text-[#a3a3a3]">{item.time}</p>
+                  <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+                  <p className="text-xs text-[#a3a3a3]">{item.time}</p>
                 </div>
-                <span className="text-base font-mono font-bold text-[#ef4444] shrink-0">
+                <span className="text-sm font-mono font-bold text-[#ef4444] shrink-0">
                   -₺{Math.abs(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>

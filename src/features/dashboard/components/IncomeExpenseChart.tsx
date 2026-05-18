@@ -41,7 +41,7 @@ export const IncomeExpenseChart: React.FC<Props> = ({ data }) => {
         </div>
         <div className="flex-1 min-h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 60, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
@@ -54,13 +54,14 @@ export const IncomeExpenseChart: React.FC<Props> = ({ data }) => {
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1E1E1E" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(val) => `₺${new Intl.NumberFormat('tr-TR', { notation: 'compact' }).format(val)}`} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(val) => val === 0 ? '₺0' : `₺${new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 }).format(val)}`} tickMargin={8} width={55} />
               <Tooltip 
                 contentStyle={{ backgroundColor: '#121212', borderColor: '#2E2E2E', borderRadius: '12px', color: '#fff' }}
                 itemStyle={{ color: '#fff' }}
+                formatter={(val: number) => `₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)}`}
               />
-              <Area type="monotone" dataKey="income" name="Gelir" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
-              <Area type="monotone" dataKey="expense" name="Gider" stroke="#EF4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
+              <Area type="monotone" dataKey="income" name="Gelir" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" dot={false} animationDuration={800} animationEasing="ease-out" />
+              <Area type="monotone" dataKey="expense" name="Gider" stroke="#EF4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" dot={false} animationDuration={800} animationEasing="ease-out" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
