@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
+import { useToast } from '../../context/ToastContext';
 import {
   LayoutDashboard,
   Settings,
@@ -54,6 +55,7 @@ const SETTINGS_GROUP = {
 
 export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: boolean, toggleSidebar?: () => void }) => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   return (
     <aside className={`h-screen bg-[#0A0A0A]/40 backdrop-blur-xl border-r border-[var(--color-border)] flex flex-col p-4 md:p-6 fixed left-0 top-0 transition-all duration-300 ease-in-out z-20 overflow-hidden whitespace-nowrap ${isCollapsed ? 'w-[80px]' : 'w-[240px]'}`}>
@@ -194,7 +196,20 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
                   Profili Düzenle
                 </Menu.Item>
                 <Menu.Separator className="my-1 h-px bg-[#2a2a2a]" />
-                <Menu.Item value="logout" className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 rounded-lg hover:bg-red-500/10 cursor-pointer outline-none transition-colors">
+                <Menu.Item
+                  value="logout"
+                  onClick={() => {
+                    const confirmLogout = window.confirm("Çıkış yapmak istediğinizden emin misiniz?");
+                    if (confirmLogout) {
+                      showToast("Oturum kapatılıyor, yönlendiriliyorsunuz...", "error", 2000);
+                      setTimeout(() => {
+                        localStorage.removeItem('access_token');
+                        navigate('/login');
+                      }, 1500);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 rounded-lg hover:bg-red-500/10 cursor-pointer outline-none transition-colors"
+                >
                   Çıkış Yap
                 </Menu.Item>
               </Menu.Content>
