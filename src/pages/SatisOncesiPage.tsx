@@ -28,21 +28,60 @@ type AnalysisStatus = 'idle' | 'bekliyor' | 'processing' | 'completed' | 'failed
 export const SatisOncesiPage = () => {
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>({
-    productName: '',
-    purchasePrice: '',
-    stock: '',
-    shippingCost: '',
-    taxRate: '20',
-    commissionRate: '15',
+  const [currentStep, setCurrentStep] = useState<number>(() => {
+    const saved = sessionStorage.getItem('satisOncesi_currentStep');
+    return saved ? parseInt(saved, 10) : 1;
   });
 
-  const [analysisId, setAnalysisId] = useState<number | null>(null);
-  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>('idle');
-  const [reportJson, setReportJson] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>(() => {
+    const saved = sessionStorage.getItem('satisOncesi_formData');
+    return saved ? JSON.parse(saved) : {
+      productName: '',
+      purchasePrice: '',
+      stock: '',
+      shippingCost: '',
+      taxRate: '20',
+      commissionRate: '15',
+    };
+  });
+
+  const [analysisId, setAnalysisId] = useState<number | null>(() => {
+    const saved = sessionStorage.getItem('satisOncesi_analysisId');
+    return saved ? parseInt(saved, 10) : null;
+  });
+
+  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>(() => {
+    const saved = sessionStorage.getItem('satisOncesi_analysisStatus');
+    return saved ? (saved as AnalysisStatus) : 'idle';
+  });
+
+  const [reportJson, setReportJson] = useState<string | null>(() => {
+    const saved = sessionStorage.getItem('satisOncesi_reportJson');
+    return saved ? saved : null;
+  });
+
   const [apiError, setApiError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    sessionStorage.setItem('satisOncesi_currentStep', currentStep.toString());
+  }, [currentStep]);
+
+  useEffect(() => {
+    sessionStorage.setItem('satisOncesi_formData', JSON.stringify(formData));
+  }, [formData]);
+
+  useEffect(() => {
+    if (analysisId) sessionStorage.setItem('satisOncesi_analysisId', analysisId.toString());
+  }, [analysisId]);
+
+  useEffect(() => {
+    sessionStorage.setItem('satisOncesi_analysisStatus', analysisStatus);
+  }, [analysisStatus]);
+
+  useEffect(() => {
+    if (reportJson) sessionStorage.setItem('satisOncesi_reportJson', reportJson);
+  }, [reportJson]);
 
   const updateData = (data: Partial<FormData>) =>
     setFormData(prev => ({ ...prev, ...data }));
@@ -364,10 +403,21 @@ export const SatisOncesiPage = () => {
                 </p>
                 <div className="flex gap-4 mt-8 w-full max-w-md">
                   <button
-                    onClick={() => navigate('/analizler')}
+                    onClick={() => {
+                      sessionStorage.removeItem('satisOncesi_currentStep');
+                      sessionStorage.removeItem('satisOncesi_formData');
+                      sessionStorage.removeItem('satisOncesi_analysisId');
+                      sessionStorage.removeItem('satisOncesi_analysisStatus');
+                      sessionStorage.removeItem('satisOncesi_reportJson');
+                      setCurrentStep(1);
+                      setFormData({ productName: '', purchasePrice: '', stock: '', shippingCost: '', taxRate: '20', commissionRate: '15' });
+                      setAnalysisId(null);
+                      setAnalysisStatus('idle');
+                      setReportJson(null);
+                    }}
                     className="flex-1 border border-white/10 text-white/70 rounded-2xl px-6 py-4 font-medium hover:bg-white/5 transition-colors"
                   >
-                    Analizleri Gör
+                    Yeni Analiz
                   </button>
                   <button
                     onClick={() => navigate('/ajanlar/satis-sureci')}

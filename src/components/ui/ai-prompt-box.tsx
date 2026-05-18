@@ -324,7 +324,6 @@ interface PromptInputBoxProps {
 export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref: React.Ref<HTMLDivElement>) => {
   const { onSend = () => {}, isLoading = false, placeholder = "Mesajınızı yazın...", className, activeAgent = 'eticaret', onAgentChange } = props;
   const [input, setInput] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
   const promptBoxRef = useRef<HTMLDivElement>(null);
 
   const handleToggleChange = (value: 'eticaret' | 'danisman') => {
@@ -342,13 +341,6 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
     }
   };
 
-  const handleStartRecording = () => console.log("Started recording");
-
-  const handleStopRecording = (duration: number) => {
-    setIsRecording(false);
-    onSend(`[Sesli Mesaj - ${duration} saniye]`);
-  };
-
   const hasContent = input.trim() !== "";
 
   return (
@@ -359,17 +351,13 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
       onSubmit={handleSubmit}
       className={cn(
         "w-full bg-[#121212] border-[#2a2a2a] shadow-2xl transition-all duration-300 ease-in-out",
-        isRecording && "border-red-500/70",
         className
       )}
-      disabled={isLoading || isRecording}
+      disabled={isLoading}
       ref={ref || promptBoxRef}
     >
       <div
-        className={cn(
-          "transition-all duration-300",
-          isRecording ? "h-0 overflow-hidden opacity-0" : "opacity-100"
-        )}
+        className="transition-all duration-300 opacity-100"
       >
         <PromptInputTextarea
           placeholder={placeholder}
@@ -377,20 +365,9 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
         />
       </div>
 
-      {isRecording && (
-        <VoiceRecorder
-          isRecording={isRecording}
-          onStartRecording={handleStartRecording}
-          onStopRecording={handleStopRecording}
-        />
-      )}
-
       <PromptInputActions className="flex items-center justify-between gap-2 p-0 pt-1 mt-1">
         <div
-          className={cn(
-            "flex items-center gap-1 transition-opacity duration-300",
-            isRecording ? "opacity-0 invisible h-0" : "opacity-100 visible"
-          )}
+          className="flex items-center gap-1 transition-opacity duration-300 opacity-100 visible"
         >
           <div className="flex items-center mt-1">
             <button
@@ -469,12 +446,10 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
           <PromptInputAction
             tooltip={
               isLoading
-                ? "Durdur"
-                : isRecording
-                ? "Kaydı bitir"
+                ? "İşleniyor..."
                 : hasContent
                 ? "Gönder"
-                : "Sesli Mesaj"
+                : ""
             }
           >
             <Button
@@ -482,27 +457,19 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
               size="icon"
               className={cn(
                 "h-8 w-8 rounded-full transition-all duration-200",
-                isRecording
-                  ? "bg-transparent hover:bg-[#2a2a2a] text-red-500 hover:text-red-400"
-                  : hasContent
+                hasContent
                   ? "bg-white hover:bg-white/80 text-black"
-                  : "bg-transparent hover:bg-[#2a2a2a] text-[#737373] hover:text-white"
+                  : "bg-transparent text-[#737373] cursor-not-allowed opacity-50"
               )}
               onClick={() => {
-                if (isRecording) setIsRecording(false);
-                else if (hasContent) handleSubmit();
-                else setIsRecording(true);
+                if (hasContent && !isLoading) handleSubmit();
               }}
-              disabled={isLoading && !hasContent}
+              disabled={isLoading || !hasContent}
             >
               {isLoading ? (
                 <Square className="h-4 w-4 fill-black animate-pulse" />
-              ) : isRecording ? (
-                <StopCircle className="h-4 w-4 text-red-500" />
-              ) : hasContent ? (
-                <ArrowUp className="h-4 w-4 text-black" />
               ) : (
-                <Mic className="h-4 w-4 transition-colors" />
+                <ArrowUp className="h-4 w-4 transition-colors" />
               )}
             </Button>
           </PromptInputAction>
