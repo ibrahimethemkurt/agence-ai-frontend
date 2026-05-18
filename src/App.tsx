@@ -18,6 +18,7 @@ import { AyarlarPage } from './pages/AyarlarPage';
 import { YardimPage } from './pages/YardimPage';
 import { SignInPage } from './components/sign-in';
 import { RegisterPage } from './components/register';
+import { LandingPage } from './pages/LandingPage';
 
 import './styles/tokens.css';
 
@@ -56,7 +57,7 @@ const Layout = () => {
 
       <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
       <div className={`flex flex-col min-h-screen transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[240px]'}`}>
-        <TopBar toggleAIAssistant={() => setIsAIAssistantOpen(true)} />
+        <TopBar toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} toggleAIAssistant={() => setIsAIAssistantOpen(true)} />
         <main className="flex-1 p-8">
           <Outlet />
         </main>
@@ -76,21 +77,22 @@ const App = () => {
         <NotificationsContext.Provider value={{ notifications: [], isConnected: true }}>
           <BrowserRouter>
             <Routes>
-              <Route path="/login" element={<SignInPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Navigate to="/login" replace />} />
-                <Route path="dashboard" element={<DashboardPage />} />
-                <Route path="finans" element={<FinansPage />} />
-                <Route path="analizler" element={<AnalizlerPage />} />
-                <Route path="satista-olan-urunler" element={<SatistaOlanUrunlerPage />} />
-                <Route path="ajanlar">
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<SignInPage onSignIn={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onCreateAccount={() => window.location.href = '/register'} />} />
+              <Route path="/register" element={<RegisterPage onRegister={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onSignInClick={() => window.location.href = '/login'} />} />
+              
+              <Route element={<Layout />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/finans" element={<FinansPage />} />
+                <Route path="/analizler" element={<AnalizlerPage />} />
+                <Route path="/satista-olan-urunler" element={<SatistaOlanUrunlerPage />} />
+                <Route path="/ajanlar">
                   <Route path="satis-oncesi" element={<SatisOncesiPage />} />
                   <Route path="satis-sureci" element={<SatisSureciPage />} />
                   <Route path="satis-sonrasi" element={<SatisSonrasiPage />} />
                 </Route>
-                <Route path="ayarlar" element={<AyarlarPage />} />
-                <Route path="yardim" element={<YardimPage />} />
+                <Route path="/ayarlar" element={<AyarlarPage />} />
+                <Route path="/yardim" element={<YardimPage />} />
               </Route>
             </Routes>
           </BrowserRouter>

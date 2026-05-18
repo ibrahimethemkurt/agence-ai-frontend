@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Mail, Bell, Search, AlertTriangle, ShieldAlert, FlaskConical, Loader2 } from "lucide-react";
+import { Sparkles, Mail, Bell, Search, AlertTriangle, ShieldAlert, FlaskConical, Loader2, Menu as MenuIcon } from "lucide-react";
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
 import { useInsights, type Insight, type InsightType } from '../../hooks/useInsights';
@@ -18,18 +18,23 @@ const typeIcon = (type: InsightType) => {
   return <AlertTriangle className="w-4 h-4 text-yellow-400 shrink-0" />;
 };
 
-export const TopBar = ({ toggleAIAssistant }: { toggleAIAssistant?: () => void }) => {
+export const TopBar = ({ toggleAIAssistant, toggleSidebar }: { toggleAIAssistant?: () => void, toggleSidebar?: () => void }) => {
   const navigate = useNavigate();
   const { insights, loading, unreadCount, markAllRead } = useInsights();
 
   const handleBellOpen = () => {
     markAllRead();
   };
-
   return (
-    <header className="h-[72px] bg-[#0A0A0A]/40 backdrop-blur-xl border-b border-[var(--color-border)] flex items-center justify-between px-8 sticky top-0 z-10">
-      <div className="flex-1 max-w-md">
-        <div className="relative group">
+    <header className="h-[72px] bg-[#0A0A0A]/40 backdrop-blur-xl border-b border-[var(--color-border)] flex items-center justify-between px-6 sticky top-0 z-10">
+      <div className="flex items-center gap-4 flex-1 max-w-md">
+        <button 
+          onClick={toggleSidebar}
+          className="text-[var(--color-fg)] opacity-50 hover:opacity-100 transition-opacity p-2 rounded-md hover:bg-[var(--color-surface)]"
+        >
+          <MenuIcon className="w-5 h-5" />
+        </button>
+        <div className="relative group flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)] group-focus-within:text-[var(--color-accent)] transition-colors" />
           <input
             type="text"

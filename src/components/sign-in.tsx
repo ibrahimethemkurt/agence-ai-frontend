@@ -73,6 +73,9 @@ export const SignInPage: React.FC = () => {
       <section className="flex-1 flex items-center justify-center p-8 z-10">
         <div className="w-full max-w-md">
           <Stagger className="flex flex-col gap-6" staggerDelay={0.25}>
+            <Reveal variant="fadeUp" className="mb-4">
+              <img src="/pazaralogo.svg" alt="Pazara" className="h-14 w-auto" />
+            </Reveal>
             <Reveal variant="fadeUp">
               <h1 className="text-4xl md:text-5xl font-display font-semibold leading-tight text-[var(--color-fg)]">
                 <span className="font-light text-[var(--color-fg)] tracking-tighter">Hoş Geldiniz!</span>

@@ -97,6 +97,9 @@ export const RegisterPage: React.FC = () => {
       <section className="flex-1 flex items-center justify-center p-8 z-10 overflow-y-auto hidden-scrollbar">
         <div className="w-full max-w-md py-4">
           <Stagger className="flex flex-col gap-4" staggerDelay={0.25}>
+            <Reveal variant="fadeUp" className="mb-3">
+              <img src="/pazaralogo.svg" alt="Pazara" className="h-14 w-auto" />
+            </Reveal>
             <Reveal variant="fadeUp">
               <h1 className="text-3xl md:text-4xl font-display font-semibold leading-tight text-[var(--color-fg)]">
                 <span className="font-light tracking-tighter">Hesap Oluşturun</span>

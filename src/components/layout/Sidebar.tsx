@@ -60,25 +60,15 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
   return (
     <aside className={`h-screen bg-[#0A0A0A]/40 backdrop-blur-xl border-r border-[var(--color-border)] flex flex-col p-4 md:p-6 fixed left-0 top-0 transition-all duration-300 ease-in-out z-20 overflow-hidden whitespace-nowrap ${isCollapsed ? 'w-[80px]' : 'w-[240px]'}`}>
 
-      <div className={`flex items-center ${isCollapsed ? 'flex-col gap-4' : 'justify-between'}`}>
+      <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'pl-2'}`}>
         {!isCollapsed ? (
-          <div className="text-[var(--color-fg)] font-display text-xl font-bold tracking-wide">
-            AjansAI
-          </div>
+          <img src="/pazaralogo.svg" alt="Pazara" className="h-10 w-auto" />
         ) : (
-          <div className="text-[var(--color-fg)] font-display text-xl font-bold tracking-wide">
-            A
-          </div>
+          <img src="/pazaralogo.svg" alt="Pazara" className="h-8 w-8 object-contain" />
         )}
-        <button
-          onClick={toggleSidebar}
-          className="text-[var(--color-fg)] opacity-50 hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-[var(--color-surface)]"
-        >
-          <MenuIcon className="w-5 h-5" />
-        </button>
       </div>
 
-      <nav className={`flex flex-col gap-8 flex-1 mt-24 ${isCollapsed ? 'items-center' : ''}`}>
+      <nav className={`flex flex-col gap-8 flex-1 mt-12 ${isCollapsed ? 'items-center' : ''}`}>
         {MAIN_GROUPS.map((group) => (
           <div key={group.title} className={isCollapsed ? 'w-full flex flex-col items-center' : ''}>
             {!isCollapsed && (
