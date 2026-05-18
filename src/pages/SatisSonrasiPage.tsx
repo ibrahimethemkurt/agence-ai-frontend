@@ -46,7 +46,7 @@ export const SatisSonrasiPage = () => {
       {activeTab === 'İadeler' && <IadelerTab />}
       {activeTab !== 'Operasyon Merkezi' && activeTab !== 'Yorumlar' && activeTab !== 'İadeler' && (
         <div className="p-12 text-center border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-muted)]">
-          Bu sekmenin içeriği yakında eklenecektir.
+          Bu sekmenin içeriği eklenecektir.
         </div>
       )}
 

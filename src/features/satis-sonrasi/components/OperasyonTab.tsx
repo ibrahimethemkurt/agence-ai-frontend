@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, AlertTriangle, Sparkles, MessageSquare } from 'lucide-react';
@@ -6,56 +6,49 @@ import { Reveal } from '../../../components/animation/Reveal';
 import { GlowCard } from '../../../components/ui/glow-card';
 import { TASK_DEFINITIONS, ActiveTaskContent, type TaskId, type TaskDef } from '../../dashboard/components/InteractiveTaskHub';
 import { BorderBeam } from '../../../components/ui/border-beam';
-import { api } from '../../../lib/api';
+
+const OPERASYON_PRODUCTS = [
+  {
+    id: 'p1',
+    name: 'Kablosuz Kulaklık V2',
+    variants: 'Beyaz',
+    sold: 1245,
+    stock: 12,
+    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=100&q=80',
+    status: 'critical',
+    aiSummary: "Müşterilerin %80'i ses kalitesinden memnun, ancak son haftadaki yorumların %60'ında kargo gecikmeleri raporlanmış. Ürün puanı düşüşte, acil lojistik müdahalesi önerilir.",
+    task: 'stok' as TaskId, // Will map to "Stok Uyarısı"
+  },
+  {
+    id: 'p2',
+    name: 'Akıllı Saat Pro Max',
+    variants: 'Siyah, Gümüş',
+    sold: 856,
+    stock: 145,
+    image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=100&q=80',
+    status: 'warning',
+    aiSummary: "Batarya ömrü genel olarak olumlu bulunuyor fakat yazılım güncellemesi sonrası donma yaşandığı belirtilmiş. Bekleyen siparişlerin gönderilmeden önce incelenmesi tavsiye edilir.",
+    task: 'siparis' as TaskId, // Will map to "Sipariş Geldi"
+  },
+  {
+    id: 'p3',
+    name: 'Mekanik Klavye Blue Switch',
+    variants: 'Siyah',
+    sold: 2130,
+    stock: 320,
+    image: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=100&q=80',
+    status: 'good',
+    aiSummary: "Kullanıcılar tuş hassasiyetini ve aydınlatmayı oldukça beğenmiş. Herhangi bir donanımsal veya kargo odaklı şikayet tespit edilmedi. Satışlar stabil.",
+    task: null,
+  }
+];
 
 export const OperasyonTab = () => {
   const [activeTask, setActiveTask] = useState<TaskId | null>(null);
   const [isSuccessAnim, setIsSuccessAnim] = useState(false);
   const [successMessage, setSuccessMessage] = useState("İşlem Başarılı!");
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchOperations = async () => {
-      try {
-        setLoading(true);
-        const listings = await api.getListings();
-        
-        const mappedProducts = listings.map((l: any) => {
-          let status = 'good';
-          let task: TaskId | null = null;
-          let aiSummary = "Ürün performansı stabil. Mevcut siparişler ve stok seviyeleri kontrol altında.";
-
-          if (l.stock < 20) {
-            status = 'critical';
-            task = 'stok';
-            aiSummary = "Stok kritik seviyede! Müşteri talebi devam ediyor, acil tedarik planlaması yapılması önerilir.";
-          }
-
-          return {
-            id: String(l.id),
-            name: l.product_name,
-            variants: 'Standart', // MOCK for now
-            sold: l.sales_count || 0,
-            stock: l.stock || 0,
-            image: l.processed_photo_url || l.photo_url || 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=100&q=80',
-            status,
-            aiSummary,
-            task
-          };
-        });
-
-        setProducts(mappedProducts);
-      } catch (err) {
-        console.error("Operasyon verileri çekilemedi:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOperations();
-  }, []);
 
   const handleAction = (id: TaskId, isComplete: boolean, customMessage?: string) => {
     if (isComplete) {
@@ -120,7 +113,7 @@ export const OperasyonTab = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {products.map((product) => {
+                {OPERASYON_PRODUCTS.map((product) => {
                   const taskDef = product.task ? TASK_DEFINITIONS.find(t => t.id === product.task) : null;
                   
                   return (
