@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { PageTransition } from '../components/animation/PageTransition';
 import { OperasyonTab } from '../features/satis-sonrasi/components/OperasyonTab';
 import { YorumlarTab } from '../features/satis-sonrasi/components/YorumlarTab';
@@ -7,7 +7,7 @@ import { IadelerTab } from '../features/satis-sonrasi/components/IadelerTab';
 
 export const SatisSonrasiPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+
   
   const activeTab = searchParams.get('tab') || 'Operasyon Merkezi';
   

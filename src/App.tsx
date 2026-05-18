@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
 import Grainient from './components/animation/GrainientBackground';
@@ -54,7 +54,7 @@ const Layout = () => {
         />
       </div>
 
-      <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+      <Sidebar isCollapsed={isSidebarCollapsed} />
       <div className={`flex flex-col min-h-screen transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[240px]'}`}>
         <TopBar toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} toggleAIAssistant={() => setIsAIAssistantOpen(true)} />
         <main className="flex-1 p-8">

@@ -38,8 +38,6 @@ const GlowCard: React.FC<GlowCardProps> = ({
 
   useEffect(() => {
     const syncPointer = (e: PointerEvent) => {
-      const { clientX: x, clientY: y } = e;
-      
       if (cardRef.current) {
         const rect = cardRef.current.getBoundingClientRect();
         const x = e.clientX - rect.left;

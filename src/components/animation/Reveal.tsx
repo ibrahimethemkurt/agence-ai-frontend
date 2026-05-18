@@ -34,7 +34,7 @@ export const Reveal = ({ variant = 'fadeUp', delay = 0, children, className }: R
     },
     initial: "hidden",
     whileInView: "visible",
-    viewport: { once: true, margin: "-50px" }
+    viewport: { once: false, amount: 0.2, margin: "0px" }
   });
 
   return (
