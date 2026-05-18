@@ -102,6 +102,12 @@ export const SignInPage: React.FC = () => {
                     placeholder="Email adresinizi girin"
                     required
                     className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 rounded-2xl focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.currentTarget.closest('form')?.requestSubmit();
+                      }
+                    }}
                   />
                 </GlassInputWrapper>
               </Reveal>
@@ -116,8 +122,14 @@ export const SignInPage: React.FC = () => {
                       placeholder="Şifrenizi girin"
                       required
                       className="w-full bg-transparent text-[var(--color-fg)] text-sm p-4 pr-12 rounded-2xl focus:outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.closest('form')?.requestSubmit();
+                        }
+                      }}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center cursor-pointer">
                       {showPassword
                         ? <EyeOff className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />
                         : <Eye className="w-5 h-5 text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors" />}
@@ -150,7 +162,7 @@ export const SignInPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading || successRedirect}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-4 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
                 >
                   {successRedirect ? (
                     <span className="text-emerald-700 font-semibold animate-pulse">Başarıyla Giriş Yapıldı!</span>
@@ -179,7 +191,7 @@ export const SignInPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="text-[var(--color-accent)] hover:underline transition-colors"
+                  className="text-[var(--color-accent)] hover:underline transition-colors cursor-pointer"
                 >
                   Hesap Oluşturun
                 </button>

@@ -122,13 +122,37 @@ export const RegisterPage: React.FC = () => {
                   <div className="flex-1">
                     <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Ad</label>
                     <GlassInputWrapper>
-                      <input name="firstName" type="text" placeholder="Adınız" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
+                      <input
+                        name="firstName"
+                        type="text"
+                        placeholder="Adınız"
+                        required
+                        className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.currentTarget.closest('form')?.requestSubmit();
+                          }
+                        }}
+                      />
                     </GlassInputWrapper>
                   </div>
                   <div className="flex-1">
                     <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Soyad</label>
                     <GlassInputWrapper>
-                      <input name="lastName" type="text" placeholder="Soyadınız" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
+                      <input
+                        name="lastName"
+                        type="text"
+                        placeholder="Soyadınız"
+                        required
+                        className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.currentTarget.closest('form')?.requestSubmit();
+                          }
+                        }}
+                      />
                     </GlassInputWrapper>
                   </div>
                 </div>
@@ -137,14 +161,38 @@ export const RegisterPage: React.FC = () => {
               <Reveal variant="fadeUp">
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şirket Adı</label>
                 <GlassInputWrapper>
-                  <input name="company" type="text" placeholder="Şirketinizin adı" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
+                  <input
+                    name="company"
+                    type="text"
+                    placeholder="Şirketinizin adı"
+                    required
+                    className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.currentTarget.closest('form')?.requestSubmit();
+                      }
+                    }}
+                  />
                 </GlassInputWrapper>
               </Reveal>
 
               <Reveal variant="fadeUp">
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Email Adresiniz</label>
                 <GlassInputWrapper>
-                  <input name="email" type="email" placeholder="Email adresinizi girin" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none" />
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Email adresinizi girin"
+                    required
+                    className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 rounded-2xl focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.currentTarget.closest('form')?.requestSubmit();
+                      }
+                    }}
+                  />
                 </GlassInputWrapper>
               </Reveal>
 
@@ -152,8 +200,20 @@ export const RegisterPage: React.FC = () => {
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şifre</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Şifrenizi oluşturun" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
+                    <input
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Şifrenizi oluşturun"
+                      required
+                      className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.closest('form')?.requestSubmit();
+                        }
+                      }}
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center cursor-pointer">
                       {showPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)]" /> : <Eye className="w-5 h-5 text-[var(--color-muted)]" />}
                     </button>
                   </div>
@@ -164,8 +224,20 @@ export const RegisterPage: React.FC = () => {
                 <label className="text-xs font-medium text-[var(--color-muted)] mb-1.5 block">Şifre (Tekrar)</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Şifrenizi tekrar girin" required className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none" />
-                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-3 flex items-center">
+                    <input
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Şifrenizi tekrar girin"
+                      required
+                      className="w-full bg-transparent text-[var(--color-fg)] text-sm px-4 py-3 pr-12 rounded-2xl focus:outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.closest('form')?.requestSubmit();
+                        }
+                      }}
+                    />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-3 flex items-center cursor-pointer">
                       {showConfirmPassword ? <EyeOff className="w-5 h-5 text-[var(--color-muted)]" /> : <Eye className="w-5 h-5 text-[var(--color-muted)]" />}
                     </button>
                   </div>
@@ -200,7 +272,7 @@ export const RegisterPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={loading || successRedirect}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#EBEBEB] py-3.5 font-medium text-black hover:bg-white transition-all duration-300 disabled:opacity-90 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
                   >
                     {successRedirect ? (
                       <span className="text-emerald-700 font-semibold animate-pulse">Başarıyla Kayıt Olundu!</span>
@@ -220,7 +292,7 @@ export const RegisterPage: React.FC = () => {
                       />
                     )}
                   </button>
-                  <button type="button" className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors" title="Google ile Kayıt Ol">
+                  <button type="button" className="flex-none flex items-center justify-center w-[52px] border border-white/10 bg-[#0A0A0A] text-white rounded-2xl hover:bg-[#1A1A1A] transition-colors cursor-pointer" title="Google ile Kayıt Ol">
                     <GoogleIcon />
                   </button>
                 </div>
@@ -230,7 +302,7 @@ export const RegisterPage: React.FC = () => {
             <Reveal variant="fadeUp">
               <p className="text-center text-sm text-[var(--color-muted)] mt-2">
                 Zaten üye misiniz?{' '}
-                <button type="button" onClick={() => navigate('/login')} className="text-[var(--color-accent)] hover:underline transition-colors">
+                <button type="button" onClick={() => navigate('/login')} className="text-[var(--color-accent)] hover:underline transition-colors cursor-pointer">
                   Giriş Yapın
                 </button>
               </p>
