@@ -65,6 +65,7 @@ export const SatistaOlanUrunlerPage = () => {
             name: item.product_name,
             variants: item.status === "removed" ? "Pasif" : (item.status === "completed" || item.status === "published") ? "Yayınlandı" : "İşleniyor...",
             rawStatus: item.status,
+            rawPrice: item.price || 0,
             salePrice: `₺ ${(item.price || 0).toLocaleString('tr-TR', {minimumFractionDigits: 2})}`,
             purchasePrice: "Hesaplanıyor",
             inventory: `${item.stock || 0} adet`,
@@ -97,7 +98,7 @@ export const SatistaOlanUrunlerPage = () => {
     try { parsed = JSON.parse(product.seoData || '{}'); } catch(e) {}
     setEditItem(product);
     setDraftTitle(parsed.title || product.name);
-    setDraftPrice(product.salePrice.replace(/[^\d.,]/g, '').replace(',', '.'));
+    setDraftPrice(product.rawPrice ? String(product.rawPrice) : '0');
     setDraftDesc(parsed.description || '');
     const tagsString = parsed.tags ? (Array.isArray(parsed.tags) ? parsed.tags.join(', ') : parsed.tags) : '';
     setDraftTags(tagsString);
@@ -462,7 +463,7 @@ export const SatistaOlanUrunlerPage = () => {
 
                     {visibleColumns.has("inventory") && (
                       <td className="p-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${
+                        <span className={`whitespace-nowrap inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${
                           product.inventory === 'Tükendi' 
                             ? 'bg-red-500/10 text-red-400 border-red-500/20' 
                             : 'bg-[#1A1A1A] text-[var(--color-fg)] border-[var(--color-border)]'
@@ -474,7 +475,7 @@ export const SatistaOlanUrunlerPage = () => {
 
                     {visibleColumns.has("salesCount") && (
                       <td className="p-4">
-                        <span className="font-medium text-[#10B981] bg-[#10B981]/10 px-2.5 py-1 rounded-md text-xs border border-[#10B981]/20">
+                        <span className="whitespace-nowrap inline-flex items-center font-medium text-[#10B981] bg-[#10B981]/10 px-2.5 py-1 rounded-md text-xs border border-[#10B981]/20">
                           {product.salesCount} adet
                         </span>
                       </td>
