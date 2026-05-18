@@ -130,7 +130,7 @@ export const SatistaOlanUrunlerPage = () => {
   const handleSaveAll = async () => {
     if (!editItem) return;
     setIsSaving(true);
-    const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1';
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('access_token')}` };
     try {
       // SEO + title güncelle
@@ -177,7 +177,7 @@ export const SatistaOlanUrunlerPage = () => {
 
   const handleRemove = async (listingId: string) => {
     if (!confirm('Bu ürünü satıştan kaldırmak istediğinize emin misiniz?')) return;
-    const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1';
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('access_token')}` };
     try {
       await fetch(`${BASE}/listing/${listingId}/remove`, { method: 'PATCH', headers });
@@ -189,7 +189,7 @@ export const SatistaOlanUrunlerPage = () => {
   };
 
   const handleRepublish = async (listingId: string) => {
-    const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1';
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('access_token')}` };
     try {
       await fetch(`${BASE}/listing/${listingId}/republish`, { method: 'PATCH', headers });

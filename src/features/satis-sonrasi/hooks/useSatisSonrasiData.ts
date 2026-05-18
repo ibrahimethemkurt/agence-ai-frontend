@@ -12,7 +12,8 @@ export const useSatisSonrasiData = () => {
         // Wait, we need to add getOperations to api.ts first!
         // For now let's use standard fetch with token
         const token = localStorage.getItem('access_token');
-        const res = await fetch('http://localhost:8000/api/v1/support/operations', {
+        const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1';
+        const res = await fetch(`${apiBase}/support/operations`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
