@@ -12,8 +12,7 @@ import {
   PackageCheck,
   Landmark,
   ChartSpline,
-  ShoppingBag,
-  Menu as MenuIcon
+  ShoppingBag
 } from "lucide-react";
 
 const MAIN_GROUPS = [
@@ -53,7 +52,7 @@ const SETTINGS_GROUP = {
   ],
 };
 
-export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: boolean, toggleSidebar?: () => void }) => {
+export const Sidebar = ({ isCollapsed = false }: { isCollapsed?: boolean }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -106,7 +105,7 @@ export const Sidebar = ({ isCollapsed = false, toggleSidebar }: { isCollapsed?: 
                         <NavLink
                           key={sub.to}
                           to={sub.to}
-                          className={({ isActive }) => {
+                          className={() => {
                             const isSearchActive = window.location.search.includes(sub.to.split('?')[1]);
                             return `block rounded-md font-body text-xs transition-colors px-3 py-1.5 ${
                               isSearchActive

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Package, AlertTriangle, Sparkles, MessageSquare, ShieldAlert, FlaskConical, Brain } from 'lucide-react';
 import { Reveal } from '../../../components/animation/Reveal';
 import { GlowCard } from '../../../components/ui/glow-card';
-import { TASK_DEFINITIONS, ActiveTaskContent, type TaskId, type TaskDef } from '../../dashboard/components/InteractiveTaskHub';
+import { TASK_DEFINITIONS, ActiveTaskContent, type TaskId } from '../../dashboard/components/InteractiveTaskHub';
 import { BorderBeam } from '../../../components/ui/border-beam';
 import { useInsights, type InsightType } from '../../../hooks/useInsights';
 
@@ -132,7 +132,7 @@ export const OperasyonTab = () => {
   
   const navigate = useNavigate();
 
-  const handleAction = (id: TaskId, isComplete: boolean, customMessage?: string) => {
+  const handleAction = (_id: TaskId, isComplete: boolean, customMessage?: string) => {
     if (isComplete) {
       if (customMessage) setSuccessMessage(customMessage);
       else setSuccessMessage("İşlem Başarılı!");

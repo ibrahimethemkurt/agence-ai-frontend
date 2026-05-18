@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Reveal } from '../../../components/animation/Reveal';
 import { Radio } from '../../../components/radio';
 import {
-  MessageSquareText, Star, ThumbsUp, Filter,
+  MessageSquareText, Star, Filter,
   SmilePlus, Frown, ChevronDown, TrendingUp
 } from 'lucide-react';
 import {
@@ -214,8 +214,8 @@ export const YorumlarTab = () => {
                       label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
                         const RADIAN = Math.PI / 180;
                         const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                        const x = cx + radius * Math.cos(-(midAngle || 0) * RADIAN);
+                        const y = cy + radius * Math.sin(-(midAngle || 0) * RADIAN);
                         const labelText = index === 0 ? "Pozitif" : "Negatif";
                         return (
                           <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontWeight={700}>
