@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, Bell, Search, AlertTriangle, ShieldAlert, FlaskConical, Loader2, Menu as MenuIcon } from "lucide-react";
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
-import { useInsights, type Insight, type InsightType } from '../../hooks/useInsights';
+import { useInsights, type InsightType } from '../../hooks/useInsights';
 
 // Severity rengini döndür
 const severityColor: Record<string, string> = {

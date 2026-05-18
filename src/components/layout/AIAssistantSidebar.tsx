@@ -56,7 +56,7 @@ export const AIAssistantSidebar: React.FC<AIAssistantSidebarProps> = ({ isOpen, 
         };
         setMessages((prev) => [...prev, aiMsg]);
       })
-      .catch((err) => {
+      .catch((_err) => {
         const errorMsg: ChatMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',

@@ -78,8 +78,8 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<SignInPage onSignIn={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onCreateAccount={() => window.location.href = '/register'} />} />
-              <Route path="/register" element={<RegisterPage onRegister={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }} onSignInClick={() => window.location.href = '/login'} />} />
+              <Route path="/login" element={<SignInPage />} />
+              <Route path="/register" element={<RegisterPage />} />
               
               <Route element={<Layout />}>
                 <Route path="/dashboard" element={<DashboardPage />} />

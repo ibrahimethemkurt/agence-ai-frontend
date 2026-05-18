@@ -149,15 +149,11 @@ export default function Plan({ customTasks, isSimulating = false, isFinished = f
   useEffect(() => {
     if (isFinished) {
       // Tamamlandığında her şeyi "completed" yap
-      setTasks(currentTasks => 
-        currentTasks.map(t => ({
-          ...t,
-          status: "completed",
-          subtasks: t.subtasks.map(s => ({ ...s, status: "completed" }))
-        }))
-      );
-      // Hepsini aç ki tam görünüm olsun
-      setExpandedTasks(currentTasks => currentTasks.map(t => t.id));
+      setTasks(prev => {
+        const completed = prev.map(t => ({ ...t, status: 'completed', subtasks: t.subtasks.map(s => ({ ...s, status: 'completed' })) }));
+        setExpandedTasks(completed.map(t => t.id));
+        return completed;
+      });
       return;
     }
 

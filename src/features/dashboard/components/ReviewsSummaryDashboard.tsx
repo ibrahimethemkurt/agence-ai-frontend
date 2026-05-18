@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Reveal } from '../../../components/animation/Reveal';
 import { TrendingUp } from 'lucide-react';
 import {
@@ -136,9 +136,10 @@ export const ReviewsSummaryDashboard = () => {
                     stroke="#0A0A0A"
                     label={({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
                       const RADIAN = Math.PI / 180;
+                      const mid = midAngle ?? 0;
                       const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      const x = cx + radius * Math.cos(-mid * RADIAN);
+                      const y = cy + radius * Math.sin(-mid * RADIAN);
                       const labelText = index === 0 ? "Pozitif" : "Negatif";
                       return (
                         <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontWeight={700}>

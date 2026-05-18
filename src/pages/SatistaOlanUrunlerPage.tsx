@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { Reveal } from '../components/animation/Reveal';
 import { 
-  Download, Upload, Plus, Search, Filter, PanelLeftClose, 
+  Download, Plus, Search, Filter, PanelLeftClose, 
   Image as ImageIcon, MoreHorizontal, ChevronDown, ChevronLeft, ChevronRight,
   Package, Pencil, Trash2, X, Check, ShoppingCart
 } from 'lucide-react';

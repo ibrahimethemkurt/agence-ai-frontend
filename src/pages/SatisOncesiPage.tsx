@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { Reveal } from '../components/animation/Reveal';
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
@@ -6,87 +6,44 @@ import AgentPlan from '../components/ui/agent-plan';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { PresaleReportCard } from '../components/ui/PresaleReportCard';
+import { useSessionStorage, clearSessionStorageByPrefix } from '../hooks/useSessionStorage';
 
-const stepsData = [
+const STEPS = [
   { id: 1, title: 'Ürün Bilgisi' },
   { id: 2, title: 'Maliyet Detayları' },
   { id: 3, title: 'Yapay Zeka Analizi' },
   { id: 4, title: 'Sonuç' },
 ];
 
-type FormData = {
-  productName: string;
-  purchasePrice: string;
-  stock: string;
-  shippingCost: string;
-  taxRate: string;
-  commissionRate: string;
+const DEFAULT_FORM = {
+  productName: '',
+  purchasePrice: '',
+  stock: '',
+  shippingCost: '',
+  taxRate: '20',
+  commissionRate: '15',
 };
 
+type FormData = typeof DEFAULT_FORM;
 type AnalysisStatus = 'idle' | 'bekliyor' | 'processing' | 'completed' | 'failed';
 
 export const SatisOncesiPage = () => {
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState<number>(() => {
-    const saved = sessionStorage.getItem('satisOncesi_currentStep');
-    return saved ? parseInt(saved, 10) : 1;
-  });
+  const [currentStep, setCurrentStep]       = useSessionStorage<number>('satisOncesi_step', 1);
+  const [formData, setFormData]             = useSessionStorage<FormData>('satisOncesi_form', DEFAULT_FORM);
+  const [analysisId, setAnalysisId]         = useSessionStorage<number | null>('satisOncesi_analysisId', null);
+  const [analysisStatus, setAnalysisStatus] = useSessionStorage<AnalysisStatus>('satisOncesi_status', 'idle');
+  const [reportJson, setReportJson]         = useSessionStorage<string | null>('satisOncesi_report', null);
 
-  const [formData, setFormData] = useState<FormData>(() => {
-    const saved = sessionStorage.getItem('satisOncesi_formData');
-    return saved ? JSON.parse(saved) : {
-      productName: '',
-      purchasePrice: '',
-      stock: '',
-      shippingCost: '',
-      taxRate: '20',
-      commissionRate: '15',
-    };
-  });
-
-  const [analysisId, setAnalysisId] = useState<number | null>(() => {
-    const saved = sessionStorage.getItem('satisOncesi_analysisId');
-    return saved ? parseInt(saved, 10) : null;
-  });
-
-  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>(() => {
-    const saved = sessionStorage.getItem('satisOncesi_analysisStatus');
-    return saved ? (saved as AnalysisStatus) : 'idle';
-  });
-
-  const [reportJson, setReportJson] = useState<string | null>(() => {
-    const saved = sessionStorage.getItem('satisOncesi_reportJson');
-    return saved ? saved : null;
-  });
-
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useSessionStorage<string | null>('satisOncesi_apiError', null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    sessionStorage.setItem('satisOncesi_currentStep', currentStep.toString());
-  }, [currentStep]);
-
-  useEffect(() => {
-    sessionStorage.setItem('satisOncesi_formData', JSON.stringify(formData));
-  }, [formData]);
-
-  useEffect(() => {
-    if (analysisId) sessionStorage.setItem('satisOncesi_analysisId', analysisId.toString());
-  }, [analysisId]);
-
-  useEffect(() => {
-    sessionStorage.setItem('satisOncesi_analysisStatus', analysisStatus);
-  }, [analysisStatus]);
-
-  useEffect(() => {
-    if (reportJson) sessionStorage.setItem('satisOncesi_reportJson', reportJson);
-  }, [reportJson]);
 
   const updateData = (data: Partial<FormData>) =>
     setFormData(prev => ({ ...prev, ...data }));
 
-  const currentStepData = stepsData.find(s => s.id === currentStep);
+  const currentStepData = STEPS.find(s => s.id === currentStep);
+
 
   // --- API: Analizi başlat ---
   const startAnalysis = async () => {
@@ -168,7 +125,7 @@ export const SatisOncesiPage = () => {
     <PageTransition className="max-w-3xl mx-auto py-8">
       {/* Step Indicator */}
       <div className="flex justify-between items-end border-b border-[#2a2a2a] pb-6 mb-10 px-4">
-        {stepsData.map(step => {
+        {STEPS.map(step => {
           const isActive = currentStep === step.id;
           const isDone = currentStep > step.id;
           return (
@@ -404,16 +361,13 @@ export const SatisOncesiPage = () => {
                 <div className="flex gap-4 mt-8 w-full max-w-md">
                   <button
                     onClick={() => {
-                      sessionStorage.removeItem('satisOncesi_currentStep');
-                      sessionStorage.removeItem('satisOncesi_formData');
-                      sessionStorage.removeItem('satisOncesi_analysisId');
-                      sessionStorage.removeItem('satisOncesi_analysisStatus');
-                      sessionStorage.removeItem('satisOncesi_reportJson');
+                      clearSessionStorageByPrefix('satisOncesi_');
                       setCurrentStep(1);
-                      setFormData({ productName: '', purchasePrice: '', stock: '', shippingCost: '', taxRate: '20', commissionRate: '15' });
+                      setFormData(DEFAULT_FORM);
                       setAnalysisId(null);
                       setAnalysisStatus('idle');
                       setReportJson(null);
+                      setApiError(null);
                     }}
                     className="flex-1 border border-white/10 text-white/70 rounded-2xl px-6 py-4 font-medium hover:bg-white/5 transition-colors"
                   >
@@ -434,7 +388,7 @@ export const SatisOncesiPage = () => {
 
       {/* Step Counter */}
       <div className="text-center text-sm font-medium text-[#737373] mt-8">
-        Adım {currentStep} / {stepsData.length}: <span className="text-white">{currentStepData?.title}</span>
+        Adım {currentStep} / {STEPS.length}: <span className="text-white">{currentStepData?.title}</span>
       </div>
     </PageTransition>
   );

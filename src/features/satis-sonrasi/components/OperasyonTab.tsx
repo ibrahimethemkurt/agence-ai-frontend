@@ -1,48 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, AlertTriangle, Sparkles, MessageSquare, ShieldAlert, FlaskConical, Brain } from 'lucide-react';
+import { AlertTriangle, Sparkles, MessageSquare, ShieldAlert, FlaskConical, Brain } from 'lucide-react';
 import { Reveal } from '../../../components/animation/Reveal';
 import { GlowCard } from '../../../components/ui/glow-card';
 import { TASK_DEFINITIONS, ActiveTaskContent, type TaskId } from '../../dashboard/components/InteractiveTaskHub';
 import { BorderBeam } from '../../../components/ui/border-beam';
-import { useInsights, type InsightType } from '../../../hooks/useInsights';
+import { useInsights } from '../../../hooks/useInsights';
 
-const OPERASYON_PRODUCTS = [
-  {
-    id: 'p1',
-    name: 'Kablosuz Kulaklık V2',
-    variants: 'Beyaz',
-    sold: 1245,
-    stock: 12,
-    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=100&q=80',
-    status: 'critical',
-    aiSummary: "Müşterilerin %80'i ses kalitesinden memnun, ancak son haftadaki yorumların %60'ında kargo gecikmeleri raporlanmış. Ürün puanı düşüşte, acil lojistik müdahalesi önerilir.",
-    task: 'stok' as TaskId, // Will map to "Stok Uyarısı"
-  },
-  {
-    id: 'p2',
-    name: 'Akıllı Saat Pro Max',
-    variants: 'Siyah, Gümüş',
-    sold: 856,
-    stock: 145,
-    image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=100&q=80',
-    status: 'warning',
-    aiSummary: "Batarya ömrü genel olarak olumlu bulunuyor fakat yazılım güncellemesi sonrası donma yaşandığı belirtilmiş. Bekleyen siparişlerin gönderilmeden önce incelenmesi tavsiye edilir.",
-    task: 'siparis' as TaskId, // Will map to "Sipariş Geldi"
-  },
-  {
-    id: 'p3',
-    name: 'Mekanik Klavye Blue Switch',
-    variants: 'Siyah',
-    sold: 2130,
-    stock: 320,
-    image: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=100&q=80',
-    status: 'good',
-    aiSummary: "Kullanıcılar tuş hassasiyetini ve aydınlatmayı oldukça beğenmiş. Herhangi bir donanımsal veya kargo odaklı şikayet tespit edilmedi. Satışlar stabil.",
-    task: null,
-  }
-];
 
 import { useSatisSonrasiData } from '../hooks/useSatisSonrasiData';
 

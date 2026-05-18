@@ -18,11 +18,10 @@ const stepsData = [
 ];
 
 export const SatisSureciPage = () => {
-  const { currentStep, formData, nextStep, prevStep, updateData, setStep } = useListingWizard();
+  const { currentStep, formData, nextStep, prevStep, updateData } = useListingWizard();
   const navigate = useNavigate();
   const { completedReports } = useAnalysisHistory();
 
-  const currentStepData = stepsData.find(s => s.id === currentStep);
   const [isPublished, setIsPublished] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [preparing, setPreparing] = useState(false);

@@ -13,13 +13,6 @@ type QuickAction = {
   description: string;
 };
 
-type Activity = {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  time: string;
-  amount: number;
-};
 
 // --- HELPER COMPONENTS ---
 const IconWrapper = ({
@@ -39,19 +32,6 @@ const IconWrapper = ({
   </div>
 );
 
-const LogoIcon = ({
-  letter,
-  className,
-}: {
-  letter: string;
-  className?: string;
-}) => (
-  <div
-    className={cn(`w-9 h-9 flex items-center justify-center rounded-full font-bold text-white text-sm`, className)}
-  >
-    {letter}
-  </div>
-);
 
 const QUICK_ACTIONS: QuickAction[] = [
   { id: 'income', icon: ArrowUpRight, title: 'Gelir Ekle', description: 'Yeni Giriş' },

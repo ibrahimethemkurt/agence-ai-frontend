@@ -177,19 +177,6 @@ export const api = {
     return res.json();
   },
 
-  // Support
-  async getSupportOrders() {
-    const res = await fetch(`${BASE_URL}/support/orders`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Siparişler alınamadı');
-    return res.json();
-  },
-
-  async getSupportReviews() {
-    const res = await fetch(`${BASE_URL}/support/reviews`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Yorumlar alınamadı');
-    return res.json();
-  },
-
   async chatWithAssistant(data: { message: string; mode: string }) {
     const res = await fetch(`${BASE_URL}/assistant/chat`, {
       method: 'POST',

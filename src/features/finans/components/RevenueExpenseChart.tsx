@@ -10,8 +10,9 @@ const formatYAxis = (value: number) => {
   return `₺${new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 }).format(value)}`;
 };
 
-const formatTooltip = (value: number) => {
-  return `₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+const formatTooltip = (value: unknown) => {
+  const num = typeof value === 'number' ? value : Number(value);
+  return `₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num)}`;
 };
 
 export const RevenueExpenseChart = ({ data }: RevenueExpenseChartProps) => {

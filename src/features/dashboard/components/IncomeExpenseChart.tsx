@@ -58,7 +58,7 @@ export const IncomeExpenseChart: React.FC<Props> = ({ data }) => {
               <Tooltip 
                 contentStyle={{ backgroundColor: '#121212', borderColor: '#2E2E2E', borderRadius: '12px', color: '#fff' }}
                 itemStyle={{ color: '#fff' }}
-                formatter={(val: number) => `₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)}`}
+                formatter={(val: unknown) => { const n = typeof val === 'number' ? val : Number(val); return `₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`; }}
               />
               <Area type="monotone" dataKey="income" name="Gelir" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" dot={false} animationDuration={800} animationEasing="ease-out" />
               <Area type="monotone" dataKey="expense" name="Gider" stroke="#EF4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" dot={false} animationDuration={800} animationEasing="ease-out" />
