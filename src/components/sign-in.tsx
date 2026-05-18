@@ -43,13 +43,14 @@ export const SignInPage: React.FC = () => {
 
     try {
       await api.login(email, password);
-      showToast('Giriş başarılı! Hoş geldiniz.', 'success');
-      navigate('/dashboard');
+      showToast('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
     } catch (err: any) {
       const errMsg = err.message || 'Giriş başarısız. Email veya şifrenizi kontrol edin.';
       setError(errMsg);
       showToast(errMsg, 'error');
-    } finally {
       setLoading(false);
     }
   };

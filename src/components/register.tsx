@@ -67,15 +67,16 @@ export const RegisterPage: React.FC = () => {
         password,
         password_confirm: confirmPassword,
       });
-      showToast('Hesap başarıyla oluşturuldu! Giriş yapılıyor...', 'success');
+      showToast('Hesap başarıyla oluşturuldu! Yönlendiriliyorsunuz...', 'success');
       // Kayıt başarılı → otomatik giriş yap
       await api.login(email, password);
-      navigate('/dashboard');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
     } catch (err: any) {
       const errMsg = err.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.';
       setError(errMsg);
       showToast(errMsg, 'error');
-    } finally {
       setLoading(false);
     }
   };
