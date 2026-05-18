@@ -55,7 +55,7 @@ const Layout = () => {
 
       <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
       <div className={`flex flex-col min-h-screen transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[240px]'}`}>
-        <TopBar toggleAIAssistant={() => setIsAIAssistantOpen(true)} />
+        <TopBar toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} toggleAIAssistant={() => setIsAIAssistantOpen(true)} />
         <main className="flex-1 p-8">
           <Outlet />
         </main>
