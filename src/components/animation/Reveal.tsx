@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { fadeUp, fadeIn, scaleIn } from './variants';
 import { useSafeAnimation } from '../../hooks/useSafeAnimation';
 
@@ -22,6 +23,18 @@ interface RevealProps {
 
 export const Reveal = ({ variant = 'fadeUp', delay = 0, children, className, onClick }: RevealProps) => {
   const selectedVariant = TRANSITIONS[variant];
+  const rootRef = useRef<Element | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const el = document.getElementById('main-scroll-container');
+    if (el) {
+      rootRef.current = el;
+      setReady(true);
+    } else {
+      setReady(true);
+    }
+  }, []);
   
   const transition = {
     ...selectedVariant.visible.transition,
@@ -35,8 +48,12 @@ export const Reveal = ({ variant = 'fadeUp', delay = 0, children, className, onC
     },
     initial: "hidden",
     whileInView: "visible",
-    viewport: { once: true, amount: 0.05, margin: "0px" }
+    viewport: { once: false, amount: 0.05, margin: "0px", root: rootRef }
   });
+
+  if (!ready) {
+    return <div className={className} style={{ opacity: 0 }}>{children}</div>;
+  }
 
   return (
     <motion.div className={className} onClick={onClick} {...animationProps as any}>
