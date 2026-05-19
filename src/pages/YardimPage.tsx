@@ -92,7 +92,10 @@ export const YardimPage = () => {
       {/* Quick Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <Reveal variant="fadeUp" delay={0.1}>
-          <div className="bg-[#0A0A0A] border border-[var(--color-border)] rounded-2xl p-6 hover:border-[var(--color-accent)]/50 transition-colors cursor-pointer group">
+          <div 
+            className="bg-[#0A0A0A] border border-[var(--color-border)] rounded-2xl p-6 hover:border-[var(--color-accent)]/50 transition-colors cursor-pointer group"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
+          >
             <div className="w-12 h-12 rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] flex items-center justify-center mb-4 group-hover:bg-[var(--color-accent)] group-hover:text-white transition-colors">
               <MessageSquareText className="w-6 h-6" />
             </div>

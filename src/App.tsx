@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
@@ -25,6 +25,12 @@ import './styles/tokens.css';
 const Layout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setIsAIAssistantOpen(true);
+    window.addEventListener('open-ai-assistant', handler);
+    return () => window.removeEventListener('open-ai-assistant', handler);
+  }, []);
 
   return (
     <div className="min-h-screen text-[var(--color-fg)] font-body relative">
