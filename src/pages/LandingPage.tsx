@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { LineChart, Sparkles, MessageSquareHeart, LayoutDashboard, CheckCircle2, UploadCloud, Tag, ShoppingBag, Mic } from 'lucide-react';
 import { Reveal } from '../components/animation/Reveal';
 import { BorderBeam } from '../components/ui/border-beam';
+import { api } from '../lib/api';
 
 import Spline from '@splinetool/react-spline';
 const DeferredSpline = ({ scene, className, priority = false }: { scene: string, className?: string, priority?: boolean }) => {
@@ -32,6 +33,33 @@ const SLOGANS = [
 export const LandingPage = () => {
   const navigate = useNavigate();
   const [sloganIndex, setSloganIndex] = useState(0);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
+
+  const handleDemoLogin = async () => {
+    try {
+      setIsDemoLoading(true);
+      const randId = Math.random().toString(36).substring(2, 9);
+      const email = `demo_${randId}@agence.ai`;
+      const password = "demo_password123";
+      
+      await api.register({
+        full_name: "Demo Kullanıcı",
+        company_name: "Demo A.Ş.",
+        email,
+        password,
+        password_confirm: password
+      });
+
+      const res = await api.login(email, password);
+      localStorage.setItem('access_token', res.access_token);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error(error);
+      alert("Demo girişi başarısız. Lütfen tekrar deneyin.");
+    } finally {
+      setIsDemoLoading(false);
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -106,21 +134,23 @@ export const LandingPage = () => {
         </div>
 
         {/* Auth Buttons */}
-        <div className="flex items-center gap-6 pointer-events-auto">
-          <button onClick={() => navigate('/login')} className="text-sm font-semibold text-gray-600 hover:text-[#9333ff] transition-colors">
-            Giriş Yap
+        <div className="hidden md:flex items-center gap-3 pointer-events-auto">
+          <button onClick={handleDemoLogin} disabled={isDemoLoading} className="px-5 py-2 text-[14px] font-semibold text-white bg-[#9333ff] rounded-full hover:bg-[#7b22df] transition-all flex items-center gap-2 shadow-md">
+            {isDemoLoading ? <span className="animate-spin inline-block h-4 w-4 border-2 border-white/40 border-t-transparent rounded-full"></span> : null}
+            {isDemoLoading ? 'Hazırlanıyor...' : 'Demoyu Dene'}
           </button>
+          <button onClick={() => navigate('/login')} className="px-5 py-2 text-[14px] font-semibold text-gray-800 hover:text-[#9333ff] transition-colors rounded-full hover:bg-gray-100">Giriş Yap</button>
           <div className="relative rounded-full">
-            <button onClick={() => navigate('/register')} className="relative z-10 bg-[#9333ff] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#7b22df] transition-colors shadow-md">
-              Hesap Oluştur
+            <button onClick={() => navigate('/register')} className="relative z-10 bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-black transition-colors shadow-md">
+              Ücretsiz Başla
             </button>
             <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
               <BorderBeam size={60} duration={4} borderWidth={3} colorFrom="#3b0764" colorTo="#c084fc" />
             </div>
           </div>
         </div>
-        </div>
-      </nav>
+      </div>
+    </nav>
 
       {/* Hero Section */}
       <main className="snap-start relative z-10 w-full h-screen flex flex-col justify-center px-6 md:px-12 max-w-7xl mx-auto pointer-events-none pt-20">
