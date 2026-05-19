@@ -5,8 +5,7 @@ import { LineChart, Sparkles, MessageSquareHeart, LayoutDashboard, CheckCircle2,
 import { Reveal } from '../components/animation/Reveal';
 import { BorderBeam } from '../components/ui/border-beam';
 
-const Spline = React.lazy(() => import('@splinetool/react-spline'));
-
+import Spline from '@splinetool/react-spline';
 const DeferredSpline = ({ scene, className, priority = false }: { scene: string, className?: string, priority?: boolean }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "1000px" });
@@ -15,9 +14,7 @@ const DeferredSpline = ({ scene, className, priority = false }: { scene: string,
   return (
     <div ref={ref} className={className}>
       {shouldRender && (
-        <Suspense fallback={<div className="w-full h-full opacity-0" />}>
-          <Spline scene={scene} className="w-full h-full" />
-        </Suspense>
+        <Spline scene={scene} className="w-full h-full" />
       )}
     </div>
   );
@@ -69,11 +66,20 @@ export const LandingPage = () => {
   return (
     <div id="main-scroll-container" className="h-screen w-full bg-white text-gray-900 font-body relative overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth selection:bg-gray-900 selection:text-white">
 
-      {/* Spline Background (Locked to the first screen/hero section) */}
-      <div className="absolute top-0 left-0 w-full h-screen z-0 pointer-events-none overflow-hidden">
+      {/* Spline Background (Locked to the viewport so it stays behind all sections) */}
+      <div 
+        className="fixed top-0 left-0 w-full h-screen z-0 pointer-events-auto overflow-hidden"
+        style={{ touchAction: 'pan-y' }}
+        onWheelCapture={(e) => {
+          const container = document.getElementById('main-scroll-container');
+          if (container) {
+            container.scrollBy({ top: e.deltaY, behavior: 'auto' });
+          }
+        }}
+      >
         {/* We make the canvas 100px taller. The center shifts down slightly, 
             but the bottom-right logo gets pushed exactly into the hidden overflow area! */}
-        <div className="absolute top-0 -left-[5%] md:-left-[15%] lg:-left-[20%] w-[105%] md:w-[115%] lg:w-[120%] h-[calc(100%+100px)]">
+        <div className="absolute top-0 -left-[5%] md:-left-[15%] lg:-left-[20%] w-[105%] md:w-[115%] lg:w-[120%] h-[calc(100%+100px)] pointer-events-auto">
           <DeferredSpline priority={true} scene="https://prod.spline.design/K-fd31LMtV67Aidp/scene.splinecode" className="w-full h-full" />
         </div>
       </div>
@@ -335,14 +341,7 @@ export const LandingPage = () => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="snap-start w-full bg-white relative z-20 border-t border-gray-100 h-screen flex flex-col justify-center overflow-hidden">
-        
-        {/* Background Spline Robot (Full width so the camera aligns perfectly like Hero) */}
-        <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-          <div className="absolute top-0 -left-[5%] md:-left-[15%] lg:-left-[20%] w-[105%] md:w-[115%] lg:w-[120%] h-[calc(100%+100px)]">
-            <DeferredSpline scene="https://prod.spline.design/K-fd31LMtV67Aidp/scene.splinecode" className="w-full h-full" />
-          </div>
-        </div>
+      <section className="snap-start w-full bg-transparent relative z-20 border-t border-transparent h-screen flex flex-col justify-center overflow-hidden pointer-events-none">
 
         <div className="max-w-7xl mx-auto w-full px-6 md:px-12 flex flex-col md:flex-row items-center justify-start h-full relative z-10 pointer-events-none">
           
