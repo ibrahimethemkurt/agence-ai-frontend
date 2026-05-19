@@ -221,9 +221,16 @@ export const SatistaOlanUrunlerPage = () => {
     setVisibleColumns(newCols);
   };
 
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const filteredListings = listings.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.channels && item.channels.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   const exportToExcel = () => {
     let table = '<table border="1"><thead><tr><th>Ürün Adı</th><th>Satış Fiyatı</th><th>Envanter</th><th>Satış Adedi</th><th>Toplam Getiri</th></tr></thead><tbody>';
-    listings.forEach(item => {
+    filteredListings.forEach(item => {
       table += `<tr><td>${item.name}</td><td>${item.salePrice}</td><td>${item.inventory}</td><td>${item.salesCount}</td><td>${item.revenue}</td></tr>`;
     });
     table += '</tbody></table>';
@@ -244,7 +251,7 @@ export const SatistaOlanUrunlerPage = () => {
 
   const exportToPDF = () => {
     let tableRows = '';
-    listings.forEach(item => {
+    filteredListings.forEach(item => {
       tableRows += `<tr><td>${item.name}</td><td>${item.salePrice}</td><td>${item.inventory}</td><td>${item.salesCount}</td><td>${item.revenue}</td></tr>`;
     });
 
@@ -351,6 +358,8 @@ export const SatistaOlanUrunlerPage = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
               <input 
                 type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tabloda arama yapın..." 
                 className="w-full bg-[#1A1A1A] border border-[var(--color-border)] text-[var(--color-fg)] text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-[var(--color-accent)] transition-colors placeholder:text-[var(--color-muted)]"
               />
@@ -402,7 +411,7 @@ export const SatistaOlanUrunlerPage = () => {
                     onClick={toggleAll}
                   >
                     <div className="pointer-events-none">
-                      <Radio checked={selectedItems.size === listings.length && listings.length > 0} />
+                      <Radio checked={selectedItems.size === filteredListings.length && filteredListings.length > 0} />
                     </div>
                   </div>
                 </th>
@@ -415,9 +424,9 @@ export const SatistaOlanUrunlerPage = () => {
             <tbody className="divide-y divide-[var(--color-border)]">
               {loading ? (
                 <tr><td colSpan={10} className="p-8 text-center text-[var(--color-muted)]">Satıştaki ürünler yükleniyor...</td></tr>
-              ) : listings.length === 0 ? (
-                <tr><td colSpan={10} className="p-8 text-center text-[var(--color-muted)]">Henüz satışta olan bir ürününüz bulunmuyor. Satış Süreci sayfasından ürün ekleyebilirsiniz.</td></tr>
-              ) : listings.map((product) => {
+              ) : filteredListings.length === 0 ? (
+                <tr><td colSpan={10} className="p-8 text-center text-[var(--color-muted)]">Arama kriterlerine uygun ürün bulunamadı.</td></tr>
+              ) : filteredListings.map((product) => {
                 const isSelected = selectedItems.has(product.id);
                 const isPassive = product.rawStatus === 'removed';
                 return (
@@ -559,7 +568,7 @@ export const SatistaOlanUrunlerPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span>1-{listings.length} / {listings.length} adet</span>
+            <span>{filteredListings.length > 0 ? 1 : 0}-{filteredListings.length} / {filteredListings.length} adet</span>
             <div className="flex items-center gap-1">
               <button className="p-1 rounded-md hover:bg-[#1A1A1A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
                 <ChevronLeft className="w-5 h-5" />

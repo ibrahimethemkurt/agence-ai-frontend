@@ -97,6 +97,14 @@ export const TopBar = ({ toggleAIAssistant, toggleSidebar }: { toggleAIAssistant
             onFocus={() => {
               if (searchQuery.trim().length > 0) setShowSearchDropdown(true);
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchResults) {
+                const firstResult = searchResults.modules?.[0] || searchResults.products?.[0] || searchResults.orders?.[0];
+                if (firstResult) {
+                  handleResultClick(firstResult.link);
+                }
+              }
+            }}
             placeholder="Modül, ürün veya sipariş arayın..."
             className="w-full bg-[#1A1A1A]/50 border border-[var(--color-border)] rounded-lg pl-10 pr-4 py-2 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-accent)] focus:bg-[#1A1A1A] transition-all"
           />

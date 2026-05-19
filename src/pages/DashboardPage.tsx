@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { PageTransition } from '../components/animation/PageTransition';
 import { useDashboardData } from '../features/dashboard/hooks/useDashboardData';
 import { InteractiveTaskHub } from '../features/dashboard/components/InteractiveTaskHub';
@@ -8,16 +9,24 @@ import { ActiveAgentsList } from '../features/dashboard/components/ActiveAgentsL
 import { ActiveProductsList } from '../features/dashboard/components/ActiveProductsList';
 import { StoreOptimizationScore } from '../features/dashboard/components/StoreOptimizationScore';
 import { AIInsights } from '../features/dashboard/components/AIInsights';
+import { api } from '../lib/api';
 
 export const DashboardPage = () => {
   const data = useDashboardData();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    api.getMe()
+      .then(user => setUserName(user.full_name))
+      .catch(console.error);
+  }, []);
 
   return (
     <PageTransition className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-display font-bold text-[var(--color-fg)] mb-2">Merhaba, Furkan Zengin</h1>
-          <p className="text-[var(--color-muted)]">AjansAI'a hoş geldin, işte güncel özetin.</p>
+          <h1 className="text-3xl font-display font-bold text-[var(--color-fg)] mb-2">Merhaba, {userName || 'Kullanıcı'}</h1>
+          <p className="text-[var(--color-muted)]">Pazara'ya hoş geldin, işte güncel özetin.</p>
         </div>
       </div>
 

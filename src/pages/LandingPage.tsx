@@ -158,9 +158,6 @@ export const LandingPage = () => {
             <button onClick={() => navigate('/register')} className="bg-black text-white px-8 py-3.5 rounded-full text-[15px] font-medium hover:bg-gray-800 transition-all w-full sm:w-auto shadow-xl hover:shadow-2xl hover:-translate-y-0.5">
               Hemen Başlayın — Ücretsiz
             </button>
-            <button onClick={() => navigate('/dashboard')} className="border border-gray-200 bg-white/80 backdrop-blur-md text-black px-8 py-3.5 rounded-full text-[15px] font-medium hover:bg-gray-50 transition-all w-full sm:w-auto shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-              Demoyu İncele
-            </button>
           </div>
 
         </motion.div>

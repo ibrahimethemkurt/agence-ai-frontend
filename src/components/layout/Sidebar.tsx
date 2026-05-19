@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
 import { useToast } from '../../context/ToastContext';
+import { useState, useEffect } from 'react';
+import { api } from '../../lib/api';
 import {
   LayoutDashboard,
   Settings,
@@ -55,6 +57,13 @@ const SETTINGS_GROUP = {
 export const Sidebar = ({ isCollapsed = false }: { isCollapsed?: boolean }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    api.getMe()
+      .then(user => setUserName(user.full_name))
+      .catch(console.error);
+  }, []);
 
   return (
     <aside className={`h-screen bg-[#0A0A0A]/40 backdrop-blur-xl border-r border-[var(--color-border)] flex flex-col p-4 md:p-6 fixed left-0 top-0 transition-all duration-300 ease-in-out z-20 overflow-hidden whitespace-nowrap ${isCollapsed ? 'w-[80px]' : 'w-[240px]'}`}>
@@ -166,12 +175,12 @@ export const Sidebar = ({ isCollapsed = false }: { isCollapsed?: boolean }) => {
         <Menu.Root positioning={{ placement: "top-start", gutter: 8 }}>
           <Menu.Trigger className={`flex items-center gap-3 p-2 rounded-md hover:bg-[var(--color-surface)] transition-colors focus:outline-none cursor-pointer ${isCollapsed ? 'justify-center' : 'justify-between w-full -mx-2'}`}>
             <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="min-w-10 min-h-10 w-10 h-10 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[var(--color-fg)] font-bold font-display">
-                K
+              <div className="min-w-10 min-h-10 w-10 h-10 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[var(--color-fg)] font-bold font-display uppercase">
+                {userName ? userName.charAt(0) : 'K'}
               </div>
               {!isCollapsed && (
                 <div className="text-left">
-                  <div className="text-sm font-medium text-[var(--color-fg)] font-body">Kullanıcı</div>
+                  <div className="text-sm font-medium text-[var(--color-fg)] font-body truncate max-w-[120px]">{userName || 'Kullanıcı'}</div>
                   <div className="text-xs text-[var(--color-fg)] opacity-50 font-body">Yönetici</div>
                 </div>
               )}

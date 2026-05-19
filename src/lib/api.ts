@@ -206,4 +206,27 @@ export const api = {
     if (!res.ok) throw new Error('Arama yapılamadı');
     return res.json();
   },
+
+  async updateProfile(data: { full_name?: string; company_name?: string }) {
+    const res = await fetch(`${BASE_URL}/auth/me`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('Profil güncellenemedi');
+    return res.json();
+  },
+
+  async changePassword(data: { current_password: string; new_password: string }) {
+    const res = await fetch(`${BASE_URL}/auth/me/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Şifre değiştirilemedi');
+    }
+    return res.json();
+  },
 };

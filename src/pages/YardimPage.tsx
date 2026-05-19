@@ -9,8 +9,8 @@ import {
 
 const FAQS = [
   {
-    question: "AjansAI platformu tam olarak ne işe yarar?",
-    answer: "AjansAI, e-ticaret mağazanızı yapay zeka ajanlarıyla otopilotta yönetmenizi sağlayan bir sistemdir. Satış öncesi müşteri sorularını yanıtlar, satış sürecinde sepet terklerini önler ve satış sonrasında kargo/iade takibini otomatik yapar."
+    question: "Pazara platformu tam olarak ne işe yarar?",
+    answer: "Pazara, e-ticaret mağazanızı yapay zeka ajanlarıyla otopilotta yönetmenizi sağlayan bir sistemdir. Satış öncesi müşteri sorularını yanıtlar, satış sürecinde sepet terklerini önler ve satış sonrasında kargo/iade takibini otomatik yapar."
   },
   {
     question: "Hangi pazaryerleri ile entegrasyon sağlayabilirim?",
