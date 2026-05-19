@@ -1,8 +1,10 @@
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Mail, Bell, Search, AlertTriangle, ShieldAlert, FlaskConical, Loader2, Menu as MenuIcon } from "lucide-react";
+import { Sparkles, Mail, Bell, Search, AlertTriangle, ShieldAlert, FlaskConical, Loader2, Menu as MenuIcon, Package, ShoppingCart, Layout } from "lucide-react";
 import { Menu } from "@ark-ui/react/menu";
 import { Portal } from "@ark-ui/react/portal";
 import { useInsights, type InsightType } from '../../hooks/useInsights';
+import { api } from '../../lib/api';
 
 // Severity rengini döndür
 const severityColor: Record<string, string> = {
@@ -20,11 +22,60 @@ const typeIcon = (type: InsightType) => {
 
 export const TopBar = ({ toggleAIAssistant, toggleSidebar }: { toggleAIAssistant?: () => void, toggleSidebar?: () => void }) => {
   const navigate = useNavigate();
-  const { insights, loading, unreadCount, markAllRead } = useInsights();
+  const { insights, loading: insightsLoading, unreadCount, markAllRead } = useInsights();
+
+  // Search States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ modules: any[], products: any[], orders: any[] } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const handleBellOpen = () => {
     markAllRead();
   };
+
+  // Close search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Perform search with debounce
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults(null);
+      setIsSearching(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const results = await api.globalSearch(searchQuery);
+        setSearchResults(results);
+        setShowSearchDropdown(true);
+      } catch (error) {
+        console.error('Arama hatası:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleResultClick = (link: string) => {
+    setShowSearchDropdown(false);
+    setSearchQuery('');
+    navigate(link);
+  };
+
   return (
     <header className="h-[72px] bg-[#0A0A0A]/40 backdrop-blur-xl border-b border-[var(--color-border)] flex items-center justify-between px-6 sticky top-0 z-10">
       <div className="flex items-center gap-4 flex-1 max-w-md">
@@ -34,13 +85,90 @@ export const TopBar = ({ toggleAIAssistant, toggleSidebar }: { toggleAIAssistant
         >
           <MenuIcon className="w-5 h-5" />
         </button>
-        <div className="relative group flex-1">
+        <div className="relative group flex-1" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)] group-focus-within:text-[var(--color-accent)] transition-colors" />
           <input
             type="text"
-            placeholder="Arama yapın..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (e.target.value.trim().length > 0) setShowSearchDropdown(true);
+            }}
+            onFocus={() => {
+              if (searchQuery.trim().length > 0) setShowSearchDropdown(true);
+            }}
+            placeholder="Modül, ürün veya sipariş arayın..."
             className="w-full bg-[#1A1A1A]/50 border border-[var(--color-border)] rounded-lg pl-10 pr-4 py-2 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-accent)] focus:bg-[#1A1A1A] transition-all"
           />
+          
+          {/* Search Dropdown */}
+          {showSearchDropdown && (searchQuery.trim().length >= 2) && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-[#0A0A0A]/95 backdrop-blur-xl border border-[#2a2a2a] rounded-xl shadow-2xl overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+              {isSearching ? (
+                <div className="p-4 flex items-center justify-center text-[var(--color-muted)]">
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  <span>Aranıyor...</span>
+                </div>
+              ) : searchResults ? (
+                <div className="p-2 space-y-4">
+                  {/* Sayfalar / Modüller */}
+                  {searchResults.modules?.length > 0 && (
+                    <div>
+                      <h3 className="text-xs font-semibold text-[#737373] px-2 mb-1 uppercase tracking-wider">Modüller & Sayfalar</h3>
+                      {searchResults.modules.map((item, i) => (
+                        <div key={i} onClick={() => handleResultClick(item.link)} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[var(--color-surface)] cursor-pointer transition-colors">
+                          <Layout className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-[var(--color-fg)] truncate">{item.title}</div>
+                            <div className="text-xs text-[#a3a3a3] truncate">{item.description}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Ürünler */}
+                  {searchResults.products?.length > 0 && (
+                    <div>
+                      <h3 className="text-xs font-semibold text-[#737373] px-2 mb-1 uppercase tracking-wider mt-2">Satıştaki Ürünler</h3>
+                      {searchResults.products.map((item, i) => (
+                        <div key={i} onClick={() => handleResultClick(item.link)} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[var(--color-surface)] cursor-pointer transition-colors">
+                          <Package className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-[var(--color-fg)] truncate">{item.title}</div>
+                            <div className="text-xs text-[#a3a3a3] truncate">{item.description}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Siparişler */}
+                  {searchResults.orders?.length > 0 && (
+                    <div>
+                      <h3 className="text-xs font-semibold text-[#737373] px-2 mb-1 uppercase tracking-wider mt-2">Siparişler</h3>
+                      {searchResults.orders.map((item, i) => (
+                        <div key={i} onClick={() => handleResultClick(item.link)} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[var(--color-surface)] cursor-pointer transition-colors">
+                          <ShoppingCart className="w-4 h-4 text-orange-400 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-[var(--color-fg)] truncate">{item.title}</div>
+                            <div className="text-xs text-[#a3a3a3] truncate">{item.description}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* No Results */}
+                  {searchResults.modules?.length === 0 && searchResults.products?.length === 0 && searchResults.orders?.length === 0 && (
+                    <div className="p-4 text-center text-sm text-[#737373]">
+                      Sonuç bulunamadı
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
 
@@ -94,22 +222,22 @@ export const TopBar = ({ toggleAIAssistant, toggleSidebar }: { toggleAIAssistant
                 <Menu.Content className="z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border border-[#2a2a2a] rounded-xl shadow-2xl p-2 min-w-[320px] max-w-[360px] focus-visible:outline-none font-body text-white">
                   <div className="px-2 py-1.5 text-sm font-bold border-b border-[#2a2a2a] mb-2 text-[#737373] tracking-wide flex items-center justify-between">
                     <span>AI Operasyon Uyarıları</span>
-                    {loading && <Loader2 className="w-3 h-3 animate-spin text-[#737373]" />}
+                    {insightsLoading && <Loader2 className="w-3 h-3 animate-spin text-[#737373]" />}
                   </div>
 
-                  {loading && (
+                  {insightsLoading && (
                     <div className="px-3 py-4 text-center text-xs text-[#737373]">
                       Ajan analiz ediyor...
                     </div>
                   )}
 
-                  {!loading && insights.length === 0 && (
+                  {!insightsLoading && insights.length === 0 && (
                     <div className="px-3 py-4 text-center text-xs text-[#737373]">
                       Şu an kritik bir uyarı yok 🎉
                     </div>
                   )}
 
-                  {!loading && insights.map((insight, i) => (
+                  {!insightsLoading && insights.map((insight, i) => (
                     <Menu.Item
                       key={i}
                       value={`insight-${i}`}
@@ -136,7 +264,7 @@ export const TopBar = ({ toggleAIAssistant, toggleSidebar }: { toggleAIAssistant
                     </Menu.Item>
                   ))}
 
-                  {!loading && insights.length > 0 && (
+                  {!insightsLoading && insights.length > 0 && (
                     <div
                       className="mt-2 pt-2 border-t border-[#2a2a2a] px-3 py-1.5 text-xs text-center text-[var(--color-accent)] cursor-pointer hover:underline"
                       onClick={() => navigate('/ajanlar/satis-sonrasi?tab=Operasyon Merkezi')}

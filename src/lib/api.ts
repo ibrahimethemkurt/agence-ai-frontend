@@ -186,4 +186,12 @@ export const api = {
     if (!res.ok) throw new Error('Asistan yanıt veremedi');
     return res.json();
   },
+
+  async globalSearch(query: string) {
+    const res = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query)}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error('Arama yapılamadı');
+    return res.json();
+  },
 };
