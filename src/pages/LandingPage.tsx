@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useState, useEffect, Suspense, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { LineChart, Sparkles, MessageSquareHeart, LayoutDashboard, CheckCircle2, UploadCloud, Tag, ShoppingBag, Mic } from 'lucide-react';
 import { Reveal } from '../components/animation/Reveal';

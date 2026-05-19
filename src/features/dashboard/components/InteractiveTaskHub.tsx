@@ -52,9 +52,7 @@ export const InteractiveTaskHub = () => {
     count: store.taskCounts[t.id],
   }));
 
-  const pendingTasks = liveTasks.filter(t => !store.completedTasks.has(t.id));
-
-  const handleAction = (id: TaskId, isComplete: boolean, customMessage?: string) => {
+  const handleAction = (_id: TaskId, isComplete: boolean, customMessage?: string) => {
     if (isComplete) {
       setSuccessMessage(customMessage || 'İşlem Başarılı!');
       setIsSuccessAnim(true);
