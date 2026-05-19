@@ -109,7 +109,7 @@ export const api = {
     return res.json();
   },
 
-  async prepareListing(data: { product_name: string; photo_url: string; source_type?: string }) {
+  async prepareListing(data: { product_name: string; photo_url: string; source_type?: string; skip_ai?: boolean }) {
     const res = await fetch(`${BASE_URL}/listing/prepare`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders() },

@@ -46,9 +46,14 @@ export const SatisOncesiPage = () => {
 
 
   // --- API: Analizi başlat ---
+  // Guard: zaten bir analiz ID'si varsa tekrar başlatma
   const startAnalysis = async () => {
+    if (analysisId !== null) return; // Analiz zaten başlatıldı, yeniden başlatma
     setApiError(null);
     setAnalysisStatus('bekliyor');
+    // Yeni analiz başlarken agent-plan animasyon geçmişini temizle
+    sessionStorage.removeItem('agentPlan_tasks');
+    sessionStorage.removeItem('agentPlan_expanded');
 
     try {
       const result = await api.startAnalysis({
@@ -98,20 +103,31 @@ export const SatisOncesiPage = () => {
     };
   }, [analysisId, analysisStatus]);
 
-  // --- Adım 2 → 3 geçişinde API'yi tetikle ---
+  // --- Sayfa mount'ta: adım 3 + analysisId varsa ve hâlâ devam ediyorsa polling'i sürdür ---
+  const resumeRef = useRef(false);
+  useEffect(() => {
+    if (resumeRef.current) return;
+    resumeRef.current = true;
+    // Sayfa yeniden yüklendiğinde adım 3'te devam eden bir analiz varsa polling zaten
+    // yukarıdaki polling useEffect tarafından otomatik devreye girer (analysisId + !completed).
+    // Ekstra bir şey yapmaya gerek yok — sessionStorage'dan gelen analysisId yeterli.
+  }, []);
+
+  // --- Adım 2 → 3 geçişinde API'yi tetikle (zaten başlamışsa atla) ---
   const handleNextStep = () => {
     if (currentStep === 2) {
       setCurrentStep(3);
-      startAnalysis();
+      // analysisId varsa analiz devam ediyor, yeniden başlatma
+      if (analysisId === null) {
+        startAnalysis();
+      }
     } else {
       setCurrentStep(prev => Math.min(prev + 1, 4));
     }
   };
 
   const handlePrevStep = () => {
-    if (currentStep === 3 && pollingRef.current) {
-      clearInterval(pollingRef.current);
-    }
+    // Analiz devam ederken geri gidilse bile polling durdurmuyoruz — arka planda sürsün
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
@@ -349,7 +365,13 @@ export const SatisOncesiPage = () => {
               <PresaleReportCard
                 productName={formData.productName}
                 reportContent={reportJson}
-                onSave={() => alert('Rapor analizler sayfasına kaydedildi!')}
+                onSave={() => {
+                  // Raporu kaydet ve state'i sıfırla — bir sonraki ziyarette baştan başlasın
+                  clearSessionStorageByPrefix('satisOncesi_');
+                  sessionStorage.removeItem('agentPlan_tasks');
+                  sessionStorage.removeItem('agentPlan_expanded');
+                  alert('Rapor kaydedildi! Yeni bir analiz başlatabilirsiniz.');
+                }}
                 onProceed={() => {
                   clearSessionStorageByPrefix('satisOncesi_');
                   navigate('/ajanlar/satis-sureci');
@@ -366,6 +388,8 @@ export const SatisOncesiPage = () => {
                   <button
                     onClick={() => {
                       clearSessionStorageByPrefix('satisOncesi_');
+                      sessionStorage.removeItem('agentPlan_tasks');
+                      sessionStorage.removeItem('agentPlan_expanded');
                       setCurrentStep(1);
                       setFormData(DEFAULT_FORM);
                       setAnalysisId(null);
@@ -380,6 +404,8 @@ export const SatisOncesiPage = () => {
                   <button
                     onClick={() => {
                       clearSessionStorageByPrefix('satisOncesi_');
+                      sessionStorage.removeItem('agentPlan_tasks');
+                      sessionStorage.removeItem('agentPlan_expanded');
                       navigate('/ajanlar/satis-sureci');
                     }}
                     className="flex-[2] bg-white text-black rounded-2xl px-8 py-4 font-bold hover:bg-white/90 transition-colors cursor-pointer"

@@ -18,7 +18,7 @@ const stepsData = [
 ];
 
 export const SatisSureciPage = () => {
-  const { currentStep, formData, nextStep, prevStep, updateData } = useListingWizard();
+  const { currentStep, formData, nextStep, prevStep, updateData, setStep } = useListingWizard();
   const navigate = useNavigate();
   const { completedReports } = useAnalysisHistory();
 
@@ -93,6 +93,29 @@ export const SatisSureciPage = () => {
       nextStep();
     } catch (err: any) {
       alert(`Hazırlık başlatılamadı: ${err.message}`);
+    } finally {
+      setPreparing(false);
+    }
+  };
+
+  const handleSkipAI = async () => {
+    setPreparing(true);
+    try {
+      const productName = formData.sourceType === 'analyzed' ? formData.selectedProduct : formData.productName;
+      const data = await api.prepareListing({
+        product_name: productName,
+        photo_url: formData.photoUrl,
+        source_type: formData.sourceType,
+        skip_ai: true
+      });
+      updateData({ 
+        listingId: data.id, 
+        seoTitle: productName, 
+        processedPhotoUrl: formData.photoUrl 
+      });
+      setStep(4); // Fiyat adımına atla
+    } catch (err: any) {
+      alert(`İşlem başlatılamadı: ${err.message}`);
     } finally {
       setPreparing(false);
     }
@@ -338,13 +361,22 @@ export const SatisSureciPage = () => {
               >
                 <ChevronLeft size={18} /> Geri
               </button>
-              <button 
-                onClick={handlePrepare} 
-                disabled={preparing || !formData.photoUrl || (formData.sourceType === 'analyzed' ? !formData.selectedProduct : !formData.productName)}
-                className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {preparing ? 'Hazırlanıyor...' : 'İleri (AI İşleme)'} <ChevronRight size={18} />
-              </button>
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleSkipAI}
+                  disabled={preparing || !formData.photoUrl || (formData.sourceType === 'analyzed' ? !formData.selectedProduct : !formData.productName)}
+                  className="flex items-center gap-2 bg-transparent border border-[#2a2a2a] text-[#a3a3a3] rounded-2xl px-6 py-3 font-medium hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {preparing ? 'İşleniyor...' : 'AI Olmadan Atla'}
+                </button>
+                <button 
+                  onClick={handlePrepare} 
+                  disabled={preparing || !formData.photoUrl || (formData.sourceType === 'analyzed' ? !formData.selectedProduct : !formData.productName)}
+                  className="flex items-center gap-2 bg-[#e5e5e5] text-black rounded-2xl px-8 py-3 font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {preparing ? 'Hazırlanıyor...' : 'İleri (AI İşleme)'} <ChevronRight size={18} />
+                </button>
+              </div>
             </div>
           </Reveal>
         )}

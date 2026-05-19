@@ -125,8 +125,40 @@ const initialTasks: Task[] = [
 ];
 
 export default function Plan({ customTasks, isSimulating = false, isFinished = false }: { customTasks?: Task[], isSimulating?: boolean, isFinished?: boolean }) {
-  const [tasks, setTasks] = useState<Task[]>(customTasks || initialTasks);
-  const [expandedTasks, setExpandedTasks] = useState<string[]>(["1"]);
+  // sessionStorage'a dayalı tasks state — sayfa değişse bile sıfırlanmaz
+  const STORAGE_KEY = 'agentPlan_tasks';
+  const [tasks, setTasksRaw] = useState<Task[]>(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved) as Task[];
+    } catch {}
+    return customTasks || initialTasks;
+  });
+
+  const setTasks = (updater: Task[] | ((prev: Task[]) => Task[])) => {
+    setTasksRaw(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const [expandedTasks, setExpandedTasks] = useState<string[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('agentPlan_expanded');
+      if (saved) return JSON.parse(saved) as string[];
+    } catch {}
+    return ["1"];
+  });
+
+  const setExpandedTasksPersisted = (updater: string[] | ((prev: string[]) => string[])) => {
+    setExpandedTasks(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      try { sessionStorage.setItem('agentPlan_expanded', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
   const [expandedSubtasks, setExpandedSubtasks] = useState<{
     [key: string]: boolean;
   }>({});
@@ -138,7 +170,7 @@ export default function Plan({ customTasks, isSimulating = false, isFinished = f
 
   // Toggle task expansion
   const toggleTaskExpansion = (taskId: string) => {
-    setExpandedTasks((prev) =>
+    setExpandedTasksPersisted((prev) =>
       prev.includes(taskId)
         ? prev.filter((id) => id !== taskId)
         : [...prev, taskId],
@@ -148,10 +180,9 @@ export default function Plan({ customTasks, isSimulating = false, isFinished = f
   // --- Simulation Logic ---
   useEffect(() => {
     if (isFinished) {
-      // Tamamlandığında her şeyi "completed" yap
       setTasks(prev => {
         const completed = prev.map(t => ({ ...t, status: 'completed', subtasks: t.subtasks.map(s => ({ ...s, status: 'completed' })) }));
-        setExpandedTasks(completed.map(t => t.id));
+        setExpandedTasksPersisted(completed.map(t => t.id));
         return completed;
       });
       return;
@@ -177,7 +208,7 @@ export default function Plan({ customTasks, isSimulating = false, isFinished = f
           if (task.status === "pending") {
              task.status = "in-progress";
              nextTasks[i] = task;
-             setExpandedTasks(prev => prev.includes(task.id) ? prev : [...prev, task.id]);
+             setExpandedTasksPersisted(prev => prev.includes(task.id) ? prev : [...prev, task.id]);
              stateChanged = true;
              break;
           }
@@ -213,7 +244,7 @@ export default function Plan({ customTasks, isSimulating = false, isFinished = f
             // Bir sonraki görevi açmak için (eğer varsa)
             if (i + 1 < nextTasks.length) {
               const nextId = nextTasks[i + 1].id;
-              setExpandedTasks(prev => prev.includes(nextId) ? prev : [...prev, nextId]);
+              setExpandedTasksPersisted(prev => prev.includes(nextId) ? prev : [...prev, nextId]);
             }
           }
           
