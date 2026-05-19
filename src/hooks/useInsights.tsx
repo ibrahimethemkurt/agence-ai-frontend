@@ -46,7 +46,7 @@ export const InsightsProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setLoading(true);
-      const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1';
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
       const res = await fetch(`${apiBase}/support/insights`, {
         headers: { Authorization: `Bearer ${token}` },
       });
