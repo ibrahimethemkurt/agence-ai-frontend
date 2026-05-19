@@ -63,7 +63,6 @@ function extractTags(comment: string, sentiment: 'positive' | 'negative'): Revie
   const found: ReviewTag[] = [];
   for (const rule of TAG_RULES) {
     if (rule.keywords.some(kw => lower.includes(kw))) {
-      // Determine tag sentiment: if overall negative review and tag is complaint keyword → negative
       const tagSentiment: 'positive' | 'negative' =
         sentiment === 'negative' &&
         ['KARGO', 'KALİTE', 'BOYUT', 'SATICI', 'PAKETLEME', 'GÖRÜNÜM'].includes(rule.label)
@@ -118,30 +117,19 @@ export const useYorumlarData = () => {
       try {
         setLoading(true);
 
-        // Fetch reviews
+        // Sadece reviews yeterli — product adı zaten reviews içinde geliyor
+        // /support/operations çağrısı kaldırıldı (AI beklettiriyor)
         const reviewsRes = await fetch(`${BASE_URL}/support/reviews`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Fetch products (via operations endpoint which has image + name)
-        const productsRes = await fetch(`${BASE_URL}/support/operations`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!reviewsRes.ok || !productsRes.ok) return;
+        if (!reviewsRes.ok) return;
 
         const rawReviews = await reviewsRes.json();
-        const rawProducts = await productsRes.json();
-
-        // Build product map for quick lookup
-        const productMap: Record<string, { name: string; image: string }> = {};
-        for (const p of rawProducts) {
-          productMap[String(p.id)] = { name: p.name, image: p.image };
-        }
 
         // Transform reviews
         const transformed: Review[] = rawReviews
-          .filter((r: any) => r.comment) // only reviews with text
+          .filter((r: any) => r.comment)
           .map((r: any) => {
             const sentiment = getSentiment(r.rating);
             const tags = extractTags(r.comment || '', sentiment);
@@ -158,28 +146,25 @@ export const useYorumlarData = () => {
             } as Review;
           });
 
-        // Build ReviewProduct list from operations data
-        const productReviewMap: Record<string, { ratings: number[]; count: number }> = {};
+        // ReviewProduct listesi: reviews verisinden türet (operations çağrısına gerek yok)
+        const productMap: Record<string, { name: string; ratings: number[]; count: number }> = {};
         for (const r of transformed) {
-          if (!productReviewMap[r.productId]) productReviewMap[r.productId] = { ratings: [], count: 0 };
-          productReviewMap[r.productId].ratings.push(r.rating);
-          productReviewMap[r.productId].count++;
+          if (!productMap[r.productId]) {
+            productMap[r.productId] = { name: r.productName, ratings: [], count: 0 };
+          }
+          productMap[r.productId].ratings.push(r.rating);
+          productMap[r.productId].count++;
         }
 
-        const builtProducts: ReviewProduct[] = rawProducts.map((p: any) => {
-          const pid = String(p.id);
-          const pData = productReviewMap[pid];
-          const avgRating = pData
-            ? +(pData.ratings.reduce((a: number, b: number) => a + b, 0) / pData.ratings.length).toFixed(1)
-            : 0;
-          return {
-            id: pid,
-            name: p.name,
-            image: p.image,
-            rating: avgRating,
-            reviewCount: pData?.count ?? 0,
-          };
-        }).filter((p: ReviewProduct) => p.reviewCount > 0); // only products with reviews
+        const builtProducts: ReviewProduct[] = Object.entries(productMap).map(([pid, data]) => ({
+          id: pid,
+          name: data.name,
+          image: `https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=80&q=60`,
+          rating: data.ratings.length
+            ? +(data.ratings.reduce((a, b) => a + b, 0) / data.ratings.length).toFixed(1)
+            : 0,
+          reviewCount: data.count,
+        }));
 
         setAllReviews(transformed);
         setProducts(builtProducts);

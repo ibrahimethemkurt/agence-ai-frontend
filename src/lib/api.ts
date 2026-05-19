@@ -1,4 +1,7 @@
-const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1';
+// Production: always use backend URL. Dev: use localhost.
+const BASE_URL = (import.meta.env.DEV
+  ? 'http://localhost:8000'
+  : 'https://agence-ai-backend-671962657032.europe-west1.run.app') + '/api/v1';
 
 function getToken(): string | null {
   return localStorage.getItem('access_token');
@@ -109,7 +112,7 @@ export const api = {
     return res.json();
   },
 
-  async prepareListing(data: { product_name: string; photo_url: string; source_type?: string }) {
+  async prepareListing(data: { product_name: string; photo_url: string; source_type?: string; skip_ai?: boolean }) {
     const res = await fetch(`${BASE_URL}/listing/prepare`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders() },
@@ -118,6 +121,19 @@ export const api = {
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.detail ? JSON.stringify(errorData.detail) : 'Hazırlık süreci başlatılamadı');
+    }
+    return res.json();
+  },
+
+  async directListing(data: { product_name: string; photo_url: string; source_type?: string }) {
+    const res = await fetch(`${BASE_URL}/listing/direct`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || 'Listing oluşturulamadı');
     }
     return res.json();
   },
