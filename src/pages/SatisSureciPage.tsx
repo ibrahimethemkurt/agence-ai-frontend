@@ -3,7 +3,7 @@ import { PageTransition } from '../components/animation/PageTransition';
 import { useListingWizard } from '../features/satis-sureci/hooks/useListingWizard';
 import { useAnalysisHistory } from '../features/analizler/hooks/useAnalysisHistory';
 import { Reveal } from '../components/animation/Reveal';
-import { CheckCircle2, ChevronLeft, ChevronRight, UploadCloud, Search, PlusCircle, ShoppingCart, Wand2 } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, UploadCloud, Search, PlusCircle, ShoppingCart, Wand2, AlertTriangle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ShineBorder } from '../components/ui/ShineBorder';
 import { api } from '../lib/api';
@@ -27,6 +27,7 @@ export const SatisSureciPage = () => {
   const [preparing, setPreparing] = useState(false);
   const [polling, setPolling] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Polling for Step 3 (SEO & Görsel İşleme)
@@ -106,7 +107,12 @@ export const SatisSureciPage = () => {
         platforms: formData.platforms,
         seo_title: formData.seoTitle,
         seo_description: formData.seoDescription,
-        seo_tags: formData.seoTags
+        seo_tags: formData.seoTags,
+        cost_price: parseFloat(formData.purchasePrice) || 0,
+        stock: parseInt(formData.stock) || 0,
+        shipping_cost: parseFloat(formData.shippingCost) || 0,
+        vat_rate: parseFloat(formData.vatRate) || 0,
+        commission_rate: parseFloat(formData.commissionRate) || 0,
       });
       setIsPublished(true);
     } catch (err: any) {
@@ -439,29 +445,90 @@ export const SatisSureciPage = () => {
               <p className="text-[#a3a3a3] text-base">Ürününüzün pazar yerlerindeki ana satış fiyatını girin.</p>
             </div>
             
-            <div className="flex-1 flex items-center justify-center">
-               <div className="w-full max-w-xl flex gap-6 items-start">
-                 {/* Fiyat Girişi */}
-                 <div className="flex-1">
-                   <label className="block text-sm font-bold text-white mb-4 text-center">Hedef Satış Fiyatı (₺)</label>
-                   <input 
-                     type="number" 
-                     value={formData.price}
-                     onChange={(e) => updateData({ price: e.target.value })}
-                     placeholder="0.00"
-                     className="w-full bg-[#0a0a0a] border-2 border-white/10 rounded-2xl px-6 py-6 text-4xl text-center text-white font-bold focus:outline-none focus:border-white transition-colors"
-                   />
-                   <p className="text-xs text-[#737373] mt-3 text-center">Pazar yeri komisyonları bu fiyata eklenir.</p>
+            <div className="flex-1 flex flex-col items-center justify-center">
+               <div className="w-full flex flex-col gap-6">
+                 
+                 {/* Üst Kısım: Satış Fiyatı & Önerilen Fiyat */}
+                 <div className="flex flex-col md:flex-row gap-6 items-start">
+                   <div className="flex-1 w-full">
+                     <label className="block text-sm font-bold text-white mb-2">Hedef Satış Fiyatı (₺)</label>
+                     <input 
+                       type="number" 
+                       value={formData.price}
+                       onChange={(e) => updateData({ price: e.target.value })}
+                       placeholder="0.00"
+                       className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-4 text-2xl text-white font-bold focus:outline-none focus:border-green-500 transition-colors"
+                     />
+                   </div>
+                   <div className="md:w-48 w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-4 flex flex-col items-center justify-center text-center gap-1">
+                     <span className="text-xs text-[#737373] font-medium">Önerilen Fiyat</span>
+                     <span className="text-xl font-bold text-green-400">
+                       {recommendedPrice ? `₺${recommendedPrice}` : '—'}
+                     </span>
+                     <span className="text-[10px] text-[#555]">Pazar Analizi</span>
+                   </div>
                  </div>
 
-                 {/* Önerilen Fiyat Kutusu — her zaman göster */}
-                 <div className="w-40 bg-[#0a0a0a] border border-[#2a2a2a] rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2 mt-8">
-                   <span className="text-xs text-[#737373] font-medium">Önerilen Fiyat</span>
-                   <span className="text-2xl font-bold text-green-400">
-                     {recommendedPrice ? `₺${recommendedPrice}` : '—'}
-                   </span>
-                   <span className="text-[10px] text-[#555]">Pazar Analizi</span>
+                 {/* Alt Kısım: Maliyet Detayları */}
+                 <div className="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-6 mt-4">
+                   <div className="mb-6">
+                     <h3 className="text-xl font-bold text-white">Maliyet Detayları</h3>
+                     <p className="text-sm text-[#737373] mt-1">Karlılık hesabı ve komisyon analizi için maliyet verilerini doldurun.</p>
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                     <div>
+                       <label className="block text-sm font-bold text-white mb-2">Toptan Alış Fiyatı (₺)</label>
+                       <input 
+                         type="number"
+                         value={formData.purchasePrice}
+                         onChange={(e) => updateData({ purchasePrice: e.target.value })}
+                         placeholder="0.00"
+                         className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                       />
+                     </div>
+                     <div>
+                       <label className="block text-sm font-bold text-white mb-2">Stok Adedi</label>
+                       <input 
+                         type="number"
+                         value={formData.stock}
+                         onChange={(e) => updateData({ stock: e.target.value })}
+                         placeholder="100"
+                         className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                       />
+                     </div>
+                     <div>
+                       <label className="block text-sm font-bold text-white mb-2">Kargo Ücreti (₺)</label>
+                       <input 
+                         type="number"
+                         value={formData.shippingCost}
+                         onChange={(e) => updateData({ shippingCost: e.target.value })}
+                         placeholder="0.00"
+                         className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                       />
+                     </div>
+                     <div>
+                       <label className="block text-sm font-bold text-white mb-2">KDV Oranı (%)</label>
+                       <input 
+                         type="number"
+                         value={formData.vatRate}
+                         onChange={(e) => updateData({ vatRate: e.target.value })}
+                         placeholder="20"
+                         className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                       />
+                     </div>
+                     <div className="md:col-span-2">
+                       <label className="block text-sm font-bold text-white mb-2">Platform Komisyon Oranı (%)</label>
+                       <input 
+                         type="number"
+                         value={formData.commissionRate}
+                         onChange={(e) => updateData({ commissionRate: e.target.value })}
+                         placeholder="15"
+                         className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
+                       />
+                     </div>
+                   </div>
                  </div>
+
                </div>
             </div>
 
@@ -577,7 +644,7 @@ export const SatisSureciPage = () => {
                     <ChevronLeft size={18} /> Geri Dön
                   </button>
                   <button 
-                    onClick={handlePublish}
+                    onClick={() => setShowConfirmModal(true)}
                     disabled={publishing}
                     className="flex items-center gap-2 bg-green-500 text-black rounded-2xl px-8 py-3 font-bold hover:bg-green-400 transition-colors"
                   >
@@ -608,6 +675,46 @@ export const SatisSureciPage = () => {
           </Reveal>
         )}
       </div>
+
+      {/* Onay Modalı */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#121212] border border-[#2a2a2a] rounded-3xl p-8 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowConfirmModal(false)}
+              className="absolute top-4 right-4 text-[#737373] hover:text-white"
+            >
+              <X size={24} />
+            </button>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mb-6 border border-yellow-500/20">
+                <AlertTriangle className="text-yellow-500" size={32} />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Emin misiniz?</h3>
+              <p className="text-[#a3a3a3] mb-8">
+                Bu ürün seçtiğiniz <strong className="text-white">{formData.platforms.join(', ')}</strong> platformlarında <strong>₺{formData.price}</strong> fiyatıyla anında satışa açılacaktır. Onaylıyor musunuz?
+              </p>
+              <div className="flex gap-4 w-full">
+                <button 
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 py-3 px-4 bg-transparent border border-[#2a2a2a] text-white rounded-xl font-bold hover:bg-[#1a1a1a] transition-colors"
+                >
+                  İptal
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    handlePublish();
+                  }}
+                  className="flex-1 py-3 px-4 bg-green-500 text-black rounded-xl font-bold hover:bg-green-400 transition-colors"
+                >
+                  Evet, Yayınla
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </PageTransition>
   );
 };

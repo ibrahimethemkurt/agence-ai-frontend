@@ -52,7 +52,7 @@ export const PlatformLogo: React.FC<PlatformLogoProps> = ({
           width: size,
           height: size,
           minWidth: size,
-          background: bg,
+          background: (!imageError && logoUrl) ? '#fff' : bg,
           border: `2px solid ${border}`,
           borderRadius,
           display: 'flex',
@@ -66,6 +66,8 @@ export const PlatformLogo: React.FC<PlatformLogoProps> = ({
           userSelect: 'none',
           flexShrink: 0,
           overflow: 'hidden',
+          padding: (!imageError && logoUrl) ? size * 0.12 : 0,
+          boxSizing: 'border-box',
         }}
         title={platform.charAt(0).toUpperCase() + platform.slice(1)}
       >
@@ -74,7 +76,7 @@ export const PlatformLogo: React.FC<PlatformLogoProps> = ({
             src={logoUrl} 
             alt={platform} 
             onError={() => setImageError(true)}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
         ) : (
           label

@@ -350,6 +350,10 @@ export const SatisOncesiPage = () => {
                 productName={formData.productName}
                 reportContent={reportJson}
                 onSave={() => alert('Rapor analizler sayfasına kaydedildi!')}
+                onProceed={() => {
+                  clearSessionStorageByPrefix('satisOncesi_');
+                  navigate('/ajanlar/satis-sureci');
+                }}
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
@@ -358,7 +362,7 @@ export const SatisOncesiPage = () => {
                 <p className="text-[#a3a3a3] text-center max-w-md text-lg">
                   Rapor verisi henüz yüklenemedi. Analizler sayfasından görüntüleyebilirsiniz.
                 </p>
-                <div className="flex gap-4 mt-8 w-full max-w-md">
+                <div className="flex gap-4 mt-8 w-full max-w-md relative z-50">
                   <button
                     onClick={() => {
                       clearSessionStorageByPrefix('satisOncesi_');
@@ -369,13 +373,16 @@ export const SatisOncesiPage = () => {
                       setReportJson(null);
                       setApiError(null);
                     }}
-                    className="flex-1 border border-white/10 text-white/70 rounded-2xl px-6 py-4 font-medium hover:bg-white/5 transition-colors"
+                    className="flex-1 border border-white/10 text-white/70 rounded-2xl px-6 py-4 font-medium hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     Yeni Analiz
                   </button>
                   <button
-                    onClick={() => navigate('/ajanlar/satis-sureci')}
-                    className="flex-[2] bg-white text-black rounded-2xl px-8 py-4 font-bold hover:bg-white/90 transition-colors"
+                    onClick={() => {
+                      clearSessionStorageByPrefix('satisOncesi_');
+                      navigate('/ajanlar/satis-sureci');
+                    }}
+                    className="flex-[2] bg-white text-black rounded-2xl px-8 py-4 font-bold hover:bg-white/90 transition-colors cursor-pointer"
                   >
                     Satışa Geç →
                   </button>

@@ -46,18 +46,60 @@ export const FinancialDashboard = ({ activities = [] }: { activities?: any[] }) 
   const [txTitle, setTxTitle] = useState('');
   const [txAmount, setTxAmount] = useState('');
   const [txCategory, setTxCategory] = useState('Diğer');
+  const [txVatRate, setTxVatRate] = useState('20');
+  const [txCommissionRate, setTxCommissionRate] = useState('15');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (type: 'income' | 'expense') => {
     if (!txTitle || !txAmount) return;
     try {
       setIsSubmitting(true);
-      await api.addTransaction({
-        title: txTitle,
-        amount: parseFloat(txAmount),
-        category: txCategory,
-        type: type
-      });
+      let payloadTitle = txTitle;
+      const promises = [];
+
+      if (type === 'income') {
+        const vatVal = parseFloat(txAmount) * (parseFloat(txVatRate) / 100);
+        const commVal = parseFloat(txAmount) * (parseFloat(txCommissionRate) / 100);
+        payloadTitle = `${txTitle}|KDV: ₺${vatVal.toFixed(2)}|Komisyon: ₺${commVal.toFixed(2)}`;
+
+        // Ana Gelir
+        promises.push(api.addTransaction({
+          title: payloadTitle,
+          amount: parseFloat(txAmount),
+          category: txCategory,
+          type: 'income'
+        }));
+
+        // KDV Gideri
+        if (vatVal > 0) {
+          promises.push(api.addTransaction({
+            title: `${txTitle.split('|')[0]} KDV Kesintisi`,
+            amount: vatVal,
+            category: 'other',
+            type: 'expense'
+          }));
+        }
+
+        // Komisyon Gideri
+        if (commVal > 0) {
+          promises.push(api.addTransaction({
+            title: `${txTitle.split('|')[0]} Komisyon Payı`,
+            amount: commVal,
+            category: 'commission',
+            type: 'expense'
+          }));
+        }
+      } else {
+        promises.push(api.addTransaction({
+          title: txTitle,
+          amount: parseFloat(txAmount),
+          category: txCategory,
+          type: 'expense'
+        }));
+      }
+
+      await Promise.all(promises);
+      
       setView('dashboard');
       setTxTitle('');
       setTxAmount('');
@@ -250,6 +292,31 @@ export const FinancialDashboard = ({ activities = [] }: { activities?: any[] }) 
             className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none"
           />
         </div>
+        
+        {type === 'income' && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-[#737373] mb-1.5">KDV Oranı (%)</label>
+              <input 
+                type="number" 
+                value={txVatRate}
+                onChange={(e) => setTxVatRate(e.target.value)}
+                placeholder="20"
+                className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#737373] mb-1.5">Komisyon (%)</label>
+              <input 
+                type="number" 
+                value={txCommissionRate}
+                onChange={(e) => setTxCommissionRate(e.target.value)}
+                placeholder="15"
+                className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none"
+              />
+            </div>
+          </div>
+        )}
         <div>
           <label className="block text-xs font-medium text-[#737373] mb-1.5">Kategori</label>
           <select 

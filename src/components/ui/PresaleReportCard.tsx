@@ -5,6 +5,7 @@ interface PresaleReportCardProps {
   productName: string;
   reportContent: string;
   onSave?: () => void;
+  onProceed?: () => void;
 }
 
 // Sıfır bağımlılıklı basit Markdown → JSX dönüştürücü
@@ -162,7 +163,7 @@ function renderJsonReport(json: Record<string, any>) {
   );
 }
 
-export function PresaleReportCard({ productName, reportContent, onSave }: PresaleReportCardProps) {
+export function PresaleReportCard({ productName, reportContent, onSave, onProceed }: PresaleReportCardProps) {
   const navigate = useNavigate();
 
   const isFailed = reportContent?.startsWith('## Analiz Başarısız');
@@ -219,7 +220,7 @@ export function PresaleReportCard({ productName, reportContent, onSave }: Presal
       </div>
 
       {/* Aksiyon Butonları */}
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-3 pt-2 relative z-50">
         {onSave && (
           <button
             onClick={onSave}
@@ -229,8 +230,14 @@ export function PresaleReportCard({ productName, reportContent, onSave }: Presal
           </button>
         )}
         <button
-          onClick={() => navigate('/ajanlar/satis-sureci')}
-          className="flex-1 bg-white text-black rounded-2xl px-8 py-3 font-bold hover:bg-white/90 transition-colors text-sm"
+          onClick={() => {
+            if (onProceed) {
+              onProceed();
+            } else {
+              navigate('/ajanlar/satis-sureci');
+            }
+          }}
+          className="flex-1 bg-white text-black rounded-2xl px-8 py-3 font-bold hover:bg-white/90 transition-colors text-sm text-center cursor-pointer"
         >
           Satışa Geç →
         </button>

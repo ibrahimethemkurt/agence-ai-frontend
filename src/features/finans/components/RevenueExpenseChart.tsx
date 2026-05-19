@@ -49,6 +49,8 @@ export const RevenueExpenseChart = ({ data }: RevenueExpenseChartProps) => {
               tickFormatter={formatYAxis}
               tickMargin={8}
               width={55}
+              domain={[0, (dataMax: number) => dataMax === 0 ? 100 : Math.ceil(dataMax * 1.15)]}
+              tickCount={7}
             />
             <Tooltip
               contentStyle={{ backgroundColor: '#121212', borderColor: '#2a2a2a', color: '#ffffff', borderRadius: '12px' }}

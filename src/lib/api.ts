@@ -122,7 +122,19 @@ export const api = {
     return res.json();
   },
 
-  async publishListing(data: { listing_id: number; price: number; platforms: string[]; seo_title: string; seo_description: string; seo_tags: string[] }) {
+  async publishListing(data: { 
+    listing_id: number; 
+    price: number; 
+    platforms: string[]; 
+    seo_title: string; 
+    seo_description: string; 
+    seo_tags: string[];
+    cost_price?: number;
+    stock?: number;
+    shipping_cost?: number;
+    vat_rate?: number;
+    commission_rate?: number;
+  }) {
     const res = await fetch(`${BASE_URL}/listing/publish`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders() },

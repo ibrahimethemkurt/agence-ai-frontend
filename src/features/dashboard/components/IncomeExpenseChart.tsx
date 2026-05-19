@@ -54,7 +54,16 @@ export const IncomeExpenseChart: React.FC<Props> = ({ data }) => {
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1E1E1E" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(val) => val === 0 ? '₺0' : `₺${new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 }).format(val)}`} tickMargin={8} width={55} />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#6B7280', fontSize: 12 }} 
+                tickFormatter={(val) => val === 0 ? '₺0' : `₺${new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 }).format(val)}`} 
+                tickMargin={8} 
+                width={55} 
+                domain={[0, (dataMax: number) => dataMax === 0 ? 100 : Math.ceil(dataMax * 1.15)]}
+                tickCount={7}
+              />
               <Tooltip 
                 contentStyle={{ backgroundColor: '#121212', borderColor: '#2E2E2E', borderRadius: '12px', color: '#fff' }}
                 itemStyle={{ color: '#fff' }}
