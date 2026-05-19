@@ -1,7 +1,7 @@
 // Production: always use backend URL. Dev: use localhost.
-const BASE_URL = (import.meta.env.DEV
+const BASE_URL = (import.meta.env.VITE_API_URL || (import.meta.env.DEV
   ? 'http://localhost:8000'
-  : 'https://agence-ai-backend-671962657032.europe-west1.run.app') + '/api/v1';
+  : 'https://agence-ai-backend-671962657032.europe-west1.run.app')) + '/api/v1';
 
 function getToken(): string | null {
   return localStorage.getItem('access_token');
