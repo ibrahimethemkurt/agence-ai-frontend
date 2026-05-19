@@ -1,6 +1,13 @@
 // Production: always use backend URL. Dev: use localhost.
 const envApiUrl = import.meta.env.VITE_API_URL;
-const BASE_URL = envApiUrl ? envApiUrl : (import.meta.env.DEV ? 'http://localhost:8000/api/v1' : 'https://agence-ai-backend-671962657032.europe-west1.run.app/api/v1');
+let BASE_URL = envApiUrl ? envApiUrl : (import.meta.env.DEV ? 'http://localhost:8000/api/v1' : 'https://agence-ai-backend-671962657032.europe-west1.run.app/api/v1');
+
+if (BASE_URL.endsWith('/')) {
+  BASE_URL = BASE_URL.slice(0, -1);
+}
+if (!BASE_URL.endsWith('/api/v1')) {
+  BASE_URL = BASE_URL + '/api/v1';
+}
 
 function getToken(): string | null {
   return localStorage.getItem('access_token');
