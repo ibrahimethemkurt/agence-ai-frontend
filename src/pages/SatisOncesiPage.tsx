@@ -22,6 +22,7 @@ const DEFAULT_FORM = {
   shippingCost: '',
   taxRate: '20',
   commissionRate: '15',
+  adBudget: '',
 };
 
 type FormData = typeof DEFAULT_FORM;
@@ -64,6 +65,7 @@ export const SatisOncesiPage = () => {
           tax_rate: parseFloat(formData.taxRate || '20'),
           commission_rate: parseFloat(formData.commissionRate || '15'),
           stock: parseInt(formData.stock || '0'),
+          monthly_ad_budget: parseFloat(formData.adBudget || '0'),
         },
       });
       setAnalysisId(result.id);
@@ -240,6 +242,16 @@ export const SatisOncesiPage = () => {
                   type="number"
                   value={formData.shippingCost}
                   onChange={e => updateData({ shippingCost: e.target.value })}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-white mb-2">Aylık Reklam Bütçesi (₺)</label>
+                <input
+                  type="number"
+                  value={formData.adBudget}
+                  onChange={e => updateData({ adBudget: e.target.value })}
                   placeholder="0.00"
                   className={inputClass}
                 />

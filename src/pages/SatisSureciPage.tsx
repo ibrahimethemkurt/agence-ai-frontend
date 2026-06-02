@@ -165,14 +165,19 @@ export const SatisSureciPage = () => {
     try {
       const parsed = JSON.parse(reportText);
       if (parsed.onerilen_satis_fiyati) return String(parsed.onerilen_satis_fiyati);
+      if (parsed.suggested_price) return String(parsed.suggested_price);
+      if (parsed.price) return String(parsed.price);
     } catch(e) {}
 
     // 2. Regex ile farklı markdown formatlarından çekme
     const patterns = [
-      /önerilen satış fiyatı[^\d]*?(\d[\d.,]*)\s*tl/i,
-      /(\d[\d.,]*)\s*tl[^\n]*?önerilen/i,
-      /en az\s*(\d[\d.,]*)\s*tl/i,
-      /(\d[\d.,]*)\s*tl\s*satış fiyatı ile/i
+      /optimum\s*satış\s*fiyat[ıi]?[^:]*:\s*(?:₺|tl|try)?\s*(\d[\d.,]*)/i,
+      /önerilen\s*satış\s*fiyat[ıi]?[^:]*:\s*(?:₺|tl|try)?\s*(\d[\d.,]*)/i,
+      /önerilen\s*fiyat[ıi]?[^:]*:\s*(?:₺|tl|try)?\s*(\d[\d.,]*)/i,
+      /satış\s*fiyat[ıi]?\s*:\s*(?:₺|tl|try)?\s*(\d[\d.,]*)/i,
+      /önerilen[^\d]*?fiyat[ıi]?[^\d]*?(?:₺|tl|try)?\s*(\d[\d.,]*)\s*(?:tl|₺|try)?/i,
+      /önerilen[^\d]*?(?:₺|tl|try)?\s*(\d[\d.,]*)\s*(?:tl|₺|try)?/i,
+      /en az[^\d]*?(?:₺|tl|try)?\s*(\d[\d.,]*)\s*(?:tl|₺|try)?/i
     ];
     
     for (const pattern of patterns) {
